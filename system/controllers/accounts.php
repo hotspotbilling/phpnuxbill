@@ -31,6 +31,16 @@ switch ($action) {
         }
         run_hook('customer_change_password'); #HOOK
         if ($password != '') {
+            // one password change at a time for this customer (Forgot password takes the same lock): the customer is read again
+            // under it, so the current password is checked against what is saved now, and the password saved is the one the
+            // routers were sent
+            if (!Package::passwordLock($user['id'])) {
+                r2(getUrl('accounts/change-password'), 'e', Lang::T('Your password is being changed by another request. Try again in a moment.'));
+            }
+            $user = ORM::for_table('tbl_customers')->find_one($user['id']);
+            if (!$user) {
+                r2(getUrl('accounts/change-password'), 'e', Lang::T('Incorrect Current Password'));
+            }
             $d_pass = $user['password'];
             $npass = _post('npass');
             $cnpass = _post('cnpass');
@@ -49,6 +59,7 @@ switch ($action) {
                     _log('[' . $user['username'] . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
                 }
                 $user->save();
+                Package::passwordLock($user['id'], false);
                 if (class_exists('RedisCache')) {
                     RedisCache::forgetRadiusCustomer($user['username']);
                 }

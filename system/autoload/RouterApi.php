@@ -40,13 +40,7 @@ class RouterApi
             $old = ini_get('default_socket_timeout');
             ini_set('default_socket_timeout', (string) max(1, (int) ceil($timeout)));
             try {
-                // the api-ssl port is spoken over TLS, with the certificate checked. A context of our own is always passed: given
-                // none, the library switches PHP's default context to unverified anonymous ciphers for everything in this request
-                if ((string) $port === '8729') {
-                    $tls = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
-                    return [new RouterClient($host, $user, $pass, $port, false, $timeout, \PEAR2\Net\Transmitter\NetworkStream::CRYPTO_TLS, $tls), null];
-                }
-                return [new RouterClient($host, $user, $pass, $port, false, $timeout), null];
+                return [self::newClient($host, $user, $pass, $port, $timeout), null];
             } finally {
                 ini_set('default_socket_timeout', (string) $old);
             }
@@ -76,10 +70,24 @@ class RouterApi
         // the stream takes its read time limit from this when it opens, whatever it is set to (even "never")
         ini_set('default_socket_timeout', (string) $readTimeout);
         try {
-            return (new RouterClient($host, $user, $pass, $port, false, $connectTimeout))->limitSync($readTimeout);
+            return self::newClient($host, $user, $pass, $port, $connectTimeout)->limitSync($readTimeout);
         } finally {
             ini_set('default_socket_timeout', (string) $old);
         }
+    }
+
+    /**
+     * The client for a host and port (as RouterAddress::split() gives them). The api-ssl port (8729, however it is written:
+     * "08729" too) is spoken over TLS, with the certificate checked. A context of our own is always passed: given none, the
+     * library switches PHP's default context to unverified anonymous ciphers for everything in this request.
+     */
+    private static function newClient($host, $user, $pass, $port, $timeout)
+    {
+        if ($port !== null && (int) $port === 8729) {
+            $tls = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
+            return new RouterClient($host, $user, $pass, 8729, false, $timeout, \PEAR2\Net\Transmitter\NetworkStream::CRYPTO_TLS, $tls);
+        }
+        return new RouterClient($host, $user, $pass, $port, false, $timeout);
     }
 
     /**
@@ -204,12 +212,19 @@ class RouterApi
     /** The first error the router sent back for a request (no permission, unknown command), or null. */
     public static function error($res)
     {
+        $err = null;
         foreach ($res as $r) {
             if ($r->getType() === Response::TYPE_ERROR) {
-                return (string) self::text($r->getProperty('message')) ?: Lang::T('The router refused the command');
+                $err = (string) self::text($r->getProperty('message')) ?: Lang::T('The router refused the command');
+                break;
             }
         }
-        return null;
+        // the loop leaves the collection's pointer past its end, and a later $res->getProperty() (which reads the current
+        // reply) would fail: put back at the first reply, where it was
+        if ($res instanceof \PEAR2\Net\RouterOS\ResponseCollection) {
+            $res->rewind();
+        }
+        return $err;
     }
 
     /**
@@ -285,26 +300,38 @@ class RouterApi
 
     /**
      * Whether the backup password may be sent over this connection: null when it may, otherwise the reason it may not. The
-     * /system/backup/save command carries the password as typed, so it goes only over a connection that is encrypted (API-SSL)
-     * or one whose far end is a private address (the same network, or a VPN tunnel), checked on the open connection itself (the
-     * address it really reached, not the saved name). Encrypting the backup file protects the file, not the way there.
+     * /system/backup/save command carries the password as typed, so by default it goes only over API-SSL with the router's
+     * certificate checked. Plain API is allowed only when the operator has said so (router_backup_plain_ok = 1) and then
+     * still only to a private address (the same network, or a VPN tunnel), checked on the open connection itself (the address
+     * it really reached, not the saved name): a private address alone proves nothing about who else is on that network.
+     * Encrypting the backup file protects the file, not the way there.
      */
     public static function backupTransportError($c)
     {
+        global $config;
         $t = self::transmitter($c);
         if ($t === null) {
             return Lang::T('The connection to the router could not be checked, so the backup password was not sent.');
         }
         try {
-            if ($t instanceof \PEAR2\Net\Transmitter\NetworkStream && $t->getCrypto() !== \PEAR2\Net\Transmitter\NetworkStream::CRYPTO_OFF) {
-                return null;
-            }
             $stream = \Closure::bind(function () {
                 return $this->stream;
             }, $t, \PEAR2\Net\Transmitter\Stream::class)();
+            if ($t instanceof \PEAR2\Net\Transmitter\NetworkStream && $t->getCrypto() !== \PEAR2\Net\Transmitter\NetworkStream::CRYPTO_OFF) {
+                // encrypted: only with the certificate and its name checked (PHP checks both unless told not to)
+                $ssl = is_resource($stream) ? (stream_context_get_options($stream)['ssl'] ?? []) : null;
+                if (is_array($ssl) && ($ssl['verify_peer'] ?? true) !== false && ($ssl['verify_peer_name'] ?? true) !== false
+                    && empty($ssl['allow_self_signed'])) {
+                    return null;
+                }
+                return Lang::T('The backup was not made: the API-SSL connection to this router does not check its certificate, so the backup password was not sent.');
+            }
             $peer = is_resource($stream) ? (string) @stream_socket_get_name($stream, true) : '';
         } catch (Throwable $e) {
             $peer = '';
+        }
+        if (($config['router_backup_plain_ok'] ?? '0') !== '1') {
+            return Lang::T('The backup was not made: the connection to this router is plain API (not encrypted), so the backup password was not sent. Use API-SSL (port 8729) with a certificate this server trusts, or, if the router is reached only over a network you trust (LAN or VPN), turn on Allow backups over plain API in Network > Routers > Settings.');
         }
         // "1.2.3.4:8728", "[::1]:8728" or "::1:8728": the port is after the last colon
         $ip = trim(($p = strrpos($peer, ':')) !== false ? substr($peer, 0, $p) : $peer, '[]');
@@ -331,12 +358,15 @@ class RouterApi
 
     /**
      * Nightly backups, from the cron: once a day, each enabled router saves "phpnuxbill-auto-<date>.backup" on itself, and only
-     * the newest few of those are kept (older ones are removed from the router). Backups made by hand are never removed.
-     * A router that fails is tried again on the next runs that day (up to 3 times); one that is done is not touched again.
-     * Progress is kept per router row and address, so a router moved to another address starts again. A save counts as made
-     * only once the router confirmed it and the file has something in it; that is recorded before older backups are removed,
-     * so a retry after a failed clean-up only cleans up. A file left by a save that never answered is saved again (the same
-     * name, so it is replaced). The password is sent only over a protected connection (see backupTransportError()).
+     * the newest few of those are kept (older ones are removed from the router). Only files this code confirmed it saved (kept
+     * per router in the state's "made" list) are ever removed: backups made by hand, and nightly-named files saved before that
+     * list existed, are left alone (they are counted in the output so they can be removed by hand).
+     * A router that fails, or whose connection is not protected, is tried again on the next runs that day (up to 3 times); one
+     * that is done is not touched again. Progress is kept per router row and address, so a router moved to another address
+     * starts again. A save counts as made only once the router confirmed it and the file has something in it; that is recorded
+     * before older backups are removed, so a retry after a failed clean-up only cleans up, as long as today's file is still
+     * listed with something in it (otherwise it is saved again). A file left by a save that never answered is saved again (the
+     * same name, so it is replaced). The password is sent only over a protected connection (see backupTransportError()).
      * Never throws; returns lines for the cron's output.
      */
     public static function nightlyBackups()
@@ -364,11 +394,14 @@ class RouterApi
             $today = date('Y-m-d');
             $saved = ORM::for_table('tbl_appconfig')->where('setting', 'router_backup_state')->find_one();
             $state = json_decode($saved ? (string) $saved['value'] : '', true);
+            // which files nightly backups made on each router (under backupKey()): kept from day to day, unlike the progress
+            $made = is_array($state['made'] ?? null) ? $state['made'] : [];
             if (!is_array($state) || ($state['date'] ?? '') !== $today || !is_array($state['routers'] ?? null)) {
                 $state = ['date' => $today, 'routers' => []];
             }
+            $state['made'] = $made;
             // each router's progress, under backupKey(): ['tries' => failures, 'saved' => today's save confirmed, 'ok' => done,
-            // 'blocked' => not sent over an unprotected connection]
+            // 'blocked' => the last try was not sent over an unprotected connection (it counts as a try)]
             $entry = function ($key) use (&$state) {
                 $s = $state['routers'][$key] ?? null;
                 return is_array($s) ? $s + ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false]
@@ -376,7 +409,7 @@ class RouterApi
             };
             $pending = function ($key) use ($entry) {
                 $s = $entry($key);
-                return !$s['ok'] && !$s['blocked'] && (int) $s['tries'] < 3;
+                return !$s['ok'] && (int) $s['tries'] < 3;
             };
             $usable = function ($r) {
                 return $r && (int) $r['enabled'] === 1 && trim((string) $r['ip_address']) !== '' && strcasecmp((string) $r['name'], 'radius') !== 0;
@@ -402,7 +435,7 @@ class RouterApi
                     return preg_match($own, (string) $f['name']);
                 }));
                 usort($auto, function ($a, $b) {
-                    return strcmp(basename($b['name']), basename($a['name'])); // newest first (the date is in the name)
+                    return strcmp(self::backupDate($b['name']), self::backupDate($a['name'])); // newest first, by the date in the name
                 });
                 return $auto;
             };
@@ -430,16 +463,23 @@ class RouterApi
                 try {
                     $folder = '';
                     $auto = $autoFiles($c, $folder);
-                    $made = (bool) $s['saved']; // confirmed by an earlier run today, whose clean-up then failed
+                    // confirmed by an earlier run today, whose clean-up then failed: trusted only while today's file is still
+                    // listed with something in it (removed or emptied since, it is saved again)
+                    $made = (bool) $s['saved'] && self::hasData(self::todaysSize($auto, $name));
                     if (!$made) {
+                        $s['saved'] = false;
+                        // checked on this very connection, right before the password would go out on it
                         if (($why = self::backupTransportError($c)) !== null) {
-                            // not a failure to try again: the connection stays what it is until the router's address changes
+                            // counts as a try: a later run (up to the limit) looks again, in case the connection or the
+                            // operator's settings changed
                             $s['blocked'] = true;
+                            $s['tries']++;
                             $state['routers'][$key] = $s;
                             $log[] = $r['name'] . ': ' . $why;
                             self::saveBackupState($state);
                             continue; // (the connection is dropped in finally)
                         }
+                        $s['blocked'] = false;
                         // encrypted with the backup password (never written to the log or the output). A file of today's name
                         // left by a save that never answered is not trusted (its size says nothing about it being complete): this
                         // save replaces it
@@ -449,17 +489,39 @@ class RouterApi
                         if (!self::hasData(self::todaysSize($auto, $name))) {
                             throw new Exception(Lang::T('The backup file was not saved on the router'));
                         }
-                        // recorded before the clean-up, so a retry after a failed clean-up does not save again
+                        // recorded before the clean-up, so a retry after a failed clean-up does not save again; and the file
+                        // goes on this router's list of files nightly backups made, the only ones ever removed
                         $s['saved'] = true;
                         $state['routers'][$key] = $s;
+                        $list = is_array($state['made'][$key] ?? null) ? $state['made'][$key] : [];
+                        if (!in_array($folder . $name . '.backup', $list, true)) {
+                            $list[] = $folder . $name . '.backup';
+                        }
+                        $state['made'][$key] = $list;
                         self::saveBackupState($state);
                     }
-                    foreach (array_slice($auto, $keep) as $old) {
+                    // removal candidates: only files on the list (newest first, by the date in the name); a file of a
+                    // nightly-looking name that is not on it (made by hand, or before the list existed) is left alone
+                    $list = is_array($state['made'][$key] ?? null) ? $state['made'][$key] : [];
+                    $ours = array_values(array_filter($auto, function ($f) use ($list) {
+                        return in_array((string) $f['name'], $list, true);
+                    }));
+                    $foreign = count($auto) - count($ours);
+                    foreach (array_slice($ours, $keep) as $old) {
                         self::run($c, '/file/remove', ['numbers' => $old['.id']], microtime(true) + 15);
+                        $list = array_values(array_diff($list, [(string) $old['name']]));
+                        $state['made'][$key] = $list;
+                        self::saveBackupState($state);
                     }
+                    // names no longer on the router (removed by hand) leave the list, so it stays as short as what is kept
+                    $listed = array_map(function ($f) {
+                        return (string) $f['name'];
+                    }, $ours);
+                    $state['made'][$key] = array_values(array_intersect($list, $listed));
                     $s['ok'] = true;
                     $state['routers'][$key] = $s;
-                    $log[] = $r['name'] . ': ' . $folder . $name . '.backup' . ($made ? ' (' . Lang::T('already saved') . ')' : '');
+                    $log[] = $r['name'] . ': ' . $folder . $name . '.backup' . ($made ? ' (' . Lang::T('already saved') . ')' : '')
+                        . ($foreign > 0 ? ' (' . $foreign . ' ' . Lang::T('nightly-named backup files not recorded as made by the nightly backup are kept; remove them by hand if not needed') . ')' : '');
                 } catch (Throwable $e) {
                     $s['tries']++; // 'saved' is kept: the next try resumes with the clean-up
                     $state['routers'][$key] = $s;
@@ -490,6 +552,12 @@ class RouterApi
             }
         }
         return null;
+    }
+
+    /** The date (yyyymmdd) in a nightly backup's file name, or "" */
+    private static function backupDate($name)
+    {
+        return preg_match('/phpnuxbill-auto-(\d{8})\.backup$/', (string) $name, $m) ? $m[1] : '';
     }
 
     /** Whether a listed size is more than nothing ("0", "0 B" and a missing size are not) */

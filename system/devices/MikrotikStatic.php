@@ -23,6 +23,9 @@ class MikrotikStatic
         if ($this->strict && ($err = RouterApi::error($res)) !== null) {
             throw new Exception($err);
         }
+        if ($res instanceof RouterOS\ResponseCollection) {
+            $res->rewind(); // error() iterated the replies: back to the first, for getProperty()
+        }
         return $res;
     }
     // show Description
@@ -82,7 +85,12 @@ class MikrotikStatic
      */
     private function clearExpired($client, $ip)
     {
-        $err = $this->removeIpFromAddressList($client, $ip);
+        try {
+            $err = $this->removeIpFromAddressList($client, $ip);
+        } catch (Exception $e) {
+            // no answer (the connection is dropped): the queue was saved, whether the address left the list is not known
+            throw new Exception(Lang::T('Saved, but the address could not be taken off the Expired list') . ': ' . $e->getMessage(), 207, $e);
+        }
         if ($err !== null && $this->strict) {
             throw new Exception(Lang::T('Saved, but the address could not be taken off the Expired list') . ': ' . $err, 207);
         }
@@ -320,6 +328,7 @@ class MikrotikStatic
         if (($err = RouterApi::error($res)) !== null) {
             return $err;
         }
+        $res->rewind(); // error() iterated the replies: back to the first, or getProperty() has no reply to read
         $id = $res->getProperty('.id');
         if (empty($id)) {
             return null; // not on the list: nothing to take off

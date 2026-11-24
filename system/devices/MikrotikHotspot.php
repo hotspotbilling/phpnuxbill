@@ -59,6 +59,9 @@ class MikrotikHotspot
 		if ($this->strict && ($err = RouterApi::error($res)) !== null) {
 			throw new Exception($err);
 		}
+		if ($res instanceof RouterOS\ResponseCollection) {
+			$res->rewind(); // error() iterated the replies: back to the first, for getProperty()
+		}
 		return $res;
 	}
 
@@ -274,8 +277,9 @@ class MikrotikHotspot
             return null;
         }
         [$host, $saved] = RouterAddress::split($ip); // "host:port", or "[IPv6]:port"
-        $p = ($port) ? $port : $saved;
-        return RouterApi::deviceClient($host, $user, $pass, $p, $timeout); // every read time-limited
+        $p = ($port) ? $port : $saved; // an explicit port, else the saved one, else null (the default API port)
+        // $timeout holds for the connection and for each command's answer (the read limit would otherwise be 30 seconds)
+        return RouterApi::deviceClient($host, $user, $pass, $p, $timeout, $timeout);
     }
 
     function removeHotspotUser($client, $username)
@@ -361,6 +365,21 @@ class MikrotikHotspot
                     ->setArgument('email', $customer['email'])
                     ->setArgument('password', $customer['password'])
             ));
+        }
+    }
+
+    /**
+     * addHotspotUser() with the router's refusal thrown (a user of that name already there, say), whether or not a sync runs.
+     * Nothing is removed first, unlike add_customer().
+     */
+    function addHotspotUserChecked($client, $plan, $customer)
+    {
+        $was = $this->strict;
+        $this->strict = true;
+        try {
+            $this->addHotspotUser($client, $plan, $customer);
+        } finally {
+            $this->strict = $was;
         }
     }
 

@@ -10492,11 +10492,14 @@ body.dark-mode .rt-err {
 }
 .rt-meters {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  /* 220px columns where they fit, and never wider than the panel itself (as .rt-charts) */
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 10px 24px;
 }
 .rt-meter--wide {
   font-size: 13px;
+  flex-wrap: wrap; /* in a narrow column the "of ..." note goes under the bar rather than out of the panel */
+  min-width: 0;
 }
 .rt-meter--wide .rt-meter__label {
   min-width: 58px;
@@ -10752,6 +10755,14 @@ body.dark-mode .rt-check--bad > i {
 }
 body.dark-mode .rt-strip > i.is-on {
   background: #22863f;
+}
+/* a stretch with both answered and failed readings: online, striped, and as low as an offline one is high */
+.rt-strip > i.is-mixed {
+  bottom: 25%;
+  background: repeating-linear-gradient(135deg, #16a34a 0 3px, #d97706 3px 6px);
+}
+body.dark-mode .rt-strip > i.is-mixed {
+  background: repeating-linear-gradient(135deg, #22863f 0 3px, #fbbf24 3px 6px);
 }
 .rt-ranges {
   display: inline-flex;

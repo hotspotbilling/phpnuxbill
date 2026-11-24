@@ -51,13 +51,14 @@ switch ($action) {
                 if ($c) {
                     // each customer on its own: one the router refuses (or that cannot be reached) is listed, and the rest go on
                     // a switched-off router is not sent anything; its customers stay active and are synced once it is on again
-                    if (Package::routerOff($p)) {
-                        $log .= "SKIPPED (router is disabled) : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
-                        continue;
-                    }
                     try {
+                        // resolve the device first: a legacy plan has no device until getDevice() fills it in, and routerOff() reads it
+                        $dvc = $_app_stage != 'Demo' ? Package::getDevice($p) : null;
+                        if (Package::routerOff($p)) {
+                            $log .= "SKIPPED (router is disabled) : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
+                            continue;
+                        }
                         if ($_app_stage != 'Demo') {
-                            $dvc = Package::getDevice($p);
                             if (!file_exists($dvc)) {
                                 throw new Exception(Lang::T("Devices Not Found"));
                             }
@@ -67,7 +68,9 @@ switch ($action) {
                         }
                         $log .= "DONE : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
                     } catch (Throwable $e) {
-                        $log .= "FAILED : $tur[username], $tur[namebp], $tur[type], $tur[routers]: " . htmlspecialchars($e->getMessage()) . "<br>";
+                        // code 207: the device saved the customer but a cleanup step was refused; listed apart, never retried with add_customer()
+                        $state = $e->getCode() === 207 ? 'PARTIAL' : 'FAILED';
+                        $log .= "$state : $tur[username], $tur[namebp], $tur[type], $tur[routers]: " . htmlspecialchars($e->getMessage()) . "<br>";
                     }
                 } else {
                     $log .= "Customer NOT FOUND : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
@@ -431,7 +434,16 @@ switch ($action) {
                     if ($_app_stage != 'Demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
-                            (new $newPlan['device'])->add_customer($customer, $newPlan);
+                            try {
+                                (new $newPlan['device'])->add_customer($customer, $newPlan);
+                            } catch (Exception $e) {
+                                // code 207: saved on the router, one later step refused (a fixed IP not cleared): the change stands, so it is
+                                // saved here too, and logged for the admins; any other error stops as before
+                                if ($e->getCode() !== 207) {
+                                    throw $e;
+                                }
+                                _log('[' . $customer['username'] . '] change plan' . ': ' . $e->getMessage(), 'Router');
+                            }
                         } else {
                             throw new Exception(Lang::T("Devices Not Found"));
                         }
@@ -546,10 +558,14 @@ switch ($action) {
             $v = $rec ? json_decode((string) $rec['value'], true) : null;
             $madeIds = is_array($v) && is_array($v['ids'] ?? null) ? array_values(array_filter(array_map('intval', $v['ids']))) : [];
         }
+        // a batch link whose record is gone (kept a day) or never existed: say so, rather than showing every voucher as if it
+        // were that batch. Only a request without made= shows the whole list.
+        $madeGone = $made !== '' && empty($madeIds);
         if (empty($madeIds)) {
             $made = '';
         }
         $ui->assign('made', $made);
+        $ui->assign('made_gone', $madeGone);
 
         $ui->assign('batch_name', $batch_name);
         $ui->assign('router', $router);
@@ -583,6 +599,8 @@ switch ($action) {
 
         if (!empty($madeIds)) {
             $query->where_in('tbl_voucher.id', $madeIds);
+        } elseif ($madeGone) {
+            $query->where_raw('1 = 0');
         }
 
         if (!empty($_COOKIE['voucher_per_page']) && $_COOKIE['voucher_per_page'] != $config['voucher_per_page']) {
@@ -897,7 +915,12 @@ switch ($action) {
             // batch is saved, and by the database when the request ends in any other way.
             $claim = 'phpnuxbill_voucher_' . substr(hash('sha256', $svoucher), 0, 40);
             try {
-                $got = (int) ORM::getDb()->query('SELECT GET_LOCK(' . ORM::getDb()->quote($claim) . ', 0)')->fetchColumn() === 1;
+                $lock = ORM::getDb()->query('SELECT GET_LOCK(' . ORM::getDb()->quote($claim) . ', 0)')->fetchColumn();
+                // 1: claimed, 0: another request holds it; NULL (or no row) is an error, not a contention
+                if ($lock === null || $lock === false) {
+                    throw new Exception('GET_LOCK returned NULL');
+                }
+                $got = (int) $lock === 1;
             } catch (Throwable $e) {
                 // no claim to be had: nothing else is sure to keep two sends of this form apart (a session store may not lock),
                 // so no batch is made rather than perhaps two
@@ -1367,7 +1390,16 @@ switch ($action) {
                             require_once $dvc;
                             global $isChangePlan;
                             $isChangePlan = true;
-                            (new $p['device'])->add_customer($c, $p);
+                            try {
+                                (new $p['device'])->add_customer($c, $p);
+                            } catch (Exception $e) {
+                                // code 207: saved on the router, one later step refused (a fixed IP not cleared): the change stands, so it is
+                                // saved here too, and logged for the admins; any other error stops as before
+                                if ($e->getCode() !== 207) {
+                                    throw $e;
+                                }
+                                _log('[' . $c['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
+                            }
                         } else {
                             new Exception(Lang::T("Devices Not Found"));
                         }

@@ -125,15 +125,40 @@ if ($step == 1) {
         exit;
     }
     $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
+    $routerFailed = false;
+    if ($user) {
+        // one password change at a time for this customer (the account page takes the same lock), read again under it
+        if (!Package::passwordLock($user['id'])) {
+            $ui->assign('step', 2);
+            $ui->assign('username', $username);
+            $ui->assign('csrf_token', Csrf::generateAndStoreToken());
+            $ui->assign('notify_t', 'e');
+            $ui->assign('notify', Lang::T('Your password is being changed by another request. Try again in a moment.'));
+            $ui->assign('_title', Lang::T('Forgot Password'));
+            $ui->display('customer/forgot.tpl');
+            exit;
+        }
+        $user = ORM::for_table('tbl_customers')->find_one($user['id']);
+    }
+    // the code is used up from here on, whatever follows
+    unset($_SESSION['forgot_ok'], $_SESSION['forgot_username']);
     if ($user) {
         Package::keepDialPassword($user); // a PPPoE / VPN connection keeps the password its router dials with
         $user->password = $npass;
         $user->save();
         // the routers sign the customer in with their own copy of the password (a Mikrotik hotspot or PPPoE user): every
-        // active plan's device gets the new one, like a password changed from the customer's account page
-        foreach (Package::sendPassword($user) as $err) {
-            _log('[' . $username . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
+        // active plan's device gets the new one, like a password changed from the customer's account page. The new password
+        // is saved already: a device that fails is logged, and the reset goes on
+        try {
+            foreach (Package::sendPassword($user) as $err) {
+                $routerFailed = true;
+                _log('[' . $username . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
+            }
+        } catch (Throwable $e) {
+            $routerFailed = true;
+            _log('[' . $username . ']: new password not sent to the router: ' . $e->getMessage(), 'User', $user['id']);
         }
+        Package::passwordLock($user['id'], false);
         if (class_exists('RedisCache')) {
             RedisCache::forgetRadiusCustomer($username);
         }
@@ -141,11 +166,11 @@ if ($step == 1) {
         _log('[' . $username . ']: Password reset with a verification code', 'User', $user['id']);
         forgot_notify($user['phonenumber'], $user['email'], $config['CompanyName'] . ': ' . Lang::T('Your password was just changed. If this was not you, contact us at once.'), $config['CompanyName'] . ' - ' . Lang::T('Your password was changed'));
     }
-    unset($_SESSION['forgot_ok'], $_SESSION['forgot_username']);
     AuthThrottle::clear('forgot-verify-user', $username);
     $ui->assign('username', $username);
     $ui->assign('notify_t', 's');
-    $ui->assign('notify', Lang::T('Password changed successfully, Please login again'));
+    $ui->assign('notify', Lang::T('Password changed successfully, Please login again')
+        . ($routerFailed ? '. ' . Lang::T('Your new password is saved and works for this portal now. Your internet connection may take a little longer to accept it.') : ''));
 } else if ($step == 7) {
     $find = trim((string) _post('find'));
     $step = 6;

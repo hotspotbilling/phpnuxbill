@@ -86,6 +86,8 @@
                 <div class="mc-rows nf__switches">
                     {rt_switch key='router_backup' def='0' icon='fa-clock' title=Lang::T('Nightly backups')
                         hint=Lang::T('The cron saves phpnuxbill-auto-YYYYMMDD.backup on each enabled router. Files named that way count as nightly backups and are removed when older than the number below, so do not use the name for your own; other backups are never removed.')}
+                    {rt_switch key='router_backup_plain_ok' def='0' icon='fa-unlock' title=Lang::T('Allow backups over plain API')
+                        hint=Lang::T('The backup password is sent to the router in the save command. Off: only over API-SSL (port 8729) with a certificate this server trusts. On: also over plain API, but only to routers on a private address (your LAN or a VPN), never across the internet.')}
                 </div>
                 <div class="st-card-body">
                     <div class="nf__field">

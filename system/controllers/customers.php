@@ -830,7 +830,16 @@ switch ($action) {
                                         (new $p['device'])->change_username($p, $oldPppoeUsername, $pppoe_username);
                                     }
                                 }
-                                (new $p['device'])->add_customer($c, $p);
+                                try {
+                                    (new $p['device'])->add_customer($c, $p);
+                                } catch (Exception $e) {
+                                    // code 207: saved on the router, one later step refused (a fixed IP not cleared): the change stands, so it is
+                                    // saved here too, and logged for the admins; any other error stops as before
+                                    if ($e->getCode() !== 207) {
+                                        throw $e;
+                                    }
+                                    _log('[' . $c['username'] . '] edit: ' . $e->getMessage(), 'Router');
+                                }
                             } else {
                                 new Exception(Lang::T("Devices Not Found"));
                             }

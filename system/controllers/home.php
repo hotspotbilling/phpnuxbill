@@ -199,7 +199,16 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                     require_once $dvc;
                     global $isChangePlan;
                     $isChangePlan = true;
-                    (new $p['device'])->add_customer($user, $p);
+                    try {
+                        (new $p['device'])->add_customer($user, $p);
+                    } catch (Exception $e) {
+                        // code 207: saved on the router, one later step refused (a fixed IP not cleared): the change stands, so it is
+                        // saved here too, and logged for the admins; any other error stops as before
+                        if ($e->getCode() !== 207) {
+                            throw $e;
+                        }
+                        _log('[' . $user['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
+                    }
                 } else {
                     r2(getUrl('home'), 'e', Lang::T("Devices Not Found"));
                 }

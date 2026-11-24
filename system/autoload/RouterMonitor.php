@@ -87,7 +87,11 @@ class RouterMonitor
             $e->at = date('Y-m-d H:i:s');
             $e->type = 'moved';
             $e->detail = 'sample:' . $cut;
-            $e->save();
+            // (the connection throws on a database error; a save that reports failure without one counts as failed too, so
+            // the caller's transaction is rolled back rather than committing the address with no event)
+            if ($e->save() === false) {
+                throw new Exception('router moved event not saved');
+            }
         } catch (Throwable $e) {
             if ($strict) {
                 throw $e;
@@ -325,7 +329,8 @@ class RouterMonitor
                 $db->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
             } catch (Throwable $e) {
             }
-            // the alerts of the events just saved go out only now: a slow channel must not keep router edits waiting on the lock
+            // the alerts of the events just saved are queued only now (see alert(): they are sent when the run ends), so neither
+            // router edits waiting on the lock nor the other routers and the backups wait on a slow channel
             $pending = self::$pending;
             self::$pending = [];
             foreach ($pending as $text) {
@@ -337,8 +342,8 @@ class RouterMonitor
     /** Alerts of the events saved under the router edit lock, sent once it is released (see check()) */
     private static $pending = [];
 
-    /** Emails of alerts, sent when the cron run ends (see alert()) */
-    private static $mails = [];
+    /** Alerts queued by alert(), sent when the cron run ends (see deliver()) */
+    private static $queue = [];
 
     /** Save a reading and turn it into events (called with the router edit lock held) */
     private static function keep($r, array $s, $prev, $why, $since)
@@ -352,8 +357,32 @@ class RouterMonitor
         foreach ($s as $k => $v) {
             $row->$k = $v;
         }
-        $row->save();
-        self::events($r, $s, $prev, $why, (int) $row->id(), $at, $since);
+        // the reading and its events are saved together or not at all: a reading kept without its events would be the "previous"
+        // one next time, and its transitions (offline, back online, high load) would never be recorded. The alerts of those
+        // events go out only once both are saved (check() sends self::$pending); a rollback drops them.
+        $db = ORM::getDb();
+        $own = !$db->inTransaction();
+        if ($own) {
+            $db->beginTransaction();
+        }
+        try {
+            if ($row->save() === false) {
+                throw new Exception('reading not saved');
+            }
+            self::events($r, $s, $prev, $why, (int) $row->id(), $at, $since);
+            if ($own) {
+                $db->commit();
+            }
+        } catch (Throwable $e) {
+            self::$pending = [];
+            if ($own && $db->inTransaction()) {
+                try {
+                    $db->rollBack();
+                } catch (Throwable $x) {
+                }
+            }
+            throw $e;
+        }
         return $s['online'] ? 'online' . ($s['cpu'] !== null ? ', CPU ' . $s['cpu'] . '%' : '') : 'offline (' . $why . ')';
     }
 
@@ -370,7 +399,9 @@ class RouterMonitor
         $e->at = $at ?: date('Y-m-d H:i:s');
         $e->type = $type;
         $e->detail = mb_substr($detail, 0, 255);
-        $e->save();
+        if ($e->save() === false) {
+            throw new Exception('router event not saved');
+        }
         if ($alert) {
             // sent by check() once the router edit lock is released
             self::$pending[] = $r['name'] . ': ' . $alert;
@@ -431,56 +462,63 @@ class RouterMonitor
         return round($mins / 1440, 1) . ' d';
     }
 
-    /** To the channels chosen in Network > Routers > Settings. Never throws. */
+    /**
+     * To the channels chosen in Network > Routers > Settings, when the run ends (deliver()): each channel waits for its answer
+     * (Telegram, SMS in parts, WhatsApp up to 15 seconds each, SMTP minutes for each step), and sent here they would hold up the
+     * routers read after this one and the nightly backups. Never throws.
+     */
     public static function alert($text)
     {
         global $config;
         if (($config['router_alerts'] ?? '0') !== '1') {
             return;
         }
-        $text = '[' . ($config['CompanyName'] ?? 'PHPNuxBill') . '] ' . $text;
         try {
-            if (($config['router_alert_telegram'] ?? '1') === '1') {
-                // a short time limit (the default is minutes): a stalled Telegram must not hold up the other routers and the backups
-                Message::sendTelegram($text, null, '', 15);
+            if (!self::$queue) {
+                register_shutdown_function([self::class, 'deliver']);
             }
+            self::$queue[] = '[' . ($config['CompanyName'] ?? 'PHPNuxBill') . '] ' . $text;
         } catch (Throwable $e) {
-        }
-        try {
-            if (($config['router_alert_email'] ?? '0') === '1' && !empty($config['mail_from'])) {
-                // SMTP has no overall time limit (minutes for each step) and sendEmail() takes none: the emails wait for the end
-                // of the run, so a stalled mail server cannot hold up the other routers or the backups
-                if (!self::$mails) {
-                    register_shutdown_function([self::class, 'sendMails']);
-                }
-                self::$mails[] = $text;
-            }
-        } catch (Throwable $e) {
-        }
-        $phone = preg_replace('/[^0-9+]/', '', (string) ($config['router_alert_phone'] ?? ''));
-        if ($phone !== '' && strlen($phone) >= 7) {
-            try {
-                // the same short time limit as Telegram (the event is saved before any alert is sent)
-                if (($config['router_alert_via'] ?? 'wa') === 'sms') {
-                    Message::sendSMS($phone, $text, 15);
-                } else {
-                    Message::sendWhatsapp($phone, $text, 15);
-                }
-            } catch (Throwable $e) {
-            }
         }
     }
 
-    /** The alert emails kept by alert(), when the run ends. Never throws. */
-    public static function sendMails()
+    /** The alerts queued by alert(), when the run ends, one after another. Never throws. */
+    public static function deliver()
     {
         global $config;
-        $mails = self::$mails;
-        self::$mails = [];
-        foreach ($mails as $text) {
+        $queue = self::$queue;
+        self::$queue = [];
+        $phone = preg_replace('/[^0-9+]/', '', (string) ($config['router_alert_phone'] ?? ''));
+        foreach ($queue as $text) {
+            // each alert gets its own time, like each router reading (a shutdown function still counts against the limit)
+            @set_time_limit(60);
             try {
-                Message::sendEmail($config['mail_from'], Lang::T('Router alert'), $text);
+                if (($config['router_alert_telegram'] ?? '1') === '1') {
+                    // a short time limit (the default is minutes)
+                    Message::sendTelegram($text, null, '', 15);
+                }
             } catch (Throwable $e) {
+            }
+            if ($phone !== '' && strlen($phone) >= 7) {
+                try {
+                    // the same short time limit as Telegram
+                    if (($config['router_alert_via'] ?? 'wa') === 'sms') {
+                        Message::sendSMS($phone, $text, 15);
+                    } else {
+                        Message::sendWhatsapp($phone, $text, 15);
+                    }
+                } catch (Throwable $e) {
+                }
+            }
+        }
+        // emails last: SMTP has no overall time limit and sendEmail() takes none, so a stalled mail server cannot hold up the rest
+        if (($config['router_alert_email'] ?? '0') === '1' && !empty($config['mail_from'])) {
+            foreach ($queue as $text) {
+                @set_time_limit(120);
+                try {
+                    Message::sendEmail($config['mail_from'], Lang::T('Router alert'), $text);
+                } catch (Throwable $e) {
+                }
             }
         }
     }
@@ -533,6 +571,11 @@ class RouterMonitor
             $down = $up = null;
             // a restart between the two readings resets the counters: no speed across it (the same test as the restart event)
             $restarted = $prev && self::restarted($prev['t'], $prev['uptime'], $t, $r['uptime']);
+            // an uptime that went down is a restart even when the start time moved less than BOOT_SLACK (the earlier reading was
+            // made within that long of the router's start, and it restarted again soon after): its counters started again too
+            if ($prev && $prev['uptime'] !== null && $r['uptime'] !== null && (int) $r['uptime'] < (int) $prev['uptime']) {
+                $restarted = true;
+            }
             foreach ($moves as $m) {
                 // (a change in the same second as either reading cannot be placed before or after it: a break either way)
                 if ($prev && $m >= $prev['t'] && $m <= $t) {
@@ -572,12 +615,16 @@ class RouterMonitor
         };
         $out = [];
         foreach ($points as $b => $p) {
-            $out[] = ['at' => $b + $bucket / 2, 'online' => $p['on'] > 0 ? 1 : 0, 'cpu' => $avg($p['cpu']), 'mem' => $avg($p['mem']),
+            // online: any reading in the stretch answered. 'n' and 'on' say how many readings it has and how many answered, so a
+            // stretch with failed readings too (n > on > 0) can be told apart from one that was online throughout
+            $out[] = ['at' => $b + $bucket / 2, 'online' => $p['on'] > 0 ? 1 : 0, 'n' => $p['n'], 'on' => $p['on'], 'cpu' => $avg($p['cpu']), 'mem' => $avg($p['mem']),
                 'users' => $avg($p['users']), 'down' => $avg($p['down']), 'up' => $avg($p['up'])];
         }
         $events = ORM::for_table('tbl_router_events')->where('router_id', (int) $id)->where_gte('at', date('Y-m-d H:i:s', $from))
             ->order_by_desc('id')->limit(50)->find_array();
-        return ['from' => $from, 'to' => time(), 'points' => $out, 'samples' => count($rows),
+        // step: how long a stretch each point stands for (its 'at' is the middle); gap: how far apart two readings can be and
+        // still follow on from each other, so the charts break their lines across a stretch with no readings
+        return ['from' => $from, 'to' => time(), 'points' => $out, 'step' => $bucket, 'gap' => self::GAP, 'samples' => count($rows),
             'uptime' => $rows ? round($online / count($rows) * 100, 2) : null,
             'events' => array_map(function ($e) {
                 // (a change of address keeps where its readings stop in its detail: nothing to show)

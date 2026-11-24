@@ -399,9 +399,11 @@
             plot.addEventListener('pointermove', function (ev) {
                 var r = el.getBoundingClientRect();
                 var at = from + (((ev.clientX - r.left) / r.width) * W - padL) / (W - padL - padR) * (to - from);
-                var best = 0;
-                times.forEach(function (tm, i) { if (Math.abs(tm - at) < Math.abs(times[best] - at)) best = i; });
-                showAt(best, false);
+                var best = -1; // (a break in the lines is no reading: the pointer does not stop on it)
+                times.forEach(function (tm, i) {
+                    if (!series[0].points[i][2] && (best < 0 || Math.abs(tm - at) < Math.abs(times[best] - at))) best = i;
+                });
+                if (best >= 0) showAt(best, false);
             });
             plot.addEventListener('pointerleave', function () {
                 if (document.activeElement !== plot) hide(); // the keyboard's reading stays while the plot has the focus
@@ -446,23 +448,43 @@
             }).join('') + '</span>';
             if (!d.ok) { pane.innerHTML = head(t.history, picker) + fail(d); refocus(); return; }
             var long = true; // the ends of even a 24-hour axis are on different days
-            var pts = d.points;
+            var span = d.to - d.from;
+            // how long a stretch each point stands for, as the server averaged them (an older server does not say: worked out the
+            // same way)
+            var step = +d.step > 0 ? +d.step : Math.max(300, Math.ceil(span / 300));
+            // two points further apart than this have a stretch with no readings between them (the collection stopped): the lines
+            // are broken there by a point with no value (marked, so the pointer does not stop on it). Two readings that follow on
+            // (up to the server's GAP apart) can land in buckets up to GAP + one step apart, so those stay joined.
+            var brk = (+d.gap > 0 ? +d.gap : 1200) + step;
+            var pts = [];
+            d.points.forEach(function (p, i) {
+                var before = d.points[i - 1];
+                if (before && p.at - before.at > brk) pts.push({ at: (before.at + p.at) / 2, hole: true });
+                pts.push(p);
+            });
+            function line(k) {
+                return pts.map(function (p) { return p.hole ? [p.at, null, true] : [p.at, p[k]]; });
+            }
             var charts = [
-                { title: t.cpuMem, series: [{ label: t.cpu, cls: 'rt-s1', points: pts.map(function (p) { return [p.at, p.cpu]; }) },
-                    { label: t.memory, cls: 'rt-s2', points: pts.map(function (p) { return [p.at, p.mem]; }) }], fmt: function (v) { return Math.round(v) + '%'; }, max: 100 },
-                { title: t.usersOnline, series: [{ label: t.usersOnline, cls: 'rt-s1', points: pts.map(function (p) { return [p.at, p.users]; }) }], fmt: function (v) { return String(Math.round(v)); }, max: null },
-                { title: t.uplink, series: [{ label: t.dl, cls: 'rt-s1', points: pts.map(function (p) { return [p.at, p.down]; }) },
-                    { label: t.ul, cls: 'rt-s2', points: pts.map(function (p) { return [p.at, p.up]; }) }], fmt: bps, max: null }
+                { title: t.cpuMem, series: [{ label: t.cpu, cls: 'rt-s1', points: line('cpu') },
+                    { label: t.memory, cls: 'rt-s2', points: line('mem') }], fmt: function (v) { return Math.round(v) + '%'; }, max: 100 },
+                { title: t.usersOnline, series: [{ label: t.usersOnline, cls: 'rt-s1', points: line('users') }], fmt: function (v) { return String(Math.round(v)); }, max: null },
+                { title: t.uplink, series: [{ label: t.dl, cls: 'rt-s1', points: line('down') },
+                    { label: t.ul, cls: 'rt-s2', points: line('up') }], fmt: bps, max: null }
             ];
             // online and offline along the period: green or red only where there are readings, neutral where there are none.
-            // Each point stands for one stretch of time, as wide as the server's averaging step. An offline stretch is also lower
-            // (not told apart by colour alone), and each one says its time and state, on hover and to screen readers.
-            var span = d.to - d.from, strip = '';
-            var step = Math.max(300, Math.ceil(span / 300)), w = Math.max(0.15, step / span * 100);
+            // Each point stands for one stretch of time, as wide as the server's averaging step (cut to the period shown). An
+            // offline stretch is also lower, and one with failed readings as well as answered ones is striped and shorter (not
+            // told apart by colour alone); each one says its time and state, on hover and to screen readers.
+            var strip = '';
             var onText = t.stripOn || t.up, offText = t.stripOff || t.down;
-            pts.forEach(function (p) {
-                var said = stamp(p.at - step / 2, true) + ' – ' + stamp(p.at + step / 2) + ': ' + (p.online ? onText : offText);
-                strip += '<i role="listitem" class="' + (p.online ? 'is-on' : 'is-off') + '" title="' + esc(said) + '" style="left:' + ((p.at - step / 2 - d.from) / span * 100).toFixed(3) + '%;width:' + w.toFixed(3) + '%">'
+            d.points.forEach(function (p) {
+                var a = Math.max(d.from, p.at - step / 2), b = Math.min(d.to, p.at + step / 2);
+                if (b <= a) return;
+                var n = +p.n || 0, on = +p.on || 0, mixed = p.online && n > 0 && on < n;
+                var said = stamp(p.at - step / 2, true) + ' – ' + stamp(p.at + step / 2) + ': ' + (p.online ? onText : offText)
+                    + (mixed ? ' (' + on + ' ' + t.of + ' ' + n + ' ' + t.samples + ')' : '');
+                strip += '<i role="listitem" class="' + (mixed ? 'is-on is-mixed' : p.online ? 'is-on' : 'is-off') + '" title="' + esc(said) + '" style="left:' + ((a - d.from) / span * 100).toFixed(3) + '%;width:' + Math.max(0.15, (b - a) / span * 100).toFixed(3) + '%">'
                     + '<span class="sr-only">' + esc(said) + '</span></i>';
             });
             var html = head(t.history, picker)
@@ -506,8 +528,18 @@
         if (!pane || !loaders[tab]) return;
         pane.setAttribute('data-loaded', '1');
         pane._lv = null; // the list being replaced: an answer for it (a disconnect) no longer draws into the pane
+        // Refresh had the keyboard focus (Enter or Space): the new Refresh gets it back once the tab is drawn, unless the focus
+        // has been put somewhere else meanwhile (replacing the old button leaves it on the page itself)
+        var fe = document.activeElement, refocus = !!(fe && pane.contains(fe) && fe.hasAttribute('data-rt-reload'));
+        var seq = pane._lseq = (pane._lseq || 0) + 1;
         pane.innerHTML = '<span class="rt-skel rt-skel--wide" aria-label="' + esc(t.loading) + '"></span>';
-        loaders[tab](id, pane, extra);
+        var done = loaders[tab](id, pane, extra);
+        if (refocus && done && done.then) done.then(function () {
+            var now = document.activeElement;
+            if (seq !== pane._lseq || (now && now !== document.body && now !== pane)) return;
+            var b = pane.querySelector('[data-rt-reload]:not([disabled])');
+            if (b) b.focus();
+        });
     }
     function show(id, tab) {
         var row = document.getElementById('rt-detail-' + id);
@@ -638,8 +670,10 @@
                 if (dPane._lv === dModel) listRender(dPane);
                 request('drop', rid, { kind: dKind, sid: dSid, user: dUser, address: dAddr, mac: dMac, started: dStarted, cfg: dCfg }).then(function (d) {
                     // kept on the pane, not only on the row: a Refresh meanwhile replaces the rows, and the result must survive it
-                    // (unless a disconnect of a newer session with the same key has been sent since: the state is that one's)
-                    if (dPane._dropReq[dKey] === dReq) dPane._drops[dKey] = d.ok ? 'gone' : { err: d.error || t.fail, user: dUser };
+                    // (a disconnect of a newer session with the same key has been sent since: the state, the rows and any notice
+                    // are that one's to set, so this answer changes nothing)
+                    if (dPane._dropReq[dKey] !== dReq) return;
+                    dPane._drops[dKey] = d.ok ? 'gone' : { err: d.error || t.fail, user: dUser };
                     // the answer goes to the row it was sent from and to the same session in the list shown now (a Refresh may
                     // have replaced it); a list from other router settings is left alone
                     var cur = find(dPane._lv);

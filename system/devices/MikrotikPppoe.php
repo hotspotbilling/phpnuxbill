@@ -68,14 +68,16 @@ class MikrotikPppoe
             $setTaken = RouterApi::error($setRes) === null;
 
             // the fixed IP is cleared only on a secret the router has just taken: after a refused change, nothing was saved
+            $unsetErr = null;
             if ($unsetIP && $setTaken) {
                 $unsetRequest = new RouterOS\Request('/ppp/secret/unset');
-                $unsetRequest->setArgument('.id', $cid);
+                $unsetRequest->setArgument('numbers', $cid);
                 $unsetRequest->setArgument('value-name','remote-address');
                 try {
-                    $this->checked($client->sendSync($unsetRequest));
+                    // checked in every mode: a refusal is said below as a partial update, never as a failed (rolled back) one
+                    $unsetErr = RouterApi::error($client->sendSync($unsetRequest));
                 } catch (Exception $e) {
-                    // the router confirmed the secret change above: said as a partial update, with the router's reason
+                    // no answer (the connection is dropped): the secret was saved, whether the address was cleared is not known
                     throw new Exception(Lang::T('Saved, but the fixed IP address could not be cleared') . ': ' . $e->getMessage(), self::PARTIAL, $e);
                 }
             }
@@ -87,6 +89,10 @@ class MikrotikPppoe
                 if (!empty($customer['pppoe_username'])) {
                     $this->removePpoeActive($client, $customer['pppoe_username']);
                 }
+            }
+            if ($unsetErr !== null) {
+                // the router took the secret change and refused only the clear: the address is still to be cleared
+                throw new Exception(Lang::T('Saved, but the fixed IP address could not be cleared') . ': ' . $unsetErr, self::PARTIAL);
             }
         }
     }
@@ -107,6 +113,9 @@ class MikrotikPppoe
         if ($this->strict && ($err = RouterApi::error($res)) !== null) {
             throw new Exception($err);
         }
+        if ($res instanceof RouterOS\ResponseCollection) {
+            $res->rewind(); // error() iterated the replies: back to the first, for getProperty()
+        }
         return $res;
     }
 
@@ -117,7 +126,16 @@ class MikrotikPppoe
         if (!empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
             if($p){
-                $this->add_customer($customer, $p);
+                try {
+                    $this->add_customer($customer, $p);
+                } catch (Exception $e) {
+                    if ($e->getCode() !== self::PARTIAL) {
+                        throw $e;
+                    }
+                    // the expired profile is on the secret, only the address clear is pending: the expiry goes on (the cron
+                    // still turns the recharge off), and the clear is left in the log for a sync
+                    _log('PPPoE ' . $customer['username'] . ': ' . $e->getMessage(), 'Router');
+                }
                 $this->removePpoeActive($client, $customer['username']);
                 if (!empty($customer['pppoe_username'])) {
                     $this->removePpoeActive($client, $customer['pppoe_username']);
@@ -191,20 +209,32 @@ class MikrotikPppoe
     }
 
     /**
-     * Function to ID by username from Mikrotik
+     * Function to ID by username from Mikrotik. $checked (by default: during a sync) throws the router's refusal of a lookup
+     * (a !trap), so a refusal is never taken for "no such secret" and no secret is made on it; empty means the router answered
+     * and has none.
      */
-    function getIdByCustomer($customer, $client){
-        $printRequest = new RouterOS\Request('/ppp/secret/print');
-        $printRequest->setQuery(RouterOS\Query::where('name', $customer['username']));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
+    function getIdByCustomer($customer, $client, $checked = null){
+        $checked = $checked ?? $this->strict;
+        $id = $this->secretId($client, $customer['username'], $checked);
         if(empty($id)){
             if (!empty($customer['pppoe_username'])) {
-                $printRequest = new RouterOS\Request('/ppp/secret/print');
-                $printRequest->setQuery(RouterOS\Query::where('name', $customer['pppoe_username']));
-                $id = $client->sendSync($printRequest)->getProperty('.id');
+                $id = $this->secretId($client, $customer['pppoe_username'], $checked);
             }
         }
         return $id;
+    }
+
+    /** The .id of the secret with this name (empty when none); with $checked, the router's refusal is thrown */
+    private function secretId($client, $name, $checked)
+    {
+        $printRequest = new RouterOS\Request('/ppp/secret/print');
+        $printRequest->setQuery(RouterOS\Query::where('name', $name));
+        $res = $client->sendSync($printRequest);
+        if ($checked && ($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err);
+        }
+        $res->rewind(); // error() iterated the replies: back to the first, or getProperty() has no reply to read
+        return $res->getProperty('.id');
     }
 
     function update_plan($old_name, $new_plan)

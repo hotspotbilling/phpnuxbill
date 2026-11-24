@@ -20,7 +20,7 @@
     var EVERY_DOWN = 30000;  // ms between tries while the router does not answer
     var MAX_LIVE = 600000;   // ms a panel keeps reading before it pauses itself
     var data = {};           // id => last answer
-    var live = {};           // id => { cpu: [[at, v]], mem: [[at, v]], prev: {name: {rx, tx, at}}, rate: {name: [[at, down, up]]}, iface, timer, paused, started }
+    var live = {};           // id => { cpu: [[at, v]], mem: [[at, v]], prev: {name: {rx, tx, at}}, ifs: {name: {type, total}}, rate: {name: [[at, down, up]]}, iface, boot, up, timer, paused, started }
     var queue = [];
     var running = 0;
     // per kind of request (the list's checks, the Live readings), id => number of the newest request sent / shown: kept apart, so
@@ -78,6 +78,14 @@
         if (h === null && p === null) return null;
         return (h || 0) + (p || 0);
     }
+    // an uptime as the server says it ("9d 3h 4m", to the minute) as seconds, or null when it is not in that form
+    function upSecs(u) {
+        if (typeof u !== 'string' || !/^\s*(\d+\s*[wdhms]\s*)+$/.test(u)) return null;
+        var mult = { w: 604800, d: 86400, h: 3600, m: 60, s: 1 }, n = 0;
+        u.replace(/(\d+)\s*([wdhms])/g, function (all, v, k) { n += v * mult[k]; });
+        return n;
+    }
+    var BOOT_SLACK = 120; // seconds a start time worked out from a reading can move without a restart (the uptime is to the minute)
     function failText(d) {
         return '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> ' + esc(d.error || t.fail)
             + (d.hint ? '<small class="rt-hint">' + esc(d.hint) + '</small>' : '');
@@ -114,14 +122,26 @@
         // again (CPU, memory, traffic, the reading picked on them and the interface chosen) and no speed across the change
         if (d.rev && L.rev && d.rev !== L.rev) {
             L.prev = Object.create(null);
+            L.ifs = Object.create(null);
             L.cpu = [];
             L.mem = [];
             L.rate = Object.create(null);
             L.iface = null;
+            L.boot = L.up = null;
             L.gap = false;
             ['load', 'traffic'].forEach(function (k) { L.hover[k].f = null; L.hover[k].at = null; });
         }
         if (d.rev) L.rev = d.rev;
+        // the router restarted since the last reading (its start time, when read less its uptime, moved later, or its uptime went
+        // back): its counters started again, so the reading before is no baseline; this one is the new one (a gap, then speeds
+        // from the next reading on). A counter that happens to be higher after the restart would otherwise give a wrong speed.
+        var up = upSecs(d.uptime);
+        if (up !== null) {
+            var boot = d.at - up;
+            if (L.boot != null && (boot - L.boot > BOOT_SLACK || up < L.up)) L.prev = Object.create(null);
+            L.boot = boot;
+            L.up = up;
+        }
         var cut = d.at - WINDOW;
         function push(arr, row) {
             arr.push(row);
@@ -139,10 +159,13 @@
         if (m != null) push(L.mem, [d.at, m]);
         // the interfaces running now: one that has gone (unplugged, disabled) leaves the picker; its graph history stays in
         // L.rate, so it is there again if the interface comes back
+        // L.ifs is the list shown in the picker: kept apart from L.prev, the counter baseline, which a pause, a failed reading or
+        // a hidden page clears, so the traffic graph stays shown (with its history) while it waits for two new readings
         if (d.ifaces) {
             var now = Object.create(null); // (an interface may be called "constructor": no inherited names here)
-            d.ifaces.forEach(function (i) { now[i.name] = true; });
+            d.ifaces.forEach(function (i) { now[i.name] = { type: i.type, total: i.rx + i.tx }; });
             Object.keys(L.prev).forEach(function (n) { if (!now[n]) delete L.prev[n]; });
+            L.ifs = now;
         }
         (d.ifaces || []).forEach(function (i) {
             var p = L.prev[i.name];
@@ -161,13 +184,13 @@
             }
             L.prev[i.name] = { rx: i.rx, tx: i.tx, at: d.at, type: i.type, total: i.rx + i.tx };
         });
-        if (!L.iface || !L.prev[L.iface]) {
+        if (!L.iface || !L.ifs[L.iface]) {
             // the busiest interface since the router started is usually the uplink
             var best = null;
-            Object.keys(L.prev).forEach(function (n) {
-                if (!best || L.prev[n].total > L.prev[best].total) best = n;
+            Object.keys(L.ifs).forEach(function (n) {
+                if (!best || L.ifs[n].total > L.ifs[best].total) best = n;
             });
-            L.iface = saved(id) && L.prev[saved(id)] ? saved(id) : best;
+            L.iface = saved(id) && L.ifs[saved(id)] ? saved(id) : best;
         }
     }
     function saved(id, v) {
@@ -429,10 +452,10 @@
 
         var traffic = box.querySelector('[data-rt-chart="traffic"]');
         var pick = traffic.querySelector('.rt-chart__pick');
-        var names = Object.keys(L.prev).sort(function (a, b) { return L.prev[b].total - L.prev[a].total; });
+        var names = Object.keys(L.ifs).sort(function (a, b) { return L.ifs[b].total - L.ifs[a].total; });
         if (pick.getAttribute('data-names') !== names.join('\n')) {
             pick.innerHTML = names.map(function (nm) {
-                return '<option value="' + esc(nm) + '">' + esc(nm) + (L.prev[nm].type ? ' (' + esc(L.prev[nm].type) + ')' : '') + '</option>';
+                return '<option value="' + esc(nm) + '">' + esc(nm) + (L.ifs[nm].type ? ' (' + esc(L.ifs[nm].type) + ')' : '') + '</option>';
             }).join('');
             pick.setAttribute('data-names', names.join('\n'));
         }
@@ -484,7 +507,9 @@
                     return data[id] || d;
                 }
                 if (opts.live && live[id] && (live[id].vis || 0) !== vis) {
-                    return d; // its counters span the time the page was hidden: no speed from them (the next reading starts again)
+                    // its counters span the time the page was hidden: no speed from them (the next reading starts again). Not
+                    // used, and not a failure either: the next reading is asked at the usual pace, not after the backoff
+                    return { ok: false, discarded: true };
                 }
                 var cur = data[id];
                 // answers of one kind can come back out of order: one from a request older than the answer already shown is
@@ -543,12 +568,13 @@
         ask(id, { live: true, gen: gen }).then(function (d) {
             // a router that does not answer is asked every 30 seconds only: each try can wait for the connection time limit
             var cur = live[id];
-            if (cur && !cur.paused && cur.gen === gen) cur.timer = setTimeout(function () { tick(id, gen); }, d && d.ok ? EVERY : EVERY_DOWN);
+            // (an answer dropped because the page was hidden or shown meanwhile is no failure: asked again at the usual pace)
+            if (cur && !cur.paused && cur.gen === gen) cur.timer = setTimeout(function () { tick(id, gen); }, d && (d.ok || d.discarded) ? EVERY : EVERY_DOWN);
         });
     }
     function start(id) {
         // prev and rate are keyed by interface name: maps without inherited names, so "constructor" is an interface like any other
-        var L = live[id] || (live[id] = { cpu: [], mem: [], prev: Object.create(null), rate: Object.create(null), iface: null, gen: 0, hover: { load: { f: null, at: null }, traffic: { f: null, at: null } } });
+        var L = live[id] || (live[id] = { cpu: [], mem: [], prev: Object.create(null), ifs: Object.create(null), rate: Object.create(null), iface: null, gen: 0, hover: { load: { f: null, at: null }, traffic: { f: null, at: null } } });
         clearTimeout(L.timer);
         L.gen++;
         L.suspended = false;

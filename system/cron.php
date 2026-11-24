@@ -195,22 +195,46 @@ foreach ($d as $ds) {
     }
 }
 
-// Check for stale radius-rest sessions
-if ($config['frrest_interim_update'] != 0) {
-
-    $r_a = ORM::for_table('rad_acct')
-        ->whereRaw("BINARY acctstatustype = 'Start' OR acctstatustype = 'Interim-Update'")
-        ->where_lte('dateAdded', date("Y-m-d H:i:s"))->find_many();
-
-    foreach ($r_a as $ra) {
-        $interval = $_c['frrest_interim_update'] * 60;
-        $timeUpdate = strtotime($ra['dateAdded']) + $interval;
-        $timeNow = strtotime(date("Y-m-d H:i:s"));
-        if ($timeNow >= $timeUpdate) {
-            $ra->acctstatustype = 'Stop';
-            $ra->save();
+// RADIUS sessions: those that stopped sending accounting updates, then old finished REST sessions (rad_acct)
+try {
+    // Clear Stale Sessions (Settings > General): sessions that stopped sending accounting updates are closed, REST and MySQL
+    // alike, on every run (system/cron/cleanup_stale_sessions.php does the same, for a site that runs it more often)
+    $staleMinutes = RadiusSessions::staleMinutes($config);
+    if ($staleMinutes > 0) {
+        foreach (RadiusSessions::closeStale($staleMinutes)['lines'] as $line) {
+            echo "RADIUS: " . ($isCli ? $line : htmlspecialchars($line, ENT_QUOTES)) . "\n";
         }
     }
+    // Finished sessions older than the number of days set in Settings (0 keeps them all), a few thousand rows per run so
+    // the table is never locked for long. A session inside an active recharge is always kept: a limited plan adds up its
+    // usage from these rows (radius.php, radius_usage), so removing them would give the customer their usage back.
+    $keepDays = (int) ($config['frrest_keep_days'] ?? 0);
+    if ($keepDays > 0) {
+        $before = date('Y-m-d H:i:s', time() - $keepDays * 86400);
+        $removed = 0;
+        for ($i = 0; $i < 20; $i++) {
+            ORM::raw_execute(
+                "DELETE FROM rad_acct
+                  WHERE acctstatustype = 'Stop' AND COALESCE(dateUpdated, dateAdded) < ?
+                    AND NOT EXISTS (SELECT 1 FROM tbl_user_recharges r
+                         WHERE r.username = rad_acct.username AND r.status = 'on'
+                           AND rad_acct.dateAdded >= TIMESTAMP(r.recharged_on, r.recharged_time))
+                  LIMIT 5000",
+                [$before]
+            );
+            $n = ORM::get_last_statement()->rowCount();
+            $removed += $n;
+            if ($n < 5000) {
+                break;
+            }
+        }
+        if ($removed > 0) {
+            echo "RADIUS REST: removed $removed finished session(s) older than $keepDays day(s)\n";
+        }
+    }
+} catch (Throwable $e) {
+    // (no rad_acct table: RADIUS REST is not used here)
+    echo "RADIUS REST sessions: " . ($isCli ? $e->getMessage() : htmlspecialchars($e->getMessage(), ENT_QUOTES)) . "\n";
 }
 
 if ($config['router_check']) {
@@ -227,24 +251,28 @@ if ($config['router_check']) {
     echo "Checking router status...\n";
     $routers = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
     if (!$routers) {
+        // nothing to check, but the rest of the run (history pruning, nightly backups, the end hook) still goes ahead
         echo "No active routers found in the database.\n";
-        flock($lock, LOCK_UN);
-        fclose($lock);
-        unlink($lockFile);
-        exit;
+        $routers = [];
     }
 
     $offlineRouters = [];
     $errors = [];
 
     foreach ($routers as $router) {
-        // "host", "host:port", "[IPv6]" or "[IPv6]:port", read as the router pages and devices read it
-        [$ip, $port] = RouterAddress::split($router->ip_address);
-        $port = (int) ($port ?: 8728);
-        $sockHost = strpos($ip, ':') !== false ? '[' . $ip . ']' : $ip; // an IPv6 address is written in brackets to connect
+        $ip = (string) $router->ip_address;
         $isOnline = false;
 
         try {
+            // "host", "host:port", "[IPv6]" or "[IPv6]:port", read as the router pages and devices read it; a malformed saved
+            // address is an error for this router only, the next one is still checked
+            [$ip, $port] = RouterAddress::split($router->ip_address);
+            $ip = (string) $ip;
+            if ($ip === '') {
+                throw new Exception("The router {$router->name} has no address saved");
+            }
+            $port = (int) ($port ?: 8728);
+            $sockHost = strpos($ip, ':') !== false ? '[' . $ip . ']' : $ip; // an IPv6 address is written in brackets to connect
             $timeout = 5;
             if (is_callable('fsockopen') && false === stripos(ini_get('disable_functions'), 'fsockopen')) {
                 $fsock = @fsockopen($sockHost, $port, $errno, $errstr, $timeout);
@@ -265,7 +293,7 @@ if ($config['router_check']) {
             } else {
                 throw new Exception("Neither fsockopen nor stream_socket_client are enabled on the server.");
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             _log($e->getMessage());
             $errors[] = "Error with router $ip: " . $e->getMessage();
         }
@@ -312,8 +340,13 @@ if ($config['router_check']) {
         $adminEmail = $config['mail_from'];
         $subject = "Router Offline Alert";
         $routerCheckMail($adminEmail, $subject, $message);
-        // a short time limit (the default is minutes): a stalled Telegram must not hold up the monitor and the backups below
-        Message::sendTelegram($message, null, '', 15);
+        // a short time limit (the default is minutes): a stalled Telegram must not hold up the monitor and the backups below,
+        // and a failure there (or in a send_telegram plugin hook) must not stop them either
+        try {
+            Message::sendTelegram($message, null, '', 15);
+        } catch (Throwable $e) {
+            echo "Router alert Telegram note: " . ($isCli ? $e->getMessage() : htmlspecialchars($e->getMessage(), ENT_QUOTES)) . "\n";
+        }
     }
 
     if (!empty($errors)) {
@@ -325,8 +358,13 @@ if ($config['router_check']) {
         $adminEmail = $config['mail_from'];
         $subject = "Router Monitoring Error Alert";
         $routerCheckMail($adminEmail, $subject, $message);
-        // a short time limit (the default is minutes): a stalled Telegram must not hold up the monitor and the backups below
-        Message::sendTelegram($message, null, '', 15);
+        // a short time limit (the default is minutes): a stalled Telegram must not hold up the monitor and the backups below,
+        // and a failure there (or in a send_telegram plugin hook) must not stop them either
+        try {
+            Message::sendTelegram($message, null, '', 15);
+        } catch (Throwable $e) {
+            echo "Router alert Telegram note: " . ($isCli ? $e->getMessage() : htmlspecialchars($e->getMessage(), ENT_QUOTES)) . "\n";
+        }
     }
     echo "Router monitoring finished checking.\n";
 }

@@ -365,6 +365,8 @@ ALTER TABLE `rad_acct`
   ADD KEY `framedipaddress` (`framedipaddress`),
   ADD KEY `acctsessionid` (`acctsessionid`),
   ADD KEY `nasipaddress` (`nasipaddress`),
+  ADD KEY `idx_rad_acct_status_updated` (`acctstatustype`, `dateUpdated`),
+  ADD KEY `idx_rad_acct_user_added` (`username`, `dateAdded`),
   ADD UNIQUE KEY `unique_session` (`username`, `acctsessionid`);
 
 

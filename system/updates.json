@@ -367,5 +367,15 @@
     "PREPARE stmt FROM @s;",
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;"
+  ],
+  "2026.11.24": [
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct')=1 AND (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND INDEX_NAME='idx_rad_acct_status_updated')=0, 'ALTER TABLE `rad_acct` ADD INDEX `idx_rad_acct_status_updated` (`acctstatustype`, `dateUpdated`)', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct')=1 AND (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND INDEX_NAME='idx_rad_acct_user_added')=0, 'ALTER TABLE `rad_acct` ADD INDEX `idx_rad_acct_user_added` (`username`, `dateAdded`)', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;"
   ]
 }

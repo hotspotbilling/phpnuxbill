@@ -107,7 +107,12 @@ class Radius
 
     function sync_customer($customer, $plan)
     {
-        $t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->findOne();
+        // the expiry of this plan's active recharge (another active plan of the same username has its own); any active one
+        // of the username when this plan has none
+        $t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('plan_id', $plan['id'])->where('status', 'on')->findOne();
+        if (!$t) {
+            $t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->findOne();
+        }
         $date_exp = $t['expiration'];
         $time = $t['time'];
         $this->customerAddPlan($customer, $plan, $date_exp . ' ' . $time);

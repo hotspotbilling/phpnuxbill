@@ -257,7 +257,12 @@ switch ($action) {
             $enable_session_timeout = isset($_POST['enable_session_timeout']) ? 1 : 0;
             $_POST['enable_session_timeout'] = $enable_session_timeout;
             // RADIUS REST interim-update window (minutes, 0 = off), read by cron.php
-            if (isset($_POST['frrest_interim_update'])) $_POST['frrest_interim_update'] = (string) max(0, (int) $_POST['frrest_interim_update']);
+            // the former REST-only stale minutes are now Clear Stale Sessions (the form shows them there, so they are carried
+            // over): once that is saved, the old setting is retired so the two can never disagree
+            if (isset($_POST['clear_stale_sessions'])) $_POST['frrest_interim_update'] = '0';
+            if (isset($_POST['stale_session_timeout'])) $_POST['stale_session_timeout'] = (string) max(1, (int) $_POST['stale_session_timeout']);
+            // days of finished RADIUS REST sessions kept in rad_acct (0 = all), removed by cron.php
+            if (isset($_POST['frrest_keep_days'])) $_POST['frrest_keep_days'] = (string) min(3650, max(0, (int) $_POST['frrest_keep_days']));
             // Captcha: which logins are protected, one check box each
             $_POST['captcha_on_admin'] = isset($_POST['captcha_on_admin']) ? 'yes' : 'no';
             $_POST['captcha_on_customer'] = isset($_POST['captcha_on_customer']) ? 'yes' : 'no';

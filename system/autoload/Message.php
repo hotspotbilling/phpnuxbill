@@ -22,6 +22,11 @@ class Message
     {
         global $config;
         run_hook('send_telegram', [$txt, $chat_id, $topik]); #HOOK
+        // while answering FreeRADIUS (radius.php) the router is waiting: 3 seconds at most, whatever the caller asked for
+        // (a voucher login's purchase alert comes from Package::rechargeUser, in the middle of the login)
+        if (!empty($GLOBALS['radius_request'])) {
+            $timeout = min((int) $timeout, 3);
+        }
         if (!empty($config['telegram_bot'])) {
             if (empty($chat_id)) {
                 $chat_id = $config['telegram_target_id'];
@@ -108,10 +113,14 @@ class Message
             ->setArgument('phone-number', $to)
             ->setArgument('message', $message);
         try {
-            $client_m->sendSync($smsRequest);
+            $res = $client_m->sendSync($smsRequest);
         } catch (Throwable $e) {
             $client_m = null; // the connection was dropped: the next message connects again
             throw $e;
+        }
+        // the router answered but refused the command (!trap): the connection is fine, the message was not sent
+        if (($err = RouterApi::error($res)) !== null) {
+            throw new \Exception($err, 403);
         }
     }
 

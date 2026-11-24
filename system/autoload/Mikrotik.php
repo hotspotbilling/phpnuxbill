@@ -23,7 +23,8 @@ class Mikrotik
         // host and port the way the router form saves them: host, host:port, [IPv6]:port or a bare IPv6 address
         [$host, $saved] = RouterAddress::split($ip);
         $p = ($port) ? $port : (($saved ?? null) ? $saved : null);
-        return new RouterOS\Client($host, $user, $pass, $p, false, $timeout);
+        // through RouterApi: API-SSL on port 8729, a time limit on every read, and a connection that can be dropped
+        return RouterApi::deviceClient($host, $user, $pass, $p, $timeout, 30);
     }
 
     public static function isUserLogin($client, $username)

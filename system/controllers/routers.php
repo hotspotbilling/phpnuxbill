@@ -131,14 +131,30 @@ $endpointLock = function ($on = true) {
 $busyText = function () {
     return Lang::T('Another change to the routers is being saved. Try again in a moment.');
 };
-// an address that has a port but no host (":8729", "[]:8729"): not an address. An empty one is allowed (a disabled draft).
+// an address whose host is missing (":8729", "[]:8729") or is not an IPv4 address, an IPv6 address or a host name ("router
+// example", "10.0.0.256", "[router.example]"): not an address. An empty one is allowed (a disabled draft).
 $hostMissing = function ($address) {
-    $address = trim((string) $address);
+    $address = RouterAddress::normalize($address);
     if ($address === '') {
         return false;
     }
     [$h] = RouterAddress::split($address);
-    return trim((string) $h, "[] \t") === '';
+    $h = (string) $h;
+    if ($h === '' || trim($h) !== $h) {
+        return true;
+    }
+    if ($address[0] === '[') {
+        // brackets only ever hold an IPv6 address
+        return !filter_var($h, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+    }
+    if (filter_var($h, FILTER_VALIDATE_IP)) {
+        return false;
+    }
+    // digits and dots only, yet not an IPv4 address: a mistyped address, not a host name
+    if (preg_match('/^[0-9.]+$/', $h)) {
+        return true;
+    }
+    return !filter_var($h, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME);
 };
 $validPort = function ($port) {
     $port = trim((string) $port);
@@ -356,7 +372,7 @@ switch ($action) {
         // settings can be saved here, each checked before it is kept.
         $fields = [
             'router_check' => ['0', '1'], 'router_health' => ['1', '0'], 'router_monitor' => ['1', '0'], 'router_alerts' => ['0', '1'],
-            'router_alert_telegram' => ['1', '0'], 'router_alert_email' => ['0', '1'], 'router_alert_via' => ['wa', 'sms'], 'router_backup' => ['0', '1'],
+            'router_alert_telegram' => ['1', '0'], 'router_alert_email' => ['0', '1'], 'router_alert_via' => ['wa', 'sms'], 'router_backup' => ['0', '1'], 'router_backup_plain_ok' => ['0', '1'],
         ];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($_app_stage == 'Demo') {
@@ -605,7 +621,23 @@ switch ($action) {
                 @session_start();
                 r2($back, 'e', htmlspecialchars($d['name']) . ': ' . Lang::T('Another router has the same name, so its customers cannot be told apart. Rename one of them first.'));
             }
+            // the device connects to whichever router has the plan's router name when it is called: after a rename (this router's
+            // name given to another one) that would be another router. So each customer is sent under the routers lock (renames,
+            // moves and deletes wait meanwhile), after checking this router still has the name and endpoint it had when chosen;
+            // when it has not (or the lock cannot be got), the sync stops there
+            $selected = [(string) $d['name'], $endpointKey($d['ip_address']), (string) $d['username']];
+            $stoppedWhy = null;
             foreach (ORM::for_table('tbl_user_recharges')->where('status', 'on')->where('routers', $d['name'])->find_many() as $tur) {
+                $endpointLock(false); // the previous customer's
+                if (!$endpointLock()) {
+                    $stoppedWhy = $busyText();
+                    break;
+                }
+                $live = ORM::for_table('tbl_routers')->find_one($d['id']);
+                if (!$live || (int) $live['enabled'] !== 1 || [(string) $live['name'], $endpointKey($live['ip_address']), (string) $live['username']] !== $selected) {
+                    $stoppedWhy = Lang::T('The router was changed during the sync, so the rest of its customers were not sent. Run the sync again.');
+                    break;
+                }
                 // the list was read at the start: a recharge that has expired since (the cron) is not sent back to the router
                 // read again in full: its plan or router may have changed since too (a renewal, a move), and the current ones are used
                 $now = ORM::for_table('tbl_user_recharges')->find_one($tur['id']);
@@ -645,9 +677,10 @@ switch ($action) {
                     }
                 }
             }
+            $endpointLock(false);
             @session_start();
-            _log($who . 'Router sync ' . $d['name'] . ': ' . $done . ' done, ' . count($partial) . ' partly done, ' . count($failed) . ' failed, ' . count($unsure) . ' not confirmed', $admin['user_type'], $admin['id']);
-            r2($back, $failed || $unsure || $partial ? 'w' : 's', Lang::T('Customers sent to the router') . ': ' . $done
+            _log($who . 'Router sync ' . $d['name'] . ': ' . $done . ' done, ' . count($partial) . ' partly done, ' . count($failed) . ' failed, ' . count($unsure) . ' not confirmed' . ($stoppedWhy !== null ? ', stopped: ' . $stoppedWhy : ''), $admin['user_type'], $admin['id']);
+            r2($back, $stoppedWhy !== null ? 'e' : ($failed || $unsure || $partial ? 'w' : 's'), ($stoppedWhy !== null ? htmlspecialchars($stoppedWhy) . ' ' : '') . Lang::T('Customers sent to the router') . ': ' . $done
                 . ($partial ? '. ' . Lang::T('Saved, but a follow-up step failed') . ': ' . htmlspecialchars(implode(', ', array_slice($partial, 0, 20))) . (count($partial) > 20 ? ' …' : '') : '')
                 . ($failed ? '. ' . Lang::T('Not sent') . ': ' . htmlspecialchars(implode(', ', array_slice($failed, 0, 20))) . (count($failed) > 20 ? ' …' : '') : '')
                 . ($unsure ? '. ' . Lang::T('Sent, but the router did not confirm them') . ': ' . htmlspecialchars(implode(', ', array_slice($unsure, 0, 20))) . (count($unsure) > 20 ? ' …' : '') : ''));
@@ -1609,14 +1642,15 @@ switch ($action) {
             r2(getUrl('routers/edit/') . (int) $id, 'e', $busyText());
         }
         $d = ORM::for_table('tbl_routers')->find_one($id);
-        if ($d) {
-        } else {
-            $msg .= Lang::T('Data Not Found') . '<br>';
+        if (!$d) {
+            // nothing to compare the address with: stop here rather than check endpoints against a router that is not there
+            $endpointLock(false);
+            r2(getUrl('routers/list'), 'e', Lang::T('Data Not Found'));
         }
 
-        $oldname = $d ? (string) $d['name'] : '';
+        $oldname = (string) $d['name'];
         // compared as text, strictly: "1000" and "01000" (equal as numbers to PHP's ==) are two names, and so a rename
-        $renamed = $d && $oldname !== (string) $name;
+        $renamed = $oldname !== (string) $name;
         if ($renamed) {
             $c = ORM::for_table('tbl_routers')->where('name', $name)->where_not_equal('id', $id)->find_one();
             if ($c) {

@@ -23,6 +23,8 @@ if (empty($radiusLight)) {
     $radiusLight = trim((string) ($_GET['action'] ?? ''));
 }
 $radiusLight = $radiusLight === 'accounting';
+// FreeRADIUS (and the router behind it) waits on every answer: an alert sent while answering must never hold it
+$GLOBALS['radius_request'] = true;
 
 include "init.php";
 
@@ -119,53 +121,33 @@ try {
                 die();
             }
 
-            // Find existing record by session ID and username (unique session)
-            $d = ORM::for_table('rad_acct')
-                ->where('acctsessionid', $acctSessionId)
-                ->where('username', $username)
-                ->find_one();
-
-            if ($d) {
-                // Update existing record - NAS continues the session
-                $d->acctoutputoctets = $acctOutputOctets;
-                $d->acctinputoctets = $acctInputOctets;
-                $d->acctsessiontime = $acctSessionTime;
-                $d->dateUpdated = date('Y-m-d H:i:s');
-            } else {
-                // Create new record only if no existing record found for this session ID
-                $d = ORM::for_table('rad_acct')->create();
-                $d->acctoutputoctets = $acctOutputOctets;
-                $d->acctinputoctets = $acctInputOctets;
-                $d->acctsessiontime = $acctSessionTime;
-                $d->dateAdded = date('Y-m-d H:i:s');
-                $d->dateUpdated = date('Y-m-d H:i:s');
-                $d->acctsessionid = $acctSessionId;
-                $d->username = $username;
-                $d->realm = $realm;
-                $d->nasipaddress = $nasIpAddress;
-                $d->nasid = _req('nasid');
-                $d->nasportid = $nasPortId;
-                $d->nasporttype = $nasPortType;
-                $d->macaddr = $macAddr;
-            }
-
-            $d->framedipaddress = $framedIPAddress;
-            if (in_array($acctStatusType, ['Start', 'Stop', 'Interim-Update'], true)) {
-                $d->acctstatustype = $acctStatusType;
-            }
-
+            // One statement for every accounting request, keyed on the unique (username, acctsessionid): a new session is
+            // added, a known one updated. Atomic, so a Start and the NAS's resend of it (or an Interim arriving with it)
+            // can never both insert and fail on the key, which used to answer FreeRADIUS with an error and no
+            // Accounting-Response for the router. The status changes only for a known type; the start fields stay as
+            // first written. Dates in PHP's timezone, as the cron and the dashboard compare them.
+            $now = date('Y-m-d H:i:s');
+            $status = in_array($acctStatusType, ['Start', 'Stop', 'Interim-Update'], true) ? $acctStatusType : null;
             try {
-                $d->save();
-                show_radius_result(['Reply-Message' => 'Saved'], 200);
-            } catch (Exception $e) {
-                // Avoid Mikrotik no-response due server error (500)
-                sendTelegram(
-                    "Database Save Error on RADIUS Accounting.\n" .
-                    "Username: {$username}\n" .
-                    "Session ID: {$acctSessionId}\n" .
-                    "Error: " . $e->getMessage()
+                ORM::raw_execute(
+                    "INSERT INTO rad_acct (acctsessionid, username, realm, nasid, nasipaddress, nasportid, nasporttype, framedipaddress,
+                        acctsessiontime, acctinputoctets, acctoutputoctets, acctstatustype, macaddr, dateAdded, dateUpdated)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     ON DUPLICATE KEY UPDATE acctinputoctets = VALUES(acctinputoctets), acctoutputoctets = VALUES(acctoutputoctets),
+                        acctsessiontime = VALUES(acctsessiontime), framedipaddress = VALUES(framedipaddress),
+                        dateUpdated = VALUES(dateUpdated), acctstatustype = COALESCE(VALUES(acctstatustype), acctstatustype)",
+                    [
+                        (string) $acctSessionId, (string) $username, (string) $realm, (string) _req('nasid'), (string) $nasIpAddress,
+                        $nasPortId, $nasPortType, (string) $framedIPAddress, $acctSessionTime, $acctInputOctets, $acctOutputOctets,
+                        $status, (string) $macAddr, $now, $now,
+                    ]
                 );
-                show_radius_result(['Reply-Message' => 'Database save failed'], 401);
+                show_radius_result(['Reply-Message' => 'Saved'], 200);
+            } catch (Throwable $e) {
+                // the router is still answered (200): without an Accounting-Response it logs "no response" and sends the
+                // request again, which only adds load; this one update is lost, the next interim update brings the session up to date
+                radius_alert("Database save error on RADIUS accounting.\nUsername: {$username}\nSession ID: {$acctSessionId}\nError: " . $e->getMessage());
+                show_radius_result(['Reply-Message' => 'Not saved'], 200);
             }
             break;
         default:
@@ -173,12 +155,47 @@ try {
             break;
     }
 } catch (Throwable $e) {
-    Message::sendTelegram(
-        "System Error.\n" .
-        $e->getMessage() . "\n" .
-        $e->getTraceAsString()
-    );
-    show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
+    radius_alert("System Error.\n" . $e->getMessage() . "\n" . $e->getTraceAsString());
+    // accounting is answered either way (see above); a login that failed is refused
+    show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], $action === 'accounting' ? 200 : 401);
+}
+
+/**
+ * An error while answering FreeRADIUS: written to the log, and told on Telegram at most once every 5 minutes, with a short
+ * time limit (Message::sendTelegram keeps it short in a RADIUS request). A burst of errors, or a Telegram that is slow or
+ * blocked, must never hold the requests FreeRADIUS and the routers are waiting for. Never throws.
+ */
+function radius_alert($text)
+{
+    global $CACHE_PATH;
+    try {
+        _log(mb_substr((string) $text, 0, 1000), 'RADIUS');
+    } catch (Throwable $e) {
+    }
+    try {
+        $mark = rtrim((string) $CACHE_PATH, '/\\') . DIRECTORY_SEPARATOR . 'radius_alert.last';
+        $fh = @fopen($mark, 'c+');
+        if (!$fh) {
+            return;
+        }
+        $send = false;
+        if (flock($fh, LOCK_EX | LOCK_NB)) {
+            $last = (int) stream_get_contents($fh);
+            if (time() - $last >= 300) {
+                ftruncate($fh, 0);
+                rewind($fh);
+                fwrite($fh, (string) time());
+                fflush($fh);
+                $send = true;
+            }
+            flock($fh, LOCK_UN);
+        }
+        fclose($fh);
+        if ($send) {
+            Message::sendTelegram(mb_substr((string) $text, 0, 3000));
+        }
+    } catch (Throwable $e) {
+    }
 }
 
 function radius_credentials()
@@ -319,7 +336,7 @@ function process_radiust_rest($tur)
     }
     if (!$plan || !$bw) {
         _log("User {$tur['username']} has no valid internet plan or bandwidth. Plan ID: {$tur['plan_id']}, Expiration: {$tur['expiration']} {$tur['time']}", 'RADIUS');
-        Message::sendTelegram(
+        radius_alert(
             "User {$tur['username']} has no valid internet plan. Please check immediately.\n" .
             "Plan ID: {$tur['plan_id']}, Expiration: {$tur['expiration']} {$tur['time']}, \n" .
             "Error at Radius-Rest authorize."

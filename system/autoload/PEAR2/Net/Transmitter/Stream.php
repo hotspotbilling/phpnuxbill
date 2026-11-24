@@ -528,6 +528,7 @@ class Stream
                 if ($offsetIsNotNull) {
                     fseek($contents, $offset, SEEK_SET);
                 }
+                $sentChunk = false;
                 while (!feof($contents)) {
                     if ($lengthIsNotNull
                         && 0 === $chunkSize = min($chunkSize, $length - $bytes)
@@ -536,6 +537,12 @@ class Stream
                     }
                     $contentsToSend = fread($contents, $chunkSize);
                     if ('' != $contentsToSend) {
+                        // PHPNuxBill: the wait for the stream to take more comes before each chunk after the first, so it runs
+                        // only while more is to be sent (never after the last chunk, even before feof() has noticed the end)
+                        if ($sentChunk) {
+                            $this->waitToSend($bytes);
+                        }
+                        $sentChunk = true;
                         $bytesNow = $this->writeChunk($contentsToSend, $bytes);
                         if (0 != $bytesNow) {
                             $bytes += $bytesNow;
@@ -548,7 +555,6 @@ class Stream
                             );
                         }
                     }
-                    $this->waitToSend($bytes);
                 }
                 if (!$seekable) {
                     if ($offsetIsNotNull) {
@@ -583,7 +589,10 @@ class Stream
                         $bytes
                     );
                 }
-                $this->waitToSend($bytes);
+                // PHPNuxBill: wait for the stream to take more only while more is to be sent (not after the last chunk)
+                if ($bytes < $bytesToSend) {
+                    $this->waitToSend($bytes);
+                }
             }
         }
         return $bytes;

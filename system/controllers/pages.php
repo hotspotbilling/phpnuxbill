@@ -70,13 +70,20 @@ if (strpos($action, "-reset") !== false) {
     $action = str_replace("-post", "", $action);
     $path = "$PAGES_PATH/" . str_replace(".", "", $action) . ".html";
     if (file_exists($path)) {
+        // a page is shown to customers as it is saved: only from this form (another site cannot make an admin's browser save one)
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('pages/') . $action, 'e', Lang::T('Invalid or Expired CSRF Token') . '.');
+        }
         $html = _post("html");
+        // the name becomes a file in pages/vouchers: letters, digits, spaces, - and _ only, so it cannot reach another folder
+        $tplName = _post('template_save') == 'yes' ? trim((string) _post('template_name')) : '';
+        if ($tplName !== '' && !preg_match('/^[A-Za-z0-9 _-]{1,64}$/', $tplName)) {
+            r2(getUrl('pages/') . $action, 'e', Lang::T('The template name can only have letters, numbers, spaces, - and _ (64 at most)'));
+        }
         run_hook('save_pages'); #HOOK
         if (file_put_contents($path, $html)) {
-            if (_post('template_save') == 'yes') {
-                if (!empty(_post('template_name'))) {
-                    file_put_contents("$PAGES_PATH/vouchers/" . _post('template_name') . '.html', $html);
-                }
+            if ($tplName !== '') {
+                file_put_contents("$PAGES_PATH/vouchers/" . $tplName . '.html', $html);
             }
             r2(getUrl('pages/') . $action, 's', Lang::T("Saving page success"));
         } else {

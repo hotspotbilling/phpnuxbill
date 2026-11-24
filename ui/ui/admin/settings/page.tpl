@@ -1,6 +1,7 @@
 {include file="sections/header.tpl"}
 
 <form id="formpages" method="post" role="form" action="{Text::url('')}pages/{$PageFile}-post" class="st">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="{if $action=='Voucher'}col-md-8{else}col-md-12{/if}">
             <div class="panel mb20 panel-primary panel-hovered">
@@ -64,9 +65,11 @@
                     {if is_file("$PAGES_PATH/vouchers/$v")}
                         <div class="panel mb20 panel-primary panel-hovered" style="cursor: pointer;" onclick="selectTemplate(this)">
                             <div class="panel-heading">{str_replace(".html", '', $v)}</div>
-                            <div class="panel-body">{include file="$PAGES_PATH/vouchers/$v"}</div>
+                            {* the file is read as text, never compiled as a template: printed vouchers put it out the same way (only [[...]] is replaced) *}
+                            {fetch file="$PAGES_PATH/vouchers/$v" assign=vsrc}
+                            <div class="panel-body">{$vsrc}</div>
                             {* the file as written, for the editor: the preview above is the rendered page, which right-to-left languages mirror *}
-                            <textarea class="hidden" data-template-source hidden>{fetch file="$PAGES_PATH/vouchers/$v" assign=vsrc}{$vsrc|escape}</textarea>
+                            <textarea class="hidden" data-template-source hidden>{$vsrc|escape}</textarea>
                         </div>
                     {/if}
                 {/foreach}

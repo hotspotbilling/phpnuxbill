@@ -14,6 +14,12 @@
     </div>
 
     <div class="ls-card">
+        {if $made_gone}
+        <div class="ls-bar">
+            <span><i class="fa fa-info-circle" aria-hidden="true"></i> {Lang::T('The link to that batch of vouchers is no longer available. Look for them in the full list.')}</span>
+            <a href="{Text::url('')}plan/voucher/" class="ls-btn"><i class="fa fa-times" aria-hidden="true"></i> {Lang::T('Show all')}</a>
+        </div>
+        {/if}
         {if $made neq ''}
         <div class="ls-bar">
             <span><i class="fa fa-filter" aria-hidden="true"></i> {Lang::T('Showing only the vouchers that form created.')}</span>
@@ -21,6 +27,8 @@
         </div>
         {/if}
         <form id="voucher-search-form" class="ls-bar" method="post" action="{Text::url('')}plan/voucher/">
+            {* a search while one batch is shown stays inside that batch; "Show all" above clears it *}
+            {if $made neq ''}<input type="hidden" name="made" value="{$made|escape}">{/if}
             <div class="ls-search">
                 <i class="fa fa-search" aria-hidden="true"></i>
                 <input type="search" autocomplete="off" name="search" placeholder="{Lang::T('Code Voucher')}" value="{$search|escape}" aria-label="{Lang::T('Search by voucher code')}">
@@ -131,7 +139,7 @@
                     {foreachelse}
                     <tr class="ls-none"><td colspan="13">
                         <div class="ls-empty"><b>{Lang::T('No vouchers found')}</b>
-                            {if $made neq '' || $search neq '' || $router neq '' || $batch_name neq '' || $plan neq '' || $status neq '' || $customer neq ''}{Lang::T('Nothing matches your filters.')} <a href="{Text::url('')}plan/voucher/">{Lang::T('Reset Search')}</a>
+                            {if $made_gone || $made neq '' || $search neq '' || $router neq '' || $batch_name neq '' || $plan neq '' || $status neq '' || $customer neq ''}{Lang::T('Nothing matches your filters.')} <a href="{Text::url('')}plan/voucher/">{Lang::T('Reset Search')}</a>
                             {else}<a href="{Text::url('')}plan/add-voucher">{Lang::T('Vouchers')}</a>{/if}
                         </div>
                     </td></tr>

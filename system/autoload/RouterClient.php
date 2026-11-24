@@ -28,10 +28,12 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
             return;
         }
         $this->com = new PEAR2\Net\RouterOS\Communicator($host, $port, false, $timeout, $username . '/' . $password, $crypto, $context);
-        $limit = null == $timeout ? (int) ini_get('default_socket_timeout') : (int) $timeout;
-        $this->readDeadline(microtime(true) + max(1, $limit));
+        // the deadline keeps a fractional time limit as it is (0.5 is half a second, not none and not one); the library reads each
+        // login reply with whole seconds, so it is given the limit rounded up (never shorter than the deadline, which ends it)
+        $limit = null == $timeout ? max(1, (int) ini_get('default_socket_timeout')) : ((float) $timeout > 0 ? (float) $timeout : 1);
+        $this->readDeadline(microtime(true) + $limit);
         try {
-            if (!static::login($this->com, $username, $password, $limit)) {
+            if (!static::login($this->com, $username, $password, (int) ceil($limit))) {
                 throw new PEAR2\Net\RouterOS\DataFlowException('Invalid username or password supplied.', PEAR2\Net\RouterOS\DataFlowException::CODE_INVALID_CREDENTIALS);
             }
         } catch (Throwable $e) {

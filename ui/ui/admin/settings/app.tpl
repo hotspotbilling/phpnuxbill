@@ -769,32 +769,35 @@
                             </select>
                         </div>
                     </div>
+                    {* the former REST-only "Radius Rest Interim-Update" minutes, when that was the only one set: shown here as the
+                       stale timeout, so saving carries it over (the controller then retires the old setting) *}
+                    {$rs_legacy = $_c['clear_stale_sessions'] != '1' && (int) $_c['frrest_interim_update'] > 0}
                     <div class="form-group" id="clear_stale_sessions_group">
                         <label class="col-md-3 control-label">{Lang::T('Clear Stale Sessions')}</label>
                         <div class="col-md-5">
                             <select name="clear_stale_sessions" id="clear_stale_sessions" class="form-control text-muted">
                                 <option value="0">{Lang::T('No')}</option>
-                                <option value="1" {if $_c['clear_stale_sessions']}selected="selected" {/if}>{Lang::T('Yes')}
+                                <option value="1" {if $_c['clear_stale_sessions'] == '1' || $rs_legacy}selected="selected" {/if}>{Lang::T('Yes')}
                                 </option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('Clear prolong/unattended active sessions in every xx minutes')}</p>
+                        <p class="help-block col-md-4">{Lang::T('Close sessions that stopped sending accounting updates, for RADIUS REST (radius.php) and MySQL RADIUS alike. The cron does it on every run.')}</p>
                     </div>
                     <div class="form-group" id="stale_session_timeout_group">
                         <label class="col-md-3 control-label">{Lang::T('Stale Session Timeout (minutes)')}</label>
                         <div class="col-md-5">
                             <input type="text" class="form-control" id="stale_session_timeout" name="stale_session_timeout"
-                                placeholder="10" value="{$_c['stale_session_timeout']}">
+                                placeholder="10" value="{if $rs_legacy}{(int) $_c['frrest_interim_update']}{else}{$_c['stale_session_timeout']|escape}{/if}">
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('Time in minutes of inactivity before considering session stale')}</p>
+                        <p class="help-block col-md-4">{Lang::T('Minutes without an accounting update before a session counts as ended. Keep it longer than the Interim-Update interval set on the router (for example 3 times it), or live sessions are closed between two updates.')}</p>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Radius Rest Interim-Update')}</label>
+                        <label class="col-md-3 control-label" for="frrest_keep_days">{Lang::T('Keep Finished Sessions (days)')}</label>
                         <div class="col-md-5">
-                            <input type="number" min="0" class="form-control" id="frrest_interim_update" name="frrest_interim_update"
-                                value="{if $_c['frrest_interim_update']}{$_c['frrest_interim_update']}{else}0{/if}">
+                            <input type="number" min="0" max="3650" step="1" class="form-control" id="frrest_keep_days" name="frrest_keep_days"
+                                value="{$_c['frrest_keep_days']|default:'0'|escape}">
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('For radius.php (REST): the cron closes a session that sent no update for this many minutes. In minutes, leave 0 to disable this feature.')}</p>
+                        <p class="help-block col-md-4">{Lang::T('For radius.php (REST): the cron removes finished sessions older than this many days, so the accounting table stays small and RADIUS stays fast. Sessions inside a customer\'s active plan are always kept, as limited plans count their usage from them. 0 keeps every session.')}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('REST Secret')}</label>

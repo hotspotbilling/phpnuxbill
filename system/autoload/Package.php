@@ -40,6 +40,9 @@ class Package
         }
 
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
+        // the plan's router by its id, read with the plan: the device is sent to that router under the name it has when it is
+        // called, so a rename made meanwhile is followed (see deviceRouterLock)
+        $plan_router_id = $p ? self::routerId($p['routers']) : null;
 
         if (!$isVoucher) {
             $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
@@ -241,11 +244,20 @@ class Package
             if ($_app_stage != 'Demo') {
                 try {
                     if (file_exists($dvc)) {
-                        if (self::routerOff($p)) {
-                            throw new Exception(Lang::T('The router is disabled: nothing was sent to it. Use Sync customers once it is enabled again.'));
+                        // (no router lock here: it is one for every router, and would make all recharges wait on each other)
+                        $locked = false;
+                        try {
+                            $dp = self::onRouterNow($p, $plan_router_id);
+                            if (self::routerOff($dp)) {
+                                throw new Exception(Lang::T('The router is disabled: nothing was sent to it. Use Sync customers once it is enabled again.'));
+                            }
+                            require_once $dvc;
+                            (new $p['device'])->add_customer($c, $dp);
+                        } finally {
+                            if ($locked) {
+                                self::deviceRouterLock(false);
+                            }
                         }
-                        require_once $dvc;
-                        (new $p['device'])->add_customer($c, $p);
                     } else {
                         new Exception(Lang::T("Devices Not Found"));
                     }
@@ -362,11 +374,20 @@ class Package
             if ($_app_stage != 'Demo') {
                 try {
                     if (file_exists($dvc)) {
-                        if (self::routerOff($p)) {
-                            throw new Exception(Lang::T('The router is disabled: nothing was sent to it. Use Sync customers once it is enabled again.'));
+                        // (no router lock here: it is one for every router, and would make all recharges wait on each other)
+                        $locked = false;
+                        try {
+                            $dp = self::onRouterNow($p, $plan_router_id);
+                            if (self::routerOff($dp)) {
+                                throw new Exception(Lang::T('The router is disabled: nothing was sent to it. Use Sync customers once it is enabled again.'));
+                            }
+                            require_once $dvc;
+                            (new $p['device'])->add_customer($c, $dp);
+                        } finally {
+                            if ($locked) {
+                                self::deviceRouterLock(false);
+                            }
                         }
-                        require_once $dvc;
-                        (new $p['device'])->add_customer($c, $p);
                     } else {
                         new Exception(Lang::T("Devices Not Found"));
                     }
@@ -836,29 +857,20 @@ class Package
     }
 
     /**
-     * The name a router has now when it no longer has $router_name (renamed since the caller read it), else null. Followed by the
-     * router's id when it was known by that name here; otherwise by the plan, as long as no router still has the old name.
+     * The name a router has now when it no longer has $router_name (renamed since the caller read it), else null. Followed only
+     * by the router's id, when it was known by that name here. Without one nothing is followed: a name no router has could be
+     * a router renamed or one deleted after its plan was moved to another router (a payment or voucher made for it before),
+     * and the plan cannot tell the two apart, so the request keeps the name it was made for rather than go to another router.
      */
     private static function renamedTo($router_name, $router_id, $plan_id)
     {
         $name = (string) $router_name;
-        if ($name === '' || in_array($name, ['radius', 'balance', 'Custom Balance'], true)) {
+        if (!$router_id || $name === '' || in_array($name, ['radius', 'balance', 'Custom Balance'], true)) {
             return null;
         }
         try {
-            if ($router_id) {
-                $r = ORM::for_table('tbl_routers')->select('name')->find_one($router_id);
-                $now = $r ? (string) $r['name'] : '';
-            } else {
-                if (ORM::for_table('tbl_routers')->where('name', $name)->count() > 0) {
-                    return null;
-                }
-                $plan = ORM::for_table('tbl_plans')->select('routers')->find_one($plan_id);
-                $now = $plan ? (string) $plan['routers'] : '';
-                if ($now !== '' && ORM::for_table('tbl_routers')->where('name', $now)->count() === 0) {
-                    $now = '';
-                }
-            }
+            $r = ORM::for_table('tbl_routers')->select('name')->find_one($router_id);
+            $now = $r ? (string) $r['name'] : '';
         } catch (Throwable $e) {
             return null;
         }
@@ -866,31 +878,67 @@ class Package
     }
 
     /**
+     * The routers lock (the one routers.php holds while it saves a rename, a move or a delete), taken around a recharge's
+     * device call so the router cannot be renamed between reading its name and the device connecting to it. Waits 15 seconds;
+     * false when not got (the call is then made without it, as before). deviceRouterLock(false) releases it.
+     */
+    private static function deviceRouterLock($on = true)
+    {
+        try {
+            if (!$on) {
+                ORM::getDb()->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
+                return true;
+            }
+            return (int) ORM::getDb()->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 15)")->fetchColumn() === 1;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * The plan as the device is to be given it: when the plan's router (by its id) has been renamed since the plan was read, a
+     * copy naming the router as it is called now (the plan itself is not changed or saved); otherwise the plan as it is
+     */
+    private static function onRouterNow($plan, $router_id)
+    {
+        if (!$router_id || !is_object($plan)) {
+            return $plan;
+        }
+        try {
+            $r = ORM::for_table('tbl_routers')->select('name')->find_one($router_id);
+        } catch (Throwable $e) {
+            return $plan;
+        }
+        if (!$r || (string) $r['name'] === (string) $plan['routers']) {
+            return $plan;
+        }
+        $copy = clone $plan;
+        $copy->routers = (string) $r['name'];
+        return $copy;
+    }
+
+    /**
      * A router renamed while this recharge was being saved: the rename moves every row saved before it to the new name, but a
      * row written after it with the name read earlier would keep the old one. Checked once the row is saved, so one or the
      * other catches it: a row whose router name no longer exists follows its plan to the router the plan names now.
      * Rows on a router that still has the name are left as they are. $id is one row's id or a list of them (a voucher batch).
-     * $router_id is the id the router had under $router_name when the caller read it: given, the row follows only that router
-     * (renamed), never a plan moved to another router while the old one was deleted.
+     * $router_id is the id the router had under $router_name when the caller read it: the row follows only that router
+     * (renamed), never a plan moved to another router while the old one was deleted. Without it nothing is moved (the two
+     * cannot be told apart, see renamedTo), so the row keeps the router it was made for.
      */
     public static function followRename($table, $id, $router_name, $plan_id, $router_id = null)
     {
         $ids = array_values(array_filter(array_map('intval', (array) $id)));
-        if (!$ids || !in_array($table, ['tbl_user_recharges', 'tbl_transactions', 'tbl_voucher'], true)
+        if (!$ids || !$router_id || !in_array($table, ['tbl_user_recharges', 'tbl_transactions', 'tbl_voucher'], true)
             || in_array($router_name, ['radius', 'balance', 'Custom Balance'], true)) {
             return;
         }
-        $same = '';
-        $args = [$plan_id, $router_name];
-        if ($router_id) {
-            $same = ' AND r2.id = ?';
-            $args[] = (int) $router_id;
-        }
+        $args = [$plan_id, $router_name, (int) $router_id];
         try {
             ORM::raw_execute("UPDATE `$table` t JOIN `tbl_plans` p ON p.id = ? SET t.routers = p.routers
                 WHERE t.id IN (" . implode(',', $ids) . ") AND t.routers = ? AND p.routers <> t.routers
                 AND NOT EXISTS (SELECT 1 FROM `tbl_routers` r WHERE r.name = t.routers)
-                AND EXISTS (SELECT 1 FROM `tbl_routers` r2 WHERE r2.name = p.routers$same)", $args);
+                AND EXISTS (SELECT 1 FROM `tbl_routers` r2 WHERE r2.name = p.routers AND r2.id = ?)", $args);
         } catch (Throwable $e) {
             // the recharge itself is saved: a failed check leaves it as it was
         }
@@ -939,13 +987,15 @@ class Package
      * told in the way that changes only the credentials, with the customer as given (the new password, even before it is saved):
      * - Voucher keeps no account (its add_customer would issue the customer a new voucher): skipped;
      * - a plan on a disabled router: nothing is sent, said as an error (Sync customers sends it once the router is enabled);
-     * - a RADIUS device's add_customer starts a new period from today: sync_customer re-adds the account with the expiry it
-     *   has, or, without one, customerUpsert writes the credentials (created when missing);
+     * - a RADIUS device's add_customer starts a new period from today, and its sync_customer (customerAddPlan) disconnects the
+     *   customer and deletes their accounting: an account that has its plan gets only its credentials (customerUpsert); one
+     *   without is added again with this recharge's own expiry. A device without sync_customer: customerUpsert;
      * - a Mikrotik hotspot user is looked up and given the new password in place (its usage counters kept); a missing one
-     *   is created with add_customer;
-     * - a Mikrotik PPPoE secret is given its dial password in place, the router's refusal said as an error; a missing one is
-     *   created by sync_customer;
+     *   is added (never by removing one first), and one made meanwhile is changed in place;
+     * - a Mikrotik PPPoE secret is given its dial password in place, the router's refusal said as an error (a refused lookup
+     *   too: nothing is made then); a missing one is created by sync_customer;
      * - any other device: add_customer.
+     * The caller holds passwordLock() for the customer from reading it to saving it.
      */
     public static function sendPassword($customer)
     {
@@ -955,11 +1005,13 @@ class Package
             return $errors;
         }
         foreach (ORM::for_table('tbl_user_recharges')->where('customer_id', $customer['id'])->where('status', 'on')->find_many() as $tur) {
-            $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
-            if (!$p || $p['device'] === 'Voucher') {
-                continue;
-            }
+            $p = null;
             try {
+                // looked up here, so a plan that cannot be read is said as that plan's error and the others are still sent
+                $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+                if (!$p || $p['device'] === 'Voucher') {
+                    continue;
+                }
                 $dvc = self::getDevice($p);
                 if ($dvc === '' || $dvc === 'none' || !file_exists($dvc)) {
                     throw new Exception(Lang::T('Devices Not Found'));
@@ -974,15 +1026,55 @@ class Package
                 } elseif ($p['device'] === 'MikrotikPppoe') {
                     self::pppoePassword($dev, $customer, $p);
                 } elseif (method_exists($dev, 'customerUpsert')) {
-                    method_exists($dev, 'sync_customer') ? $dev->sync_customer($customer, $p) : $dev->customerUpsert($customer, $p);
+                    self::radiusPassword($dev, $customer, $p, $tur);
                 } else {
                     $dev->add_customer($customer, $p);
                 }
             } catch (Throwable $e) {
-                $errors[] = $p['name_plan'] . ': ' . $e->getMessage();
+                $errors[] = ($p ? $p['name_plan'] : Lang::T('Plan') . ' #' . $tur['plan_id']) . ': ' . $e->getMessage();
             }
         }
         return $errors;
+    }
+
+    /**
+     * One password change at a time for a customer (a database lock, so across every PHP worker): taken before the customer is
+     * read for a change, held until it is saved and sent, so two changes at once (account page, Forgot password) cannot leave
+     * one password saved and the other on the routers. False when not got within $wait seconds. passwordLock($id, false)
+     * releases it (it also ends with the request).
+     */
+    public static function passwordLock($customer_id, $on = true, $wait = 20)
+    {
+        $name = 'phpnuxbill_pw_c_' . (int) $customer_id;
+        try {
+            if (!$on) {
+                ORM::getDb()->query("SELECT RELEASE_LOCK('$name')");
+                return true;
+            }
+            return (int) ORM::getDb()->query("SELECT GET_LOCK('$name', " . (int) $wait . ")")->fetchColumn() === 1;
+        } catch (Throwable $e) {
+            return !$on;
+        }
+    }
+
+    /**
+     * A RADIUS account's new password. sync_customer would re-add the plan (disconnecting the customer and deleting their
+     * accounting, which also resets a time or data limit): an account that already has its plan entry gets only its credentials
+     * (customerUpsert); one without is added again with the expiry of this recharge (the one being sent, whatever the
+     * username). A device without sync_customer: customerUpsert, as before.
+     */
+    private static function radiusPassword($dev, $customer, $plan, $tur)
+    {
+        if (!method_exists($dev, 'sync_customer') || !method_exists($dev, 'getTableUserPackage')
+            || $dev->getTableUserPackage()->where_equal('username', $customer['username'])->count() > 0) {
+            $dev->customerUpsert($customer, $plan);
+            return;
+        }
+        if (method_exists($dev, 'customerAddPlan') && !empty($tur['expiration'])) {
+            $dev->customerAddPlan($customer, $plan, $tur['expiration'] . ' ' . $tur['time']);
+            return;
+        }
+        $dev->sync_customer($customer, $plan);
     }
 
     /** The client for a Mikrotik plan's router, through the device's own info() and getClient() */
@@ -1005,21 +1097,38 @@ class Package
         if (($err = RouterApi::error($res)) !== null) {
             throw new Exception($err);
         }
+        $res->rewind(); // error() iterated the replies: back to the first, or getProperty() has no reply to read
         return (string) $res->getProperty('.id');
     }
 
-    /** A Mikrotik hotspot user's password changed in place; the user is created only when the lookup says it is missing */
+    /**
+     * A Mikrotik hotspot user's password changed in place; the user is added only when the lookup says it is missing, and never
+     * by removing one first (add_customer does): when the router refuses the add because a user of that name was made since
+     * the lookup, that user is looked up again and changed in place, so the usage it has recorded meanwhile is kept
+     */
     private static function hotspotPassword($dev, $customer, $plan)
     {
         $client = self::deviceClient($dev, $plan);
         $id = self::hotspotUserId($client, $customer['username']);
         if ($id === '') {
-            $dev->add_customer($customer, $plan);
-            // add_customer does not say when the router refuses: the user is looked for again
-            if (self::hotspotUserId($client, $customer['username']) === '') {
-                throw new Exception(Lang::T('The router refused the command'));
+            if (!method_exists($dev, 'addHotspotUserChecked')) {
+                throw new Exception(Lang::T('Devices Not Found'));
             }
-            return;
+            try {
+                $dev->addHotspotUserChecked($client, $plan, $customer); // the router's refusal is thrown
+            } catch (Exception $e) {
+                $id = self::hotspotUserId($client, $customer['username']);
+                if ($id === '') {
+                    throw $e; // refused for another reason: nothing was made
+                }
+            }
+            if ($id === '') {
+                // taken: looked for again (a plan whose limit type is not known adds nothing)
+                if (self::hotspotUserId($client, $customer['username']) === '') {
+                    throw new Exception(Lang::T('The router refused the command'));
+                }
+                return;
+            }
         }
         $set = new \PEAR2\Net\RouterOS\Request('/ip/hotspot/user/set');
         $set->setArgument('numbers', $id);
@@ -1033,9 +1142,9 @@ class Package
     private static function pppoePassword($dev, $customer, $plan)
     {
         $client = self::deviceClient($dev, $plan);
-        $id = $dev->getIdByCustomer($customer, $client);
+        $id = $dev->getIdByCustomer($customer, $client, true); // a refused lookup is thrown: nothing is made then
         if (empty($id)) {
-            $dev->sync_customer($customer, $plan); // creates the secret, the router's refusal thrown
+            $dev->sync_customer($customer, $plan); // creates the secret (looked up again, checked), the router's refusal thrown
             return;
         }
         $set = new \PEAR2\Net\RouterOS\Request('/ppp/secret/set');
