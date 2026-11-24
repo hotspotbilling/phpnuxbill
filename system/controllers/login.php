@@ -270,7 +270,7 @@ switch ($do) {
                     _alert(Lang::T('Voucher invalid'), 'danger', "login");
                 }
                 if ($v['status'] == 0) {
-                    if (Package::rechargeUser(0, $v['routers'], $v['id_plan'], "Voucher", $voucher)) {
+                    if (Package::redeemVoucher($v, 0, null, $voucher)) {
                         $v->status = "1";
                         $v->save();
                         $tur = ORM::for_table('tbl_user_recharges')->where('username', $voucher)->find_one();
@@ -349,7 +349,7 @@ switch ($do) {
                     // An existing customer's password is never replaced here: typing someone's username with a voucher of your own must
                     // not let you sign in as them. The voucher only adds its plan; the owner keeps their own password.
                     // voucher activation
-                    if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $voucher)) {
+                    if (Package::redeemVoucher($v1, $user['id'], $user['username'], $voucher)) {
                         $v1->status = "1";
                         $v1->used_date = date('Y-m-d H:i:s');
                         $v1->user = $user['username'];

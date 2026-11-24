@@ -12,6 +12,15 @@ class Package
     /** The customer credential lock of the recharge running: 'none' (not needed), 'held', 'busy' (not got in time), 'released' */
     private static $pwState = 'none';
 
+    /** Whether the recharge running has gone past its checks to where it changes anything (a device, the recharge or the transaction) */
+    private static $wrote = false;
+
+    /** True once the last recharge started to change things: a voucher it was for must then stay used, whatever happened after */
+    public static function rechargeWrote()
+    {
+        return self::$wrote;
+    }
+
     /**
      * @param int   $id_customer String user identifier
      * @param string $router_name router name for this package
@@ -29,6 +38,7 @@ class Package
         // The wait is bounded: a password change holds it for the time its devices take, and never waits for a recharge. Not got
         // in time, the device is not written (said as the failure to sync by hand, like any device error), the recharge is saved.
         $was = self::$pwState;
+        self::$wrote = false;
         self::$pwState = 'none';
         $voucher = trim((string) $gateway) == 'Voucher' && $id_customer == 0;
         if (!$voucher && (int) $id_customer > 0 && !in_array($router_name, ['balance', 'Custom Balance'], true)) {
@@ -42,6 +52,49 @@ class Package
             }
             self::$pwState = $was;
         }
+    }
+
+    /**
+     * Redeems a voucher: claimed first, by one update that only an unused voucher passes (so two requests with the same code
+     * cannot both use it), and recharged only by the request that got the claim. Returns false when it was claimed by another
+     * request or the recharge was refused (the voucher is then unused again). A recharge that ends the request before it wrote
+     * anything (a disabled plan or an inactive customer redirects with r2() or _alert()) also gives the voucher back, at the end
+     * of the request. An exception from the recharge keeps it used: part of the recharge may have happened, so an admin checks it.
+     * $username: the customer's username saved on the voucher, null to leave it as it is.
+     */
+    public static function redeemVoucher($v, $customerId, $username, $code)
+    {
+        $db = ORM::get_db();
+        $st = $db->prepare("UPDATE `tbl_voucher` SET `status` = '1', `used_date` = ?" . ($username !== null ? ', `user` = ?' : '') . " WHERE `id` = ? AND `status` = '0'");
+        $st->execute(array_merge([date('Y-m-d H:i:s')], $username !== null ? [$username] : [], [(int) $v['id']]));
+        if ($st->rowCount() !== 1) {
+            return false;
+        }
+        $id = (int) $v['id'];
+        $finished = false;
+        $release = function () use (&$finished, $db, $id) {
+            // only a refusal before anything was changed gives the voucher back; once the recharge began to write it stays used
+            if (!$finished && !self::rechargeWrote()) {
+                $finished = true;
+                try {
+                    $db->prepare("UPDATE `tbl_voucher` SET `status` = '0', `used_date` = NULL, `user` = '0' WHERE `id` = ? AND `status` = '1'")->execute([$id]);
+                } catch (Throwable $e) {
+                }
+            }
+        };
+        register_shutdown_function($release);
+        try {
+            $ok = self::rechargeUser($customerId, $v['routers'], $v['id_plan'], 'Voucher', $code);
+        } catch (Throwable $e) {
+            $finished = true; // kept used (see above)
+            throw $e;
+        }
+        if (!$ok) {
+            $release();
+            return false;
+        }
+        $finished = true;
+        return true;
     }
 
     private static function rechargeUserRun($id_customer, $router_name, $plan_id, $gateway, $channel, $note = '')
@@ -136,6 +189,9 @@ class Package
         }
 
 
+
+        // every refusal that leaves things as they were (an inactive customer, a disabled plan) is above this line
+        self::$wrote = true;
 
         if ($router_name == 'balance') {
             return self::rechargeBalance($c, $p, $gateway, $channel);

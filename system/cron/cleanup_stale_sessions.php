@@ -4,6 +4,9 @@
  * by https://t.me/ibnux
  * Used to clean up stale sessions in rad_acct and radacct tables
  * Maintained by: https://t.me/focuslinkstech
+ *
+ * Optional: system/cron.php already does this on every run. Schedule this script only when the main cron runs less often than
+ * every 5 minutes and stale sessions should be closed sooner. Running both is harmless (one conditional UPDATE).
  **/
 
 // Check if script is run from CLI (before loading anything)

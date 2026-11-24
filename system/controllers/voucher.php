@@ -61,7 +61,7 @@ switch ($action) {
         $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$code'")->where('status', 0)->find_one();
         run_hook('customer_activate_voucher'); #HOOK
         if ($v1) {
-            if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $code)) {
+            if (Package::redeemVoucher($v1, $user['id'], $user['username'], $code)) {
                 $v1->status = "1";
                 $v1->used_date = date('Y-m-d H:i:s');
                 $v1->user = $user['username'];

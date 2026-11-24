@@ -442,7 +442,15 @@ $(document).ready(function () {
         .filter(function (l) { return l !== "" && l.charAt(0) !== "#" && !/:$/.test(l); }); // no comments, no "Check:" left by a link
     }
 
+    // a command or address marked .st-cmd is highlighted on its own line with its own Copy button, which copies just that text
+    root.querySelectorAll(".st-cmd").forEach(function (cmd) {
+      if (cmd.querySelector(".st-copy")) { return; }
+      var code = cmd.querySelector("code") || cmd;
+      cmd.appendChild(makeBtn("st-copy st-copy--cmd", function () { return code.textContent.trim(); }, true));
+    });
+
     root.querySelectorAll(".bs-callout > p").forEach(function (p) {
+      if (p.querySelector(".st-cmd")) { p.classList.add("st-copy-none"); return; } // its commands have their own buttons
       if (p.querySelector(".st-copy")) { return; }
       // each address has its own button, which copies that address only
       p.querySelectorAll("a[href]").forEach(function (a) {

@@ -135,7 +135,9 @@ foreach ($d as $ds) {
                 // Fetch user recharge details (read under the lock: a recharge turned off or renewed meanwhile is left alone)
                 $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
                 if (!$u) {
-                    throw new Exception("User recharge record not found for ID: " . $ds['id']);
+                    // deleted since the list was read (the customer or the recharge was removed, or another run handled it): nothing to expire
+                    echo "Recharge #{$ds['id']} no longer exists, skipped\n";
+                    continue;
                 }
                 if ($u['status'] !== 'on') {
                     continue;
@@ -173,6 +175,17 @@ foreach ($d as $ds) {
                 if ($pendingRow && (string) $pendingRow['value'] !== $pendingVal) {
                     $pendingRow->delete();
                     $pendingRow = false;
+                }
+
+                // a Mikrotik plan whose router was deleted: there is nothing to take the customer off, and every run would fail
+                // to connect. The recharge is marked off, and the log says the router entry may need removing by hand elsewhere
+                if (empty($p['is_radius']) && (string) $p['routers'] !== '' && stripos((string) $p['device'], 'Mikrotik') === 0
+                    && !ORM::for_table('tbl_routers')->where('name', $p['routers'])->find_one()) {
+                    $u->status = 'off';
+                    $u->save();
+                    _log("Router '{$p['routers']}' no longer exists: recharge of {$u['username']} ({$u['namebp']}) was marked off without contacting a router.", 'Router');
+                    echo "Router '" . ($isCli ? $p['routers'] : htmlspecialchars($p['routers'], ENT_QUOTES)) . "' not found: recharge marked off\n";
+                    continue;
                 }
 
                 $dvc = Package::getDevice($p);

@@ -15936,3 +15936,12 @@ body.dark-mode:not(.shadcn-body) .pace .pace-activity, html.dark body:not(.shadc
 body.shadcn-body .pace .pace-progress { background: var(--primary) !important; box-shadow: 0 0 10px var(--primary) !important; }
 body.shadcn-body .pace .pace-progress-inner { box-shadow: 0 0 10px var(--primary), 0 0 5px var(--primary) !important; }
 body.shadcn-body .pace .pace-activity { border-top-color: var(--primary) !important; border-left-color: var(--primary) !important; }
+
+/* A command or address to copy: highlighted on its own line, with its own Copy button (custom.js copyButtons) */
+.st .st-cmd-note { display: block; margin: 8px 0 4px; font-size: 12px; color: var(--ls-muted, #64748b); }
+.st .st-cmd-label { display: block; margin: 6px 0 2px; font-size: 12px; font-weight: 700; color: var(--ls-ink); }
+.st .st-cmd { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; padding: 8px 8px 8px 12px; border: 1px solid var(--ls-line); border-left: 3px solid var(--ls-accent); border-radius: 8px; background: rgba(15, 118, 110, 0.07); }
+.st .st-cmd code { flex: 1; min-width: 0; padding: 0; background: none; border: 0; color: var(--ls-ink); font-size: 13px; white-space: nowrap; overflow-x: auto; user-select: all; }
+.st .st-cmd code a { color: inherit; text-decoration: none; }
+.st .st-cmd code a:hover { text-decoration: underline; }
+.st-copy.st-copy--cmd { position: static; flex: none; }

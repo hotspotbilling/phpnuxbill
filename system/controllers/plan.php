@@ -1372,7 +1372,7 @@ switch ($action) {
 
         run_hook('refill_customer'); #HOOK
         if ($v1) {
-            if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $code)) {
+            if (Package::redeemVoucher($v1, $user['id'], $user['username'], $code)) {
                 $v1->status = "1";
                 $v1->user = $user['username'];
                 $v1->save();

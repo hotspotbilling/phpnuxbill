@@ -1344,50 +1344,46 @@
                         <br>
                         <h4><b>{Lang::T('Settings For Cron Expired')}</b></h4>
                         <p>
-                            # {Lang::T('Expired Cronjob Every 5 Minutes [Recommended]')}<br>
-                            */5 * * * * cd {$dir} && {$php} cron.php
-                            <br><br>
-                            # {Lang::T('Expired Cronjob Every 1 Hour')}<br>
-                            0 * * * * cd {$dir} && {$php} cron.php
+                            <span class="st-cmd-note">{Lang::T('Expired Cronjob Every 5 Minutes [Recommended]')}</span>
+                            <span class="st-cmd"><code>*/5 * * * * cd {$dir} && {$php} cron.php</code></span>
+                            <span class="st-cmd-note">{Lang::T('Expired Cronjob Every 1 Hour')}</span>
+                            <span class="st-cmd"><code>0 * * * * cd {$dir} && {$php} cron.php</code></span>
                         </p>
                         <br>
                         <h4><b>{Lang::T('Settings For Cron Reminder')}</b></h4>
                         <p>
-                            # {Lang::T('Reminder Cronjob Every 7 AM')}<br>
-                            0 7 * * * cd {$dir} && {$php} cron_reminder.php
+                            <span class="st-cmd-note">{Lang::T('Reminder Cronjob Every 7 AM')}</span>
+                            <span class="st-cmd"><code>0 7 * * * cd {$dir} && {$php} cron_reminder.php</code></span>
                         </p>
                         <br>
                         <h4><b>{Lang::T('Run Cron From Web')}</b></h4>
                         <p>
-                            <a href="{$app_url}/system/cron.php?secret={$_c['api_key']}"
-                                target="_blank">{$app_url}/system/cron.php?secret={$_c['api_key']}</a><br>
-                            <a href="{$app_url}/system/cron_reminder.php?secret={$_c['api_key']}"
-                                target="_blank">{$app_url}/system/cron_reminder.php?secret={$_c['api_key']}</a>
+                            <span class="st-cmd"><code><a href="{$app_url}/system/cron.php?secret={$_c['api_key']}" target="_blank">{$app_url}/system/cron.php?secret={$_c['api_key']}</a></code></span>
+                            <span class="st-cmd"><code><a href="{$app_url}/system/cron_reminder.php?secret={$_c['api_key']}" target="_blank">{$app_url}/system/cron_reminder.php?secret={$_c['api_key']}</a></code></span>
                         </p>
                         <br>
                         <h4><b>{Lang::T('Cron Settings to clear expired vouchers older than 30 days')}</b></h4>
                         <p>
-                            # {Lang::T('Clear expired vouchers cronjob to run every 12AM 0r 00:00HR')}<br>
-                            0 0 * * * cd {$dir}cron && {$php} clean_expired_vouchers.php<br><br>
-
-                            # {Lang::T('To check the expired voucher or clear expired voucher manually')}<br>
-                            Check: <a
-                                href="{$app_url}/system/cron/clean_expired_vouchers.php?secret={$_c['api_key']}&dry-run=1"
-                                target="_blank">{$app_url}/system/cron/clean_expired_vouchers.php?secret={$_c['api_key']}&dry-run=1</a><br>
-                            Clear: <a href="{$app_url}/system/cron/clean_expired_vouchers.php?secret={$_c['api_key']}"
-                                target="_blank">{$app_url}/system/cron/clean_expired_vouchers.php?secret={$_c['api_key']}</a>
+                            <span class="st-cmd-note">{Lang::T('Clear expired vouchers cronjob to run every 12AM 0r 00:00HR')}</span>
+                            <span class="st-cmd"><code>0 0 * * * cd {$dir}cron && {$php} clean_expired_vouchers.php</code></span>
+                            <span class="st-cmd-note">{Lang::T('To check the expired voucher or clear expired voucher manually')}</span>
+                            <span class="st-cmd-label">Check</span>
+                            <span class="st-cmd"><code><a href="{$app_url}/system/cron/clean_expired_vouchers.php?secret={$_c['api_key']}&dry-run=1" target="_blank">{$app_url}/system/cron/clean_expired_vouchers.php?secret={$_c['api_key']}&dry-run=1</a></code></span>
+                            <span class="st-cmd-label">Clear</span>
+                            <span class="st-cmd"><code><a href="{$app_url}/system/cron/clean_expired_vouchers.php?secret={$_c['api_key']}" target="_blank">{$app_url}/system/cron/clean_expired_vouchers.php?secret={$_c['api_key']}</a></code></span>
                         </p>
                         <br>
                         <h4><b>{Lang::T('Cron Settings to clear freeradius stale sessions')}</b></h4>
                         <p>
-                            # {Lang::T('Clear stale sessions cronjob to run every 5 minutes, this is important only if freeradius module is enabled')}<br>
-                           */5 * * * * cd {$dir}cron && {$php} cleanup_stale_sessions.php<br><br>
+                            <span class="st-cmd-note">{Lang::T('The main cron job (system/cron.php) already clears stale FreeRADIUS sessions on every run, so no separate job is needed when it runs every 5 minutes or less.')}</span>
+                            <span class="st-cmd-note">{Lang::T('Optional: only if the main cron job runs less often than every 5 minutes, add this to clear stale sessions sooner')}</span>
+                            <span class="st-cmd"><code>*/5 * * * * cd {$dir}cron && {$php} cleanup_stale_sessions.php</code></span>
                         </p>
                         <br>
                         <h4><b>{Lang::T('Marketplace automatic checks')}</b></h4>
                         <p>
-                            # {Lang::T('Sync the Marketplace store, detect plugin, gateway, device and theme updates, and send the Telegram notification. Every 6 hours [Recommended]')}<br>
-                            0 */6 * * * cd {$dir}cron && {$php} marketplace_sync.php<br><br>
+                            <span class="st-cmd-note">{Lang::T('Sync the Marketplace store, detect plugin, gateway, device and theme updates, and send the Telegram notification. Every 6 hours [Recommended]')}</span>
+                            <span class="st-cmd"><code>0 */6 * * * cd {$dir}cron && {$php} marketplace_sync.php</code></span>
                             <small class="text-muted">{Lang::T('Command line only, it cannot be run from the web. Turn the notification on or off in Marketplace > Tools > Settings.')}</small>
                         </p>
                     </div>

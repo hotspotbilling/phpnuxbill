@@ -8,7 +8,7 @@
 /**
  * Closing RADIUS sessions that stopped sending accounting updates (Settings > General > Clear Stale Sessions), for both
  * kinds of RADIUS: REST (table rad_acct, written by radius.php) and MySQL (table radacct, written by FreeRADIUS's sql module).
- * Run by the main cron (cron.php) on every run, and by system/cron/cleanup_stale_sessions.php for a site that wants it
+ * Run by the main cron (cron.php) on every run, and, optionally, by system/cron/cleanup_stale_sessions.php for a site whose main cron runs less often than every 5 minutes
  * more often. One conditional UPDATE per table: the stale test and the change happen together, so a session that sends an
  * update meanwhile is not closed by mistake, and no row is read into PHP.
  */
