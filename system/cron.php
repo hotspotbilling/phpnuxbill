@@ -113,50 +113,121 @@ foreach ($d as $ds) {
         if ($date_now >= $expiration) {
             echo " : EXPIRED \r\n";
 
-            // Fetch user recharge details
-            $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
-            if (!$u) {
-                throw new Exception("User recharge record not found for ID: " . $ds['id']);
-            }
-
-            // Fetch customer details
-            $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
-            if (!$c) {
-                $c = $u;
-            }
-
-            // Fetch plan details
-            $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
-            if (!$p) {
-                throw new Exception("Plan not found for ID: " . $u['plan_id']);
-            }
-
-            $dvc = Package::getDevice($p);
-            if ($_app_stage != 'demo') {
-                if (file_exists($dvc)) {
-                    require_once $dvc;
-                    (new $p['device'])->remove_customer($c, $p);
-                } else {
-                    throw new Exception("Cron error: Devices " . $p['device'] . "not found, cannot disconnect " . $c['username'] . "\n");
+            // One expiry at a time for this customer: the routers.php sync takes the same lock around its re-read and device call,
+            // so it cannot send access back after this has read the recharge as on. Not taken where a database frees the locks a
+            // connection holds when it takes another (MikrotikVpn::nestedLocks() false). Not got in time: skipped, the next run retries.
+            $expLock = null;
+            if ((class_exists('MikrotikVpn') || DeviceLoader::load('MikrotikVpn')) && MikrotikVpn::nestedLocks()) {
+                $expLock = 'phpnuxbill_exp_c_' . (int) $ds['customer_id'];
+                $gotExp = false;
+                try {
+                    $gotExp = (int) ORM::getDb()->query('SELECT GET_LOCK(' . ORM::getDb()->quote($expLock) . ', 5)')->fetchColumn() === 1;
+                } catch (Throwable $e) {
+                    $gotExp = false;
+                }
+                if (!$gotExp) {
+                    $expLock = null;
+                    echo "Busy (being changed by another request), retried next run\n";
+                    continue;
                 }
             }
-
-            // Send notification and update user status
             try {
-                print_r(sendReminderNotifications(
-                    $config,
-                    $c,
-                    $u['namebp'],
-                    $p['price'],
-                    Message::getMessageType($p['type'], $textExpired),
-                    $config['user_notification_expired']
-                )) . "\n";
-                $u->status = 'off';
-                $u->save();
-            } catch (Throwable $e) {
-                _log($e->getMessage());
-                sendTelegram($e->getMessage());
-                echo "Error: " . $e->getMessage() . "\n";
+                // Fetch user recharge details (read under the lock: a recharge turned off or renewed meanwhile is left alone)
+                $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
+                if (!$u) {
+                    throw new Exception("User recharge record not found for ID: " . $ds['id']);
+                }
+                if ($u['status'] !== 'on') {
+                    continue;
+                }
+
+                // Fetch customer details
+                $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
+                if (!$c) {
+                    $c = $u;
+                }
+
+                // Fetch plan details
+                $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
+                if (!$p) {
+                    throw new Exception("Plan not found for ID: " . $u['plan_id']);
+                }
+
+                // A fixed-IP clear (or an address-list entry) the router refused leaves the recharge on, so the next run tries
+                // again; the customer is told once (a marker in tbl_appconfig), and the recharge goes off when it succeeds.
+                $pendingKey = 'exp_pending_' . (int) $u['id'];
+                $pendingRow = ORM::for_table('tbl_appconfig')->where('setting', $pendingKey)->find_one();
+                $partial = null;
+                // the marker belongs to this expiry only (a renewed recharge has a later date and is told again)
+                $pendingVal = $u['expiration'] . ' ' . $u['time'];
+                if ($pendingRow && (string) $pendingRow['value'] !== $pendingVal) {
+                    $pendingRow->delete();
+                    $pendingRow = false;
+                }
+
+                $dvc = Package::getDevice($p);
+                if ($_app_stage != 'demo') {
+                    if (file_exists($dvc)) {
+                        require_once $dvc;
+                        try {
+                            $r = (new $p['device'])->remove_customer($c, $p);
+                            if (is_string($r) && $r !== '') {
+                                $partial = $r; // MikrotikPppoe returns its partial result
+                            }
+                        } catch (Exception $e) {
+                            if ($e->getCode() !== 207) {
+                                throw $e;
+                            }
+                            $partial = $e->getMessage(); // the access is taken off, one later step was refused
+                        }
+                    } else {
+                        throw new Exception("Cron error: Devices " . $p['device'] . "not found, cannot disconnect " . $c['username'] . "\n");
+                    }
+                }
+
+                if ($partial !== null) {
+                    _log('Expiry of ' . $c['username'] . ' is incomplete, retried next run: ' . $partial, 'Router');
+                    echo "Partial: " . ($isCli ? $partial : htmlspecialchars($partial, ENT_QUOTES)) . "\n";
+                }
+
+                // Send notification and update user status
+                try {
+                    if (!$pendingRow) {
+                        print_r(sendReminderNotifications(
+                            $config,
+                            $c,
+                            $u['namebp'],
+                            $p['price'],
+                            Message::getMessageType($p['type'], $textExpired),
+                            $config['user_notification_expired']
+                        )) . "\n";
+                    }
+                    if ($partial !== null) {
+                        if (!$pendingRow) {
+                            $pendingRow = ORM::for_table('tbl_appconfig')->create();
+                            $pendingRow->setting = $pendingKey;
+                            $pendingRow->value = $pendingVal;
+                            $pendingRow->save();
+                        }
+                    } else {
+                        $u->status = 'off';
+                        $u->save();
+                        if ($pendingRow) {
+                            $pendingRow->delete();
+                        }
+                    }
+                } catch (Throwable $e) {
+                    _log($e->getMessage());
+                    sendTelegram($e->getMessage());
+                    echo "Error: " . $e->getMessage() . "\n";
+                }
+            } finally {
+                if ($expLock !== null) {
+                    try {
+                        ORM::getDb()->query('SELECT RELEASE_LOCK(' . ORM::getDb()->quote($expLock) . ')');
+                    } catch (Throwable $e) {
+                    }
+                }
             }
 
             // Auto-renewal from deposit
@@ -199,7 +270,12 @@ foreach ($d as $ds) {
 try {
     // accounting packets radius.php could not save (database busy or down) and kept in a file: written now, oldest first,
     // before stale sessions are judged (a queued update may be what shows a session is still alive)
-    RadiusSessions::replayAccounting();
+    try {
+        RadiusSessions::replayAccounting();
+    } catch (Throwable $e) {
+        // a failed replay (packets stay queued for the next run) must not skip the stale-session cleanup and retention below
+        echo "RADIUS accounting replay: " . ($isCli ? $e->getMessage() : htmlspecialchars($e->getMessage(), ENT_QUOTES)) . "\n";
+    }
     // Clear Stale Sessions (Settings > General): sessions that stopped sending accounting updates are closed, REST and MySQL
     // alike, on every run (system/cron/cleanup_stale_sessions.php does the same, for a site that runs it more often)
     $staleMinutes = RadiusSessions::staleMinutes($config);
@@ -210,7 +286,8 @@ try {
     }
     // Finished sessions older than the number of days set in Settings (0 keeps them all), a few thousand rows per run so
     // the table is never locked for long. A session inside an active recharge is always kept: a limited plan adds up its
-    // usage from these rows (radius.php, radius_usage), so removing them would give the customer their usage back.
+    // usage from these rows (radius.php, radius_usage: rows of the recharge's own username with dateAdded between the recharge
+    // start and end, which is what the test below mirrors; a separate PPPoE username's rows are not part of that sum).
     $keepDays = (int) ($config['frrest_keep_days'] ?? 0);
     if ($keepDays > 0) {
         $before = date('Y-m-d H:i:s', time() - $keepDays * 86400);
@@ -221,7 +298,8 @@ try {
                   WHERE acctstatustype = 'Stop' AND COALESCE(dateUpdated, dateAdded) < ?
                     AND NOT EXISTS (SELECT 1 FROM tbl_user_recharges r
                          WHERE r.username = rad_acct.username AND r.status = 'on'
-                           AND rad_acct.dateAdded >= TIMESTAMP(r.recharged_on, r.recharged_time))
+                           AND rad_acct.dateAdded >= TIMESTAMP(r.recharged_on, r.recharged_time)
+                           AND rad_acct.dateAdded <= TIMESTAMP(r.expiration, r.time))
                   LIMIT 5000",
                 [$before]
             );
@@ -309,7 +387,14 @@ if ($config['router_check']) {
         $locked = false;
         try {
             $locked = (int) ORM::getDb()->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 20)")->fetchColumn() === 1;
+            if (!$locked) {
+                // timed out: nothing is saved for this router (the safeguard below), and the skipped check is reported
+                _log("Router check skipped for {$router->name}: the router endpoint lock was busy");
+                $errors[] = "Router check skipped for {$router->name}: the router endpoint lock was busy";
+            }
         } catch (Throwable $e) {
+            _log($e->getMessage());
+            $errors[] = "Router check skipped for {$router->name}: " . $e->getMessage();
         }
         try {
             $cur = $locked ? ORM::for_table('tbl_routers')->select_many('ip_address', 'enabled')->find_one($router->id) : null;
@@ -325,9 +410,12 @@ if ($config['router_check']) {
                 $router->status = 'Online';
             } else {
                 $router->status = 'Offline';
-                $offlineRouters[] = $router;
             }
             $router->save();
+            // listed as offline only once the status is saved: a failed save stays in the error alert alone
+            if (!$isOnline) {
+                $offlineRouters[] = $router;
+            }
         } catch (Throwable $e) {
             // a failed re-read or save is reported for this router only: the next router, the history and the nightly
             // backups below still run

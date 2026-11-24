@@ -25,7 +25,9 @@ class Message
         // while answering FreeRADIUS (radius.php) the router is waiting: 3 seconds at most, whatever the caller asked for
         // (a voucher login's purchase alert comes from Package::rechargeUser, in the middle of the login)
         if (!empty($GLOBALS['radius_request'])) {
-            $timeout = max(1, min((int) $timeout, 3)); // 0 or less would mean no limit at all
+            // milliseconds; never more than the time radius.php left for it (and 3 s), 0 or less would mean no limit at all
+            $budget = (int) ($GLOBALS['radius_alert_budget_ms'] ?? 3000);
+            $timeout = max(500, min(Http::timeoutMs($timeout), $budget, 3000));
         }
         if (!empty($config['telegram_bot'])) {
             if (empty($chat_id)) {
@@ -88,13 +90,13 @@ class Message
     /** $timeout: seconds the router may take to connect and to answer the command (at most 60) */
     public static function MikrotikSendSMS($router_name, $to, $message, $timeout = 30)
     {
-        global $_app_stage, $client_m, $client_m_limit, $config;
+        global $_app_stage, $client_m, $client_m_limit, $client_m_router, $config;
         if ($_app_stage == 'demo') {
             return null;
         }
         $limit = max(1, min(60, (int) $timeout));
-        // the connection is kept for the next message, but only with the same time limit: a call with another limit connects again
-        if (isset($client_m) && $client_m_limit !== $limit) {
+        // the connection is kept for the next message, but only with the same router and time limit: a call with another one connects again
+        if (isset($client_m) && ($client_m_limit !== $limit || $client_m_router !== $router_name)) {
             method_exists($client_m, 'abort') ? $client_m->abort() : null;
             $client_m = null;
         }
@@ -104,6 +106,7 @@ class Message
             [$host, $port] = RouterAddress::split($mikrotik['ip_address']);
             $client_m = RouterApi::deviceClient($host, $mikrotik['username'], $mikrotik['password'], $port, $limit, $limit);
             $client_m_limit = $limit;
+            $client_m_router = $router_name;
         }
         if (empty($config['mikrotik_sms_command'])) {
             $config['mikrotik_sms_command'] = "/tool sms send";

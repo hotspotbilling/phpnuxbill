@@ -770,14 +770,14 @@
                         </div>
                     </div>
                     {* the former REST-only "Radius Rest Interim-Update" minutes, when that was the only one set: shown here as the
-                       stale timeout, so saving carries it over (the controller then retires the old setting) *}
+                       stale timeout (not selected: it keeps applying to REST only until Yes is saved, which retires the old setting) *}
                     {$rs_legacy = $_c['clear_stale_sessions'] != '1' && (int) $_c['frrest_interim_update'] > 0}
                     <div class="form-group" id="clear_stale_sessions_group">
                         <label class="col-md-3 control-label">{Lang::T('Clear Stale Sessions')}</label>
                         <div class="col-md-5">
                             <select name="clear_stale_sessions" id="clear_stale_sessions" class="form-control text-muted">
                                 <option value="0">{Lang::T('No')}</option>
-                                <option value="1" {if $_c['clear_stale_sessions'] == '1' || $rs_legacy}selected="selected" {/if}>{Lang::T('Yes')}
+                                <option value="1" {if $_c['clear_stale_sessions'] == '1'}selected="selected" {/if}>{Lang::T('Yes')}
                                 </option>
                             </select>
                         </div>

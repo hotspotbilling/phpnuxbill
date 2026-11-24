@@ -14,6 +14,9 @@
  */
 class RadiusSessions
 {
+    /** Longest stale timeout in minutes (7 days): keeps the cutoff arithmetic inside valid date ranges */
+    const MAX_STALE_MINUTES = 10080;
+
     /**
      * The minutes of inactivity after which a session is stale, or 0 when closing is off. "Clear Stale Sessions" with its
      * timeout; a site that only had the former REST-only "Interim-Update" minutes set keeps those (the setting was merged
@@ -24,17 +27,21 @@ class RadiusSessions
         if ((string) ($config['clear_stale_sessions'] ?? '') === '1') {
             // an empty, zero or negative timeout would make every open session look stale and disconnect everyone
             $timeout = (int) ($config['stale_session_timeout'] ?? 10);
-            return $timeout < 1 ? 10 : $timeout;
+            return $timeout < 1 ? 10 : min(self::MAX_STALE_MINUTES, $timeout);
         }
-        return max(0, (int) ($config['frrest_interim_update'] ?? 0));
+        return min(self::MAX_STALE_MINUTES, max(0, (int) ($config['frrest_interim_update'] ?? 0)));
     }
 
     /**
-     * Close the stale sessions in both tables. Returns ['closed' => number, 'failed' => bool, 'lines' => [text]]; never
+     * Close the stale sessions: rad_acct always, radacct only with Clear Stale Sessions on (see $includeMysql). Returns ['closed' => number, 'failed' => bool, 'lines' => [text]]; never
      * throws. A table that does not exist (REST without radacct, or the other way round) is skipped, not an error.
      */
-    public static function closeStale(int $minutes): array
+    public static function closeStale(int $minutes, ?bool $includeMysql = null): array
     {
+        global $config;
+        // the MySQL table is only touched when "Clear Stale Sessions" was explicitly set to Yes: the former REST-only
+        // Interim-Update minutes (frrest_interim_update) apply to rad_acct alone
+        $includeMysql ??= ((string) ($config['clear_stale_sessions'] ?? '') === '1');
         $out = ['closed' => 0, 'failed' => false, 'lines' => []];
         if ($minutes < 1) {
             return $out;
@@ -58,6 +65,9 @@ class RadiusSessions
 
         // MySQL RADIUS sessions, in the separate "radius" database when one is configured. FreeRADIUS fills these dates
         // itself, so the cutoff is computed by MySQL. The stop time is the last update: the session ended when the NAS went quiet.
+        if (!$includeMysql) {
+            return $out;
+        }
         $connection = (class_exists('SystemInfo') && SystemInfo::radiusConnectionConfigured()) ? 'radius' : null;
         self::close(
             $out,
@@ -74,33 +84,42 @@ class RadiusSessions
 
     /**
      * Write one REST accounting packet to rad_acct (radius.php, and the replay of queued ones). One statement keyed on the
-     * unique (username, acctsessionid): a new session is added, a known one updated, atomically. $p holds the columns of
-     * the INSERT below; acctstatustype is null for an unknown type (the stored one is kept). A replayed packet only
-     * changes a row it is newer than (its dateUpdated is the time it was received), so it never rolls back a later update.
-     * Throws on any failure.
+     * unique (username, acctsessionid, nasipaddress): Acct-Session-Id is only unique per NAS, so two routers can send the
+     * same pair. A new session is added, a known one updated, atomically. $p holds the columns of the INSERT below;
+     * acctstatustype is null for an unknown type (the stored one is kept). A replayed packet only changes a row it is newer
+     * than: "receivedAt" (microseconds since the epoch, taken when radius.php received the packet) orders packets that
+     * arrive within one second, which dateUpdated cannot; a row from before that column falls back to dateUpdated.
+     * dateAdded only ever moves earlier, so a queued Start replayed after an Interim restores the real start time without
+     * touching the newer counters or status. Throws on any failure.
      */
     public static function saveAccounting(array $p, bool $replay = false): void
     {
         $cols = ['acctsessionid', 'username', 'realm', 'nasid', 'nasipaddress', 'nasportid', 'nasporttype', 'framedipaddress',
-            'acctsessiontime', 'acctinputoctets', 'acctoutputoctets', 'acctstatustype', 'macaddr', 'dateAdded', 'dateUpdated'];
+            'acctsessiontime', 'acctinputoctets', 'acctoutputoctets', 'acctstatustype', 'macaddr', 'dateAdded', 'dateUpdated', 'receivedAt'];
+        if (empty($p['receivedAt'])) {
+            // a packet queued before the column existed: its date is the best order there is
+            $p['receivedAt'] = (int) strtotime((string) ($p['dateUpdated'] ?? '')) * 1000000;
+        }
+        $p['receivedAt'] = (int) $p['receivedAt'];
         $set = [
             'acctinputoctets' => 'VALUES(acctinputoctets)',
             'acctoutputoctets' => 'VALUES(acctoutputoctets)',
             'acctsessiontime' => 'VALUES(acctsessiontime)',
             'framedipaddress' => 'VALUES(framedipaddress)',
             'acctstatustype' => 'COALESCE(VALUES(acctstatustype), acctstatustype)',
-            'dateUpdated' => 'VALUES(dateUpdated)', // last: MySQL applies the assignments in order, the test below reads the old value
+            'dateUpdated' => 'VALUES(dateUpdated)', // after the others: MySQL applies the assignments in order, the test reads the old values
         ];
         if ($replay) {
             // a session already closed (by its Stop or the stale cleanup) is not made live again by an older queued update
             $set['acctstatustype'] = "IF(acctstatustype = 'Stop', acctstatustype, {$set['acctstatustype']})";
         }
+        $newer = 'IF(receivedAt IS NOT NULL, VALUES(receivedAt) >= receivedAt, VALUES(dateUpdated) >= COALESCE(dateUpdated, dateAdded))';
         $parts = [];
         foreach ($set as $col => $expr) {
-            $parts[] = $replay
-                ? "{$col} = IF(VALUES(dateUpdated) >= COALESCE(dateUpdated, dateAdded), {$expr}, {$col})"
-                : "{$col} = {$expr}";
+            $parts[] = $replay ? "{$col} = IF({$newer}, {$expr}, {$col})" : "{$col} = {$expr}";
         }
+        $parts[] = 'dateAdded = LEAST(dateAdded, VALUES(dateAdded))';
+        $parts[] = 'receivedAt = ' . ($replay ? "IF({$newer}, VALUES(receivedAt), receivedAt)" : 'VALUES(receivedAt)'); // last
         $values = [];
         foreach ($cols as $col) {
             $values[] = $p[$col] ?? null;
@@ -113,7 +132,11 @@ class RadiusSessions
         }
     }
 
-    /** The accounting packets that could not be written, waiting for replayAccounting() (one JSON object per line) */
+    /**
+     * The accounting packets that could not be written, waiting for replayAccounting() (one JSON object per line). It lives
+     * in system/cache, which system/cache/.htaccess denies to the web (and sits outside any public directory a deployment
+     * that maps only the repository root does not serve: keep that folder denied in other web servers too).
+     */
     public static function queueFile(): string
     {
         global $CACHE_PATH;
@@ -122,95 +145,154 @@ class RadiusSessions
 
     /**
      * Keep a packet that could not be written, so the router can still be answered and nothing is lost. True when it is
-     * on disk. Above 50 MB (a long database outage) only Stop packets are kept: they carry a session's final usage, while
-     * a Start or Interim-Update is superseded by the next one. Never throws.
+     * on disk, complete. Above 50 MB (a long database outage) only Stop packets are kept: they carry a session's final usage,
+     * while a Start or Interim-Update is superseded by the next one. Never throws.
      */
     public static function queueAccounting(array $p): bool
     {
+        $lock = null;
         try {
             $file = self::queueFile();
-            if (($p['acctstatustype'] ?? null) !== 'Stop' && @filesize($file) > 50 * 1024 * 1024) {
-                return false;
-            }
             $line = json_encode($p, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
             if ($line === false) {
                 return false;
             }
             $line .= "\n";
-            return @file_put_contents($file, $line, FILE_APPEND | LOCK_EX) === strlen($line);
+            // the lock file is separate from the queue: the replay swaps files under it, and an append must never go to a
+            // file that was just replaced
+            $lock = @fopen($file . '.lock', 'c');
+            if (!$lock || !flock($lock, LOCK_EX)) {
+                return false;
+            }
+            clearstatcache(true, $file);
+            if (($p['acctstatustype'] ?? null) !== 'Stop' && (int) @filesize($file) > 50 * 1024 * 1024) {
+                return false;
+            }
+            $fh = @fopen($file, 'ab');
+            if (!$fh) {
+                return false;
+            }
+            $before = (int) (fstat($fh)['size'] ?? 0);
+            $written = @fwrite($fh, $line);
+            $ok = $written === strlen($line) && fflush($fh);
+            if (!$ok) {
+                // an incomplete line would corrupt the next one: back to what was there
+                @ftruncate($fh, $before);
+            }
+            fclose($fh);
+            return $ok;
         } catch (Throwable $e) {
             return false;
+        } finally {
+            if (is_resource($lock)) {
+                flock($lock, LOCK_UN);
+                fclose($lock);
+            }
         }
     }
 
     /**
-     * Write the queued accounting packets, oldest first. Meant for the cron. A packet that still fails goes back in the
-     * queue (with any written meanwhile); a line that is not a packet is dropped. Returns ['replayed' => n, 'failed' => n].
-     * Never throws.
+     * Write the queued accounting packets, oldest first, at most $max per run. Meant for the cron. The queue is read line by
+     * line (never loaded whole); what is not processed stays on disk, in the same order, for the next run: packets beyond the
+     * bound, packets that failed (retried with a growing delay, and the later packets of the same session wait behind them,
+     * while other sessions go on), and packets queued meanwhile. A line that is not a packet is dropped. Returns
+     * ['replayed' => n, 'failed' => n]. Never throws; a second run at the same time returns at once.
      */
     public static function replayAccounting(int $max = 20000): array
     {
         $out = ['replayed' => 0, 'failed' => 0];
         $file = self::queueFile();
-        if (!is_file($file) || (int) @filesize($file) === 0) {
+        $work = $file . '.replay';
+        clearstatcache(true);
+        if ((int) @filesize($file) === 0 && (int) @filesize($work) === 0) {
             return $out;
         }
-        $work = $file . '.replay';
+        $run = null;
+        $in = null;
+        $tmp = $work . '.new';
         try {
-            // take the queue as a whole under its lock, so radius.php appends to a new one meanwhile
-            $fh = @fopen($file, 'c+');
-            if (!$fh) {
+            $run = @fopen($file . '.run', 'c');
+            if (!$run || !flock($run, LOCK_EX | LOCK_NB)) {
+                return $out; // another run is working on the snapshot
+            }
+            if (!self::takeIncoming($file, $work)) {
                 return $out;
             }
-            if (!flock($fh, LOCK_EX)) {
-                fclose($fh);
+            $in = @fopen($work, 'rb');
+            $left = @fopen($tmp, 'wb');
+            if (!$in || !$left) {
                 return $out;
             }
-            // a replay that stopped halfway left its file: its packets come first
-            $data = (is_file($work) ? (string) @file_get_contents($work) : '') . stream_get_contents($fh);
-            if (@file_put_contents($work, $data, LOCK_EX) !== strlen($data)) {
-                flock($fh, LOCK_UN);
-                fclose($fh);
-                return $out;
-            }
-            ftruncate($fh, 0);
-            flock($fh, LOCK_UN);
-            fclose($fh);
-
-            $retry = '';
-            foreach (preg_split('/\r?\n/', $data, -1, PREG_SPLIT_NO_EMPTY) as $i => $line) {
+            $kept = 0;       // bytes written to $left
+            $keepOk = true;  // every write to it complete
+            $keep = function (string $line) use ($left, &$kept, &$keepOk) {
+                $line = rtrim($line, "\r\n") . "\n";
+                $n = @fwrite($left, $line);
+                if ($n !== strlen($line)) {
+                    $keepOk = false;
+                }
+                $kept += (int) $n;
+            };
+            $blocked = [];   // sessions with a record held back: their later records wait too
+            $tried = 0;
+            $streak = 0;     // failures in a row: the database is most likely down, stop hammering it
+            $now = time();
+            while (($line = fgets($in, 1048576)) !== false) {
+                if (substr($line, -1) !== "\n" && !feof($in)) {
+                    // longer than any packet: not one. Drop it up to its end.
+                    while (($rest = fgets($in, 1048576)) !== false && substr($rest, -1) !== "\n") {
+                    }
+                    continue;
+                }
+                if (trim($line) === '') {
+                    continue;
+                }
                 $p = json_decode($line, true);
                 if (!is_array($p) || empty($p['username']) || empty($p['acctsessionid'])) {
                     continue;
                 }
-                if ($i >= $max) {
-                    $retry .= $line . "\n";
+                $key = ($p['nasipaddress'] ?? '') . '|' . $p['username'] . '|' . $p['acctsessionid'];
+                // held back: an earlier packet of the session is waiting, still backing off, over the bound, or the database is down
+                if (isset($blocked[$key]) || $tried >= $max || $streak >= 25) {
+                    $blocked[$key] = true;
+                    $keep($line);
                     continue;
                 }
+                if ((int) ($p['_next'] ?? 0) > $now) {
+                    $blocked[$key] = true;
+                    $keep($line);
+                    continue;
+                }
+                $tried++; // a Stop counts like any other: the bound holds for every packet
                 try {
                     self::saveAccounting($p, true);
                     $out['replayed']++;
+                    $streak = 0;
                 } catch (Throwable $e) {
                     $out['failed']++;
-                    $retry .= $line . "\n";
+                    $streak++;
+                    $blocked[$key] = true;
+                    $p['_tries'] = (int) ($p['_tries'] ?? 0) + 1;
+                    $p['_next'] = $now + min(3600, 60 * (2 ** min(6, $p['_tries'] - 1)));
+                    $again = json_encode($p, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+                    $keep($again !== false ? $again : $line); // kept, a Stop included
                 }
             }
-            if ($retry !== '') {
-                // ahead of anything queued while this ran, to keep the order
-                $fh = @fopen($file, 'c+');
-                if ($fh && flock($fh, LOCK_EX)) {
-                    $newer = stream_get_contents($fh);
-                    ftruncate($fh, 0);
-                    rewind($fh);
-                    fwrite($fh, $retry . $newer);
-                    fflush($fh);
-                    flock($fh, LOCK_UN);
-                    fclose($fh);
-                } else {
-                    return $out; // the work file stays, and is picked up first next time
-                }
+            fclose($in);
+            $in = null;
+            $synced = $keepOk && @fflush($left) && (!function_exists('fsync') || @fsync($left));
+            fclose($left);
+            $left = null;
+            if (!$synced) {
+                @unlink($tmp); // the snapshot stays as it was: its packets are tried again (a replay is harmless to repeat)
+                return $out;
             }
-            @unlink($work);
+            if ($kept === 0) {
+                @unlink($tmp);
+                @unlink($work);
+            } elseif (!@rename($tmp, $work)) {
+                @unlink($tmp);
+            }
             if ($out['replayed'] > 0 || $out['failed'] > 0) {
                 try {
                     _log("RADIUS accounting queue: {$out['replayed']} packet(s) written, {$out['failed']} still waiting", 'CRON');
@@ -218,8 +300,67 @@ class RadiusSessions
                 }
             }
         } catch (Throwable $e) {
+        } finally {
+            foreach ([$in ?? null, $left ?? null] as $h) {
+                if (is_resource($h)) {
+                    fclose($h);
+                }
+            }
+            if (is_resource($run)) {
+                flock($run, LOCK_UN);
+                fclose($run);
+            }
         }
         return $out;
+    }
+
+    /**
+     * Move what radius.php queued behind the packets already in the snapshot file, under the queue's lock (so no packet is
+     * being appended meanwhile). Copied first and emptied only when the whole copy is verified; on a failed copy the snapshot
+     * goes back to its old length and the queue is untouched. False when it could not be done.
+     */
+    private static function takeIncoming(string $file, string $work): bool
+    {
+        $lock = @fopen($file . '.lock', 'c');
+        if (!$lock || !flock($lock, LOCK_EX)) {
+            return false;
+        }
+        $src = $dst = null;
+        try {
+            clearstatcache(true);
+            $size = (int) @filesize($file);
+            if ($size === 0) {
+                return true;
+            }
+            $src = @fopen($file, 'rb');
+            $dst = @fopen($work, 'ab');
+            if (!$src || !$dst) {
+                return false;
+            }
+            $before = (int) (fstat($dst)['size'] ?? 0);
+            $copied = stream_copy_to_stream($src, $dst, $size);
+            $ok = $copied === $size && fflush($dst) && (!function_exists('fsync') || fsync($dst));
+            if (!$ok) {
+                @ftruncate($dst, $before);
+                return false;
+            }
+            fclose($src);
+            $src = null;
+            $trunc = @fopen($file, 'r+b');
+            if ($trunc) {
+                ftruncate($trunc, 0);
+                fclose($trunc);
+            }
+            return true;
+        } finally {
+            foreach ([$src, $dst] as $h) {
+                if (is_resource($h)) {
+                    fclose($h);
+                }
+            }
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
     }
 
     private static function close(array &$out,string $label, string $table, ?string $connection, string $setSql, array $setParams, string $where, array $params): void

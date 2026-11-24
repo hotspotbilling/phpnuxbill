@@ -150,7 +150,7 @@ CREATE TABLE `tbl_routers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `tbl_router_samples`;
-CREATE TABLE IF NOT EXISTS `tbl_router_samples` (`id` bigint unsigned NOT NULL AUTO_INCREMENT, `router_id` int NOT NULL, `at` datetime NOT NULL, `online` tinyint(1) NOT NULL DEFAULT 0, `cpu` tinyint unsigned DEFAULT NULL, `mem` tinyint unsigned DEFAULT NULL, `disk` tinyint unsigned DEFAULT NULL, `users` int DEFAULT NULL, `uptime` int unsigned DEFAULT NULL, `iface` varchar(64) DEFAULT NULL, `rx` bigint unsigned DEFAULT NULL, `tx` bigint unsigned DEFAULT NULL, PRIMARY KEY (`id`), KEY `idx_router_samples_router_at` (`router_id`, `at`), KEY `idx_router_samples_at` (`at`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE IF NOT EXISTS `tbl_router_samples` (`id` bigint unsigned NOT NULL AUTO_INCREMENT, `router_id` int NOT NULL, `at` datetime NOT NULL, `online` tinyint(1) NOT NULL DEFAULT 0, `cpu` tinyint unsigned DEFAULT NULL, `mem` tinyint unsigned DEFAULT NULL, `disk` tinyint unsigned DEFAULT NULL, `users` int DEFAULT NULL, `uptime` int unsigned DEFAULT NULL, `iface` varchar(64) DEFAULT NULL, `rx` bigint unsigned DEFAULT NULL, `tx` bigint unsigned DEFAULT NULL, `ifat` datetime DEFAULT NULL, PRIMARY KEY (`id`), KEY `idx_router_samples_router_at` (`router_id`, `at`), KEY `idx_router_samples_at` (`at`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `tbl_router_events`;
 CREATE TABLE IF NOT EXISTS `tbl_router_events` (`id` bigint unsigned NOT NULL AUTO_INCREMENT, `router_id` int NOT NULL, `at` datetime NOT NULL, `type` varchar(16) NOT NULL, `detail` varchar(255) NOT NULL DEFAULT '', PRIMARY KEY (`id`), KEY `idx_router_events_router_at` (`router_id`, `at`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -246,7 +246,8 @@ CREATE TABLE `rad_acct` (
   `acctstatustype` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `macaddr` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `dateAdded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `dateUpdated` timestamp NULL DEFAULT NULL
+  `dateUpdated` timestamp NULL DEFAULT NULL,
+  `receivedAt` bigint unsigned DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `tbl_customers_inbox`;
@@ -367,7 +368,7 @@ ALTER TABLE `rad_acct`
   ADD KEY `nasipaddress` (`nasipaddress`),
   ADD KEY `idx_rad_acct_status_updated` (`acctstatustype`, `dateUpdated`),
   ADD KEY `idx_rad_acct_user_added` (`username`, `dateAdded`),
-  ADD UNIQUE KEY `unique_session` (`username`, `acctsessionid`);
+  ADD UNIQUE KEY `unique_session_nas` (`username`, `acctsessionid`, `nasipaddress`);
 
 
 ALTER TABLE `rad_acct`

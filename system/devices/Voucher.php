@@ -24,7 +24,9 @@ class Voucher
         global $config;
         if (!empty($plan['plan_expired'])) {
             $p = ORM::for_table('tbl_plans')->where('id', $plan['plan_expired'])->find_one();
-			if ($p['is_radius'] == '1') {
+			// a RADIUS voucher keeps the router name 'radius': routerId('radius') is null, so Package::followRename() below
+			// returns at once and never swaps in the source plan's router
+			if ($p && $p['is_radius'] == '1') {
 						$router_name = 'radius';
 					} else {
 						$router_name = $plan['routers'];

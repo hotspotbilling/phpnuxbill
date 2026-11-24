@@ -366,7 +366,15 @@ switch ($action) {
             if ($_app_stage != 'Demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    (new $p['device'])->remove_customer($c, $p);
+                    try {
+                        (new $p['device'])->remove_customer($c, $p);
+                    } catch (Exception $e) {
+                        // code 207: done on the router except a later step it refused: logged, and the action stands
+                        if ($e->getCode() !== 207) {
+                            throw $e;
+                        }
+                        _log('[' . $c['username'] . '] remove: ' . $e->getMessage(), 'Router');
+                    }
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
@@ -413,6 +421,7 @@ switch ($action) {
             }
 
             $p = null;
+            $routerMoved = false;
             if ($oldPlanID != $id_plan) {
                 $d->plan_id = $newPlan['id'];
                 $d->namebp = $newPlan['name_plan'];
@@ -424,7 +433,15 @@ switch ($action) {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             $p['plan_expired'] = 0;
-                            (new $p['device'])->remove_customer($customer, $p);
+                            try {
+                                (new $p['device'])->remove_customer($customer, $p);
+                            } catch (Exception $e) {
+                                // code 207: done on the router except a later step it refused: logged, and the action stands
+                                if ($e->getCode() !== 207) {
+                                    throw $e;
+                                }
+                                _log('[' . $customer['username'] . '] remove: ' . $e->getMessage(), 'Router');
+                            }
                         } else {
                             throw new Exception(Lang::T("Devices Not Found"));
                         }
@@ -444,6 +461,13 @@ switch ($action) {
                                 }
                                 _log('[' . $customer['username'] . '] change plan' . ': ' . $e->getMessage(), 'Router');
                             }
+                            // The new plan is on the device now (fully, or partly: code 207), so the recharge is saved with the
+                            // plan's id and name (set above) and, only when the new plan is on a different router, that router.
+                            // A change between plans of the same router keeps the router value the recharge has.
+                            if ((string) $newPlan['routers'] !== (string) $d['routers']) {
+                                $d->routers = $newPlan['routers'];
+                                $routerMoved = true;
+                            }
                         } else {
                             throw new Exception(Lang::T("Devices Not Found"));
                         }
@@ -453,6 +477,10 @@ switch ($action) {
 
             $planName = $d['namebp'];
             $d->save();
+            if ($routerMoved) {
+                // the router was renamed while this was saved: the row follows it (by id, see Package)
+                Package::followRename('tbl_user_recharges', $d->id(), (string) $newPlan['routers'], (int) $newPlan['id'], Package::routerId($newPlan['routers']));
+            }
 
             // Send  Notifications
             if (isset($_POST['notify']) && $_POST['notify'] == true) {
@@ -556,7 +584,9 @@ switch ($action) {
         if (preg_match('/^[0-9a-f]{40}$/', $made)) {
             $rec = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_form_' . $made)->find_one();
             $v = $rec ? json_decode((string) $rec['value'], true) : null;
-            $madeIds = is_array($v) && is_array($v['ids'] ?? null) ? array_values(array_filter(array_map('intval', $v['ids']))) : [];
+            // the link's life is judged here from the record's own timestamp, not left to the cleanup that removes old records
+            $fresh = is_array($v) && (int) ($v['at'] ?? 0) >= time() - 86400;
+            $madeIds = $fresh && is_array($v['ids'] ?? null) ? array_values(array_filter(array_map('intval', $v['ids']))) : [];
         }
         // a batch link whose record is gone (kept a day) or never existed: say so, rather than showing every voucher as if it
         // were that batch. Only a request without made= shows the whole list.
@@ -891,6 +921,19 @@ switch ($action) {
         $batch_name = _post('batch_name', '');
 
         if (!Csrf::check(_post('csrf_token'))) {
+            // A form sent again after its CSRF token expired, whose batch this session already made: show that batch. This only
+            // reads (nothing is created or changed), and needs the form's token, which only this session was given and which
+            // names a batch that is recorded as finished; every other request with a bad CSRF token is refused as before.
+            $replayToken = (string) _post('svoucher');
+            if ($replayToken !== '' && isset($_SESSION['app_tokens'][$replayToken])) {
+                $replayHash = substr(hash('sha256', $replayToken), 0, 40);
+                $replayRec = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_form_' . $replayHash)->find_one();
+                $replayV = $replayRec ? json_decode((string) $replayRec['value'], true) : null;
+                if (is_array($replayV) && !empty($replayV['ids']) && (int) ($replayV['at'] ?? 0) >= time() - 86400) {
+                    r2(getUrl('plan/voucher') . '&made=' . $replayHash, 'w',
+                        Lang::T('These vouchers were created already, the form was sent twice. They are in this list.'));
+                }
+            }
             r2(getUrl('plan/add-voucher/'), 'e', Lang::T('Invalid or Expired CSRF Token') . '.');
         }
         // the form's one-time token: a batch is created once. Sent again (the answer to a large batch was lost, a reload of the
@@ -985,6 +1028,12 @@ switch ($action) {
         $serverId = null;
         if ($msg == '' && !ORM::for_table('tbl_plans')->find_one($plan)) {
             $msg .= Lang::T('Plan Not Found') . '<br>';
+        } elseif ($msg == '' && $server === 'radius') {
+            // RADIUS is not a free choice: only a plan that is itself RADIUS-backed can have its codes there
+            $pl = ORM::for_table('tbl_plans')->find_one($plan);
+            if (!$pl || (int) $pl['is_radius'] !== 1) {
+                $msg .= Lang::T('The router or the plan was changed since this form was opened. Open it again to create the vouchers.') . '<br>';
+            }
         } elseif ($msg == '' && $server !== 'radius') {
             $st = ORM::getDb()->prepare('SELECT r.id FROM tbl_plans p JOIN tbl_routers r ON r.name = p.routers WHERE p.id = ? AND p.routers = ?');
             $st->execute([(int) $plan, $server]);
@@ -1062,6 +1111,7 @@ switch ($action) {
             $inBatch = array_flip(array_map($key, $vouchers));
 
             ORM::raw_execute('START TRANSACTION');
+            $committed = false;
             try {
                 foreach ($vouchers as $code) {
                     for ($attempt = 1;; $attempt++) {
@@ -1102,6 +1152,7 @@ switch ($action) {
                     $rec->save();
                 }
                 ORM::raw_execute('COMMIT');
+                $committed = true;
                 // a router renamed while the batch was written: its codes follow the plan to the new name (see Package)
                 Package::followRename('tbl_voucher', $newVoucherIds, $server, $plan, $serverId);
                 if ($svoucher !== '') {
@@ -1114,7 +1165,27 @@ switch ($action) {
                     }
                 }
             } catch (Throwable $e) {
-                ORM::raw_execute('ROLLBACK');
+                try {
+                    ORM::raw_execute('ROLLBACK');
+                    // Before the commit nothing of this batch may stay (the tables are InnoDB, so the rollback takes all of it; this
+                    // also removes rows a non-transactional table would have kept), so a retry starts the whole batch afresh and
+                    // cannot double it. The completion record is written only inside the transaction, so a retry finds none. After
+                    // the commit the batch is final and is kept: a retry is answered with it. (A fatal error or timeout drops the
+                    // connection, and the database rolls the open transaction back.)
+                    if (!$committed && !empty($newVoucherIds)) {
+                        ORM::for_table('tbl_voucher')->where_in('id', array_map('intval', $newVoucherIds))->where('status', '0')->where('user', '0')->delete_many();
+                    }
+                    if (!$committed && $svoucher !== '') {
+                        ORM::for_table('tbl_appconfig')->where('setting', $formKey)->delete_many();
+                    }
+                } catch (Throwable $e2) {
+                }
+                if ($claim !== null) {
+                    try {
+                        ORM::getDb()->query('SELECT RELEASE_LOCK(' . ORM::getDb()->quote($claim) . ')');
+                    } catch (Throwable $e2) {
+                    }
+                }
                 throw $e;
             }
             // records of forms older than a day are not needed: a form's page is not sent again that long after
@@ -1384,7 +1455,7 @@ switch ($action) {
     case 'extend':
         $id = $routes[2];
         $days = $routes[3];
-        $svoucher = $_GET['svoucher'];
+        $svoucher = (string) ($_GET['svoucher'] ?? '');
         if (App::getVoucherValue($svoucher)) {
             r2(getUrl('plan'), 's', "Extend already done");
         }
@@ -1398,36 +1469,48 @@ switch ($action) {
                 //expired
                 $expiration = date('Y-m-d', strtotime(" +$days day"));
             }
-            App::setVoucher($svoucher, $id);
+            // The link's completion marker is set only once the recharge is saved, so until then the extend can be tried again.
+            // $provKey remembers that the device was already set up by an earlier try of this link whose save failed: that try
+            // is reconciled by saving the recharge, not by provisioning the device a second time.
+            $provKey = $svoucher !== '' ? $svoucher . ':provisioned' : '';
             $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
             if ($c) {
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 if ($p) {
-                    $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'Demo') {
-                        if (file_exists($dvc)) {
+                    $alreadyProvisioned = $provKey !== '' && ($_SESSION[$provKey] ?? null) == $id;
+                    if ($_app_stage != 'Demo' && !$alreadyProvisioned) {
+                        try {
+                            $dvc = Package::getDevice($p);
+                            if (!file_exists($dvc)) {
+                                throw new Exception(Lang::T("Devices Not Found"));
+                            }
                             require_once $dvc;
                             global $isChangePlan;
                             $isChangePlan = true;
-                            try {
-                                (new $p['device'])->add_customer($c, $p);
-                            } catch (Throwable $e) {
-                                // code 207: saved on the router, one later step refused (a fixed IP not cleared): the change stands, so it is
-                                // saved here too, and logged for the admins; any other error stops as before, and the link's marker is
-                                // taken back so the admin can try the extend again (nothing was extended)
-                                if ($e->getCode() !== 207) {
-                                    App::clearVoucher($svoucher);
-                                    throw $e;
-                                }
-                                _log('[' . $c['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
+                            (new $p['device'])->add_customer($c, $p);
+                        } catch (Throwable $e) {
+                            // code 207: saved on the router, one later step refused (a fixed IP not cleared): the change stands, so it is
+                            // saved here too, and logged for the admins; any other error (a missing device file too) stops, with
+                            // nothing marked as done and nothing saved, so the admin can try the extend again
+                            if ($e->getCode() !== 207) {
+                                App::clearVoucher($svoucher);
+                                unset($_SESSION[$provKey]);
+                                throw $e;
                             }
-                        } else {
-                            new Exception(Lang::T("Devices Not Found"));
+                            _log('[' . $c['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
+                        }
+                        if ($provKey !== '') {
+                            $_SESSION[$provKey] = $id;
                         }
                     }
                     $tur->expiration = $expiration;
                     $tur->status = "on";
                     $tur->save();
+                    // saved: now the link is done
+                    if ($svoucher !== '') {
+                        App::setVoucher($svoucher, $id);
+                        unset($_SESSION[$provKey]);
+                    }
                 } else {
                     r2(getUrl('plan'), 's', "Plan not found");
                 }

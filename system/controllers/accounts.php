@@ -57,11 +57,14 @@ switch ($action) {
                 $user->save();
                 // every active plan's device gets the new password (see Package::sendPassword for how each kind is told). The new
                 // password is saved already: a device that fails is logged, and the change goes on (as Forgot password does)
+                $deviceFailed = false;
                 try {
                     foreach (Package::sendPassword($user) as $err) {
+                        $deviceFailed = true;
                         _log('[' . $user['username'] . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
                     }
                 } catch (Throwable $e) {
+                    $deviceFailed = true;
                     _log('[' . $user['username'] . ']: new password not sent to the router: ' . $e->getMessage(), 'User', $user['id']);
                 }
                 Package::passwordLock($user['id'], false);
@@ -72,7 +75,10 @@ switch ($action) {
                 User::removeCookie();
                 session_destroy();
                 _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
-                _alert(Lang::T('Password changed successfully, Please login again'), 'success', "login");
+                // the session is gone: a failed device update is carried in the login alert
+                _alert(Lang::T('Password changed successfully, Please login again')
+                    . ($deviceFailed ? '. ' . Lang::T('Your portal password was changed, but it could not be applied to your internet connection. Your internet service may not accept the new password: if it stops working, reconnect with your previous password or contact support.') : ''),
+                    ($deviceFailed && empty($GLOBALS['isApi'])) ? 'warning' : 'success', "login", $deviceFailed ? 20 : 3); // the API still reports the saved change
             } else {
                 r2(getUrl('accounts/change-password'), 'e', Lang::T('Incorrect Current Password'));
             }

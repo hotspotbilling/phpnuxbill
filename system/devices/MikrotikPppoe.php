@@ -72,12 +72,22 @@ class MikrotikPppoe
             $unsetCause = null;
             $connLost = false;
             if ($unsetIP && $setTaken) {
-                $unsetRequest = new RouterOS\Request('/ppp/secret/unset');
-                $unsetRequest->setArgument('numbers', $cid);
-                $unsetRequest->setArgument('value-name','remote-address');
                 try {
-                    // checked in every mode: a refusal is said below as a partial update, never as a failed (rolled back) one
-                    $unsetErr = RouterApi::error($client->sendSync($unsetRequest));
+                    // checked in every mode: a refusal is said below as a partial update, never as a failed (rolled back) one.
+                    // "numbers" is the documented argument; the older code sent ".id", which RouterOS also takes: a refusal of
+                    // one is tried again with the other, and the first refusal is the one reported if both are refused
+                    $unsetErr = null;
+                    foreach (['numbers', '.id'] as $idArg) {
+                        $unsetRequest = new RouterOS\Request('/ppp/secret/unset');
+                        $unsetRequest->setArgument($idArg, $cid);
+                        $unsetRequest->setArgument('value-name', 'remote-address');
+                        $e2 = RouterApi::error($client->sendSync($unsetRequest));
+                        if ($e2 === null) {
+                            $unsetErr = null;
+                            break;
+                        }
+                        $unsetErr = $unsetErr ?? $e2;
+                    }
                 } catch (Exception $e) {
                     // no answer (the connection is dropped): the secret was saved, whether the address was cleared is not known;
                     // the disconnect below is still tried (on a new connection) before this is reported
@@ -147,21 +157,30 @@ class MikrotikPppoe
         if (!empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
             if($p){
+                $pending = null;
                 try {
                     $this->add_customer($customer, $p);
                 } catch (Exception $e) {
                     if ($e->getCode() !== self::PARTIAL) {
                         throw $e;
                     }
-                    // the expired profile is on the secret, only the address clear is pending: the expiry goes on (the cron
-                    // still turns the recharge off), and the clear is left in the log for a sync
-                    _log('PPPoE ' . $customer['username'] . ': ' . $e->getMessage(), 'Router');
+                    // the expired profile is on the secret, only the address clear is pending: the session is still ended below,
+                    // and the message is returned so the cron keeps the recharge on (retried next run) until the clear succeeds
+                    $pending = $e->getMessage();
+                    _log('PPPoE ' . $customer['username'] . ': ' . $pending, 'Router');
                 }
-                $this->removePpoeActive($client, $customer['username']);
-                if (!empty($customer['pppoe_username'])) {
-                    $this->removePpoeActive($client, $customer['pppoe_username']);
+                try {
+                    $this->removePpoeActive($client, $customer['username']);
+                    if (!empty($customer['pppoe_username'])) {
+                        $this->removePpoeActive($client, $customer['pppoe_username']);
+                    }
+                } catch (Exception $e) {
+                    if ($pending === null) {
+                        throw $e;
+                    }
+                    $pending .= '; ' . Lang::T('the active session could not be disconnected') . ': ' . $e->getMessage();
                 }
-                return;
+                return $pending; // null when everything was done, else the partial result
             }
         }
         $this->removePpoeUser($client, $customer['username']);
@@ -180,16 +199,21 @@ class MikrotikPppoe
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         //check if customer exists
-        $printRequest = new RouterOS\Request('/ppp/secret/print');
-        $printRequest->setQuery(RouterOS\Query::where('name', $from));
-        $cid = $client->sendSync($printRequest)->getProperty('.id');
+        $cid = $this->secretId($client, $from, true); // a refused lookup is thrown: nothing is renamed or assumed missing
         if (!empty($cid)) {
             $setRequest = new RouterOS\Request('/ppp/secret/set');
             $setRequest->setArgument('numbers', $cid);
             $setRequest->setArgument('name', $to);
-            $client->sendSync($setRequest);
-            //disconnect then
-            $this->removePpoeActive($client, $from);
+            // a refused rename (the new name is taken, say) is thrown, so the caller does not go on as if it had worked
+            if (($err = RouterApi::error($client->sendSync($setRequest))) !== null) {
+                throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+            }
+            //disconnect then (the rename stands if this fails: the session ends by itself on its next login)
+            try {
+                $this->removePpoeActive($client, $from);
+            } catch (Exception $e) {
+                _log('PPPoE ' . $from . ': ' . $e->getMessage(), 'Router');
+            }
         }
     }
 
@@ -476,11 +500,21 @@ class MikrotikPppoe
         $onlineRequest = new RouterOS\Request('/ppp/active/print');
         $onlineRequest->setArgument('.proplist', '.id');
         $onlineRequest->setQuery(RouterOS\Query::where('name', $username));
-        $id = $client->sendSync($onlineRequest)->getProperty('.id');
+        $res = $client->sendSync($onlineRequest);
+        // a refused lookup or removal is thrown (the callers that carry on after a partial result catch it); no session is a no-op
+        if (($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err);
+        }
+        $id = $res->getProperty('.id');
+        if (empty($id)) {
+            return;
+        }
 
         $removeRequest = new RouterOS\Request('/ppp/active/remove');
         $removeRequest->setArgument('numbers', $id);
-        $client->sendSync($removeRequest);
+        if (($err = RouterApi::error($client->sendSync($removeRequest))) !== null) {
+            throw new Exception($err);
+        }
     }
 
     function getIpHotspotUser($client, $username)

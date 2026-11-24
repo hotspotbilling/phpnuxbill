@@ -6,6 +6,22 @@
  **/
 
 _admin();
+
+/** A "start-end" range wider than this many addresses is refused: the allocator walks it, and a typo (10.0.0.1-200.0.0.1) would make it huge */
+function pool_range_error($range)
+{
+    if (preg_match('/^\s*([0-9.]+)\s*-\s*([0-9.]+)\s*$/', (string) $range, $m)) {
+        $a = filter_var($m[1], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? ip2long($m[1]) : false;
+        $b = filter_var($m[2], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? ip2long($m[2]) : false;
+        if ($a === false || $b === false) {
+            return Lang::T('The range must be two valid IPv4 addresses');
+        }
+        if (abs((float) sprintf('%u', $b) - (float) sprintf('%u', $a)) >= 1048576) {
+            return Lang::T('The range is too large: use at most 1,048,576 addresses');
+        }
+    }
+    return '';
+}
 $ui->assign('_title', Lang::T('Network'));
 $ui->assign('_system_menu', 'network');
 
@@ -103,6 +119,9 @@ switch ($action) {
         if ($ip_address == '' or $routers == '') {
             $msg .= Lang::T('All field is required') . '<br>';
         }
+        if (($rangeErr = pool_range_error($ip_address)) !== '') {
+            $msg .= $rangeErr . '<br>';
+        }
 
         $d = ORM::for_table('tbl_pool')->where('pool_name', $name)->find_one();
         if ($d) {
@@ -137,6 +156,9 @@ switch ($action) {
 
         if ($ip_address == '' or $routers == '') {
             $msg .= Lang::T('All field is required') . '<br>';
+        }
+        if (($rangeErr = pool_range_error($ip_address)) !== '') {
+            $msg .= $rangeErr . '<br>';
         }
 
         $id = _post('id');

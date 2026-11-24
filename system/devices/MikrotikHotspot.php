@@ -456,11 +456,15 @@ class MikrotikHotspot
         $onlineRequest = new RouterOS\Request('/ip/hotspot/active/print');
         $onlineRequest->setArgument('.proplist', '.id');
         $onlineRequest->setQuery(RouterOS\Query::where('user', $username));
-        $id = $client->sendSync($onlineRequest)->getProperty('.id');
+        // in a sync a refused lookup or removal is thrown (checked()), so a later success cannot mask it
+        $id = $this->checked($client->sendSync($onlineRequest))->getProperty('.id');
+        if (empty($id)) {
+            return; // no active session: nothing to remove
+        }
 
         $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
         $removeRequest->setArgument('numbers', $id);
-        $client->sendSync($removeRequest);
+        $this->checked($client->sendSync($removeRequest));
     }
 
     function getIpHotspotUser($client, $username)

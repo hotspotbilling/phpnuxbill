@@ -18,7 +18,7 @@ class Http
 
     /**
      * Tells the admins on Telegram that a request failed. The message is itself a request: one that fails while telling is not
-     * told again (no endless loop when Telegram is the one failing), and it waits 15 seconds at most.
+     * told again (no endless loop when Telegram is the one failing), and it waits 15 seconds at most in total (connection and transfer).
      */
     private static function notify($label, $url, $error)
     {
@@ -34,8 +34,22 @@ class Http
         }
     }
 
+    /**
+     * A time limit in milliseconds. Callers pass either seconds (15) or milliseconds (3000, 5000: the defaults here); a value
+     * of 100 or more is taken as milliseconds. 0 or less would mean "no limit" to cURL, so it becomes the 3 s default.
+     * CURLOPT_TIMEOUT_MS limits the whole transfer, not only the connection.
+     */
+    public static function timeoutMs($value): int
+    {
+        $v = (float) $value;
+        if ($v <= 0) {
+            return 3000;
+        }
+        return (int) ($v >= 100 ? $v : $v * 1000);
+    }
+
     /** $error: set to cURL's error text when the request did not reach the server or timed out, '' otherwise */
-    public static function getData($url, $headers = [], $connect_timeout = 3000, $wait_timeout = 3000, &$error = null)
+    public static function getData($url, $headers = [], $connect_timeout = 3000, $wait_timeout = 15000, &$error = null)
     {
         global $http_proxy, $http_proxyauth, $admin;
         $error = '';
@@ -43,8 +57,8 @@ class Http
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 0);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $connect_timeout);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $wait_timeout);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, self::timeoutMs($connect_timeout));
+        curl_setopt($ch, CURLOPT_TIMEOUT_MS, self::timeoutMs($wait_timeout));
         if (is_array($headers) && count($headers) > 0) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
@@ -68,15 +82,15 @@ class Http
         return (!empty($server_output)) ? $server_output : $error_msg;
     }
 
-    public static function postJsonData($url, $array_post, $headers = [], $basic = null, $connect_timeout = 3000, $wait_timeout = 3000)
+    public static function postJsonData($url, $array_post, $headers = [], $basic = null, $connect_timeout = 3000, $wait_timeout = 15000)
     {
         global $http_proxy, $http_proxyauth, $admin;
         $headers[] = 'Content-Type: application/json';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $connect_timeout);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $wait_timeout);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, self::timeoutMs($connect_timeout));
+        curl_setopt($ch, CURLOPT_TIMEOUT_MS, self::timeoutMs($wait_timeout));
         curl_setopt($ch, CURLOPT_VERBOSE, false);
         curl_setopt($ch, CURLINFO_HEADER_OUT, false);
         if (!empty($http_proxy)) {
@@ -106,15 +120,15 @@ class Http
     }
 
 
-    public static function postData($url, $array_post, $headers = [], $basic = null, $connect_timeout = 3000, $wait_timeout = 3000)
+    public static function postData($url, $array_post, $headers = [], $basic = null, $connect_timeout = 3000, $wait_timeout = 15000)
     {
         global $http_proxy, $http_proxyauth, $admin;
         $headers[] = 'Content-Type: application/x-www-form-urlencoded';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $connect_timeout);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $wait_timeout);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, self::timeoutMs($connect_timeout));
+        curl_setopt($ch, CURLOPT_TIMEOUT_MS, self::timeoutMs($wait_timeout));
         curl_setopt($ch, CURLOPT_VERBOSE, false);
         curl_setopt($ch, CURLINFO_HEADER_OUT, false);
         if (!empty($http_proxy)) {

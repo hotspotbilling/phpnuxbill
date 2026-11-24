@@ -419,7 +419,12 @@ class Stream
      */
     protected function readTimedOut()
     {
-        $meta = self::isStream($this->stream) ? stream_get_meta_data($this->stream) : array('timed_out' => true);
+        if (!self::isStream($this->stream)) {
+            // already closed: report what was recorded when it closed (a deadline expiry sets the flag first), so a
+            // connection the other end dropped early is not mistaken for a time-out
+            return $this->timedOut;
+        }
+        $meta = stream_get_meta_data($this->stream);
         if (empty($meta['timed_out'])) {
             return false;
         }

@@ -1,7 +1,7 @@
 {include file="sections/header.tpl"}
 {*
     Shown by radius.php instead of the NAS pages while the RADIUS database cannot be used. $problem: why (config, enabled,
-    database, tables, login, connect), config / enabled (whether those steps are done), host, name, detail (the database's
+    database, tables, columns, login, connect), config / enabled (whether those steps are done), host, name, detail (the database's
     own message, when there is one).
 *}
 {$why = $problem['why']}
@@ -13,7 +13,8 @@
                     {if $why == 'config'}{Lang::T('The RADIUS database is not set up yet')}
                     {elseif $why == 'enabled'}{Lang::T('RADIUS is turned off')}
                     {elseif $why == 'database'}{Lang::T('The RADIUS database does not exist')}
-                    {elseif $why == 'tables'}{Lang::T('The RADIUS database has no tables yet')}
+                    {elseif $why == 'tables'}{Lang::T('The RADIUS database is missing the NAS table')}
+                    {elseif $why == 'columns'}{Lang::T('The RADIUS NAS table needs an upgrade')}
                     {elseif $why == 'login'}{Lang::T('PHPNuxBill cannot sign in to the RADIUS database')}
                     {else}{Lang::T('The RADIUS database cannot be reached')}{/if}
                 </h3>
@@ -26,6 +27,17 @@
             {/if}
 
             <ul class="rt-checks">
+                {if $why == 'columns'}
+                <li class="rt-check rt-check--bad">
+                    <i class="fa fa-times-circle" aria-hidden="true"></i>
+                    <div>
+                        <b>{Lang::T('Add the routers column to the nas table')}</b>
+                        <small>{Lang::T('PHPNuxBill saves the router a NAS belongs to in a routers column, and the nas table of this database does not have it yet. Run only this in phpMyAdmin (SQL tab) on the RADIUS database: it adds the column and changes nothing else.')}</small>
+<pre class="nf__code">ALTER TABLE `nas` ADD COLUMN IF NOT EXISTS `routers` varchar(32) NOT NULL DEFAULT '';</pre>
+                        <small>{Lang::T('On a MySQL version without ADD COLUMN IF NOT EXISTS, leave out the words IF NOT EXISTS (it is only run once).')}</small>
+                    </div>
+                </li>
+                {/if}
                 {* known to be missing only once the database was reached (or the server said it has no such database) *}
                 <li class="rt-check rt-check--{if $why == 'database' || $why == 'tables'}bad{else}warn{/if}">
                     <i class="fa {if $why == 'database' || $why == 'tables'}fa-times-circle{else}fa-exclamation-circle{/if}" aria-hidden="true"></i>

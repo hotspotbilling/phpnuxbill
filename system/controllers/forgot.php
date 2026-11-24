@@ -140,12 +140,12 @@ if ($step == 1) {
         }
         $user = ORM::for_table('tbl_customers')->find_one($user['id']);
     }
-    // the code is used up from here on, whatever follows
-    unset($_SESSION['forgot_ok'], $_SESSION['forgot_username']);
     if ($user) {
-        Package::keepDialPassword($user); // a PPPoE / VPN connection keeps the password its router dials with
+        Package::keepDialPassword($user); // a PPPoE / VPN connection keeps the password its router dials with (in memory: saved below)
         $user->password = $npass;
         $user->save();
+        // the code is used up once the new password is saved, whatever the devices do next (a lock failure above kept it)
+        unset($_SESSION['forgot_ok'], $_SESSION['forgot_username']);
         // the routers sign the customer in with their own copy of the password (a Mikrotik hotspot or PPPoE user): every
         // active plan's device gets the new one, like a password changed from the customer's account page. The new password
         // is saved already: a device that fails is logged, and the reset goes on
@@ -165,12 +165,14 @@ if ($step == 1) {
         User::revokeCookies($user['id']); // every session and remember-me cookie opened with the old password ends
         _log('[' . $username . ']: Password reset with a verification code', 'User', $user['id']);
         forgot_notify($user['phonenumber'], $user['email'], $config['CompanyName'] . ': ' . Lang::T('Your password was just changed. If this was not you, contact us at once.'), $config['CompanyName'] . ' - ' . Lang::T('Your password was changed'));
+    } else {
+        unset($_SESSION['forgot_ok'], $_SESSION['forgot_username']); // no such account: the code is used up all the same
     }
     AuthThrottle::clear('forgot-verify-user', $username);
     $ui->assign('username', $username);
     $ui->assign('notify_t', 's');
     $ui->assign('notify', Lang::T('Password changed successfully, Please login again')
-        . ($routerFailed ? '. ' . Lang::T('Your new password is saved and works for this portal now. Your internet connection may take a little longer to accept it.') : ''));
+        . ($routerFailed ? '. ' . Lang::T('Your portal password was changed, but it could not be applied to your internet connection. Your internet service may not accept the new password: please contact support about your network access.') : ''));
 } else if ($step == 7) {
     $find = trim((string) _post('find'));
     $step = 6;

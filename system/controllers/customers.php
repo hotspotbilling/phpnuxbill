@@ -255,7 +255,15 @@ switch ($action) {
                 if ($_app_stage != 'demo') {
                     if (file_exists($dvc)) {
                         require_once $dvc;
-                        (new $p['device'])->remove_customer($c, $p);
+                        try {
+                            (new $p['device'])->remove_customer($c, $p);
+                        } catch (Exception $e) {
+                            // code 207: the plan is taken off the router, one later step was refused: logged, the change stands
+                            if ($e->getCode() !== 207) {
+                                throw $e;
+                            }
+                            _log('[' . $c['username'] . '] deactivate: ' . $e->getMessage(), 'Router');
+                        }
                     } else {
                         new Exception(Lang::T("Devices Not Found"));
                     }
@@ -289,7 +297,7 @@ switch ($action) {
                     if ($_app_stage != 'demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
-                            if (method_exists($dvc, 'sync_customer')) {
+                            if (method_exists($p['device'], 'sync_customer')) {
                                 (new $p['device'])->sync_customer($c, $p);
                             }else{
                                 (new $p['device'])->add_customer($c, $p);
@@ -409,6 +417,7 @@ switch ($action) {
             $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));
             $ui->assign('customFields', $customFields);
             $ui->assign('xheader', $leafletpickerHeader);
+            $ui->assign('pppoe_password_seen', hash('sha256', (string) $d['pppoe_password']));
             $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
             $ui->display('admin/customers/edit.tpl');
         } else {
@@ -440,7 +449,15 @@ switch ($action) {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             $p['plan_expired'] = 0;
-                            (new $p['device'])->remove_customer($c, $p);
+                            try {
+                                (new $p['device'])->remove_customer($c, $p);
+                            } catch (Exception $e) {
+                                // code 207: removed from the router, one later step was refused: logged, the delete goes on
+                                if ($e->getCode() !== 207) {
+                                    throw $e;
+                                }
+                                _log('[' . $c['username'] . '] delete: ' . $e->getMessage(), 'Router');
+                            }
                         } else {
                             new Exception(Lang::T("Devices Not Found"));
                         }
@@ -630,6 +647,11 @@ switch ($action) {
             $msg .= 'Full Name should be between 2 to 25 characters' . '<br>';
         }
 
+        // the customer is read and saved under the lock a password change (Forgot password, account page) takes, so a
+        // password kept by Package::keepDialPassword() meanwhile is not overwritten by this form
+        if (!Package::passwordLock((int) $id)) {
+            r2(getUrl('customers/edit/') . $id, 'e', Lang::T('This customer is being changed by another request. Try again in a moment.'));
+        }
         $c = ORM::for_table('tbl_customers')->find_one($id);
 
         if (!$c) {
@@ -671,6 +693,13 @@ switch ($action) {
             $pppoeDiff = true;
         }
 
+        // the form carries a hash of the PPPoE password it was shown with: a form that still has it did not change the field, so
+        // the saved value (possibly kept or changed since by a password change) stays
+        $pppoeSeen = (string) _post('pppoe_password_seen');
+        if ($pppoeSeen !== '' && hash_equals($pppoeSeen, hash('sha256', $pppoe_password))) {
+            $pppoe_password = (string) $oldPppoePassword;
+        }
+        $pppoePassDiff = (string) $oldPppoePassword !== $pppoe_password;
         if ($oldPppoeIp != $pppoe_ip) {
             $pppoeIpDiff = true;
         }
@@ -679,6 +708,31 @@ switch ($action) {
         }
 
         if ($msg == '') {
+            $oldPhoto = '';
+            // a changed address is checked and saved under the locks VPN provisioning takes (MikrotikVpn::lockAddressEdit()):
+            // the old one stays reserved until a provisioning that uses it has finished, and one another customer holds is refused
+            $vpnLocks = [];
+            $heldOld = false;
+            if ($pppoeIpDiff) {
+                if (class_exists('MikrotikVpn') || DeviceLoader::load('MikrotikVpn')) {
+                    $vpnRouters = [];
+                    foreach (ORM::for_table('tbl_user_recharges')->select('routers')->where('customer_id', $c['id'])->find_array() as $row) {
+                        $vpnRouters[] = (string) $row['routers'];
+                    }
+                    $vpnLocks = MikrotikVpn::lockAddressEdit($c['id'], $vpnRouters);
+                    if ($vpnLocks === false) {
+                        Package::passwordLock((int) $id, false);
+                        r2(getUrl('customers/edit/') . $id, 'e', Lang::T('Another customer is being given an address from this pool. Try again in a moment.'));
+                    }
+                }
+                if ($pppoe_ip !== '' && ORM::for_table('tbl_customers')->where('pppoe_ip', $pppoe_ip)->where_not_equal('id', $c['id'])->find_one()) {
+                    Package::passwordLock((int) $id, false);
+                    if ($vpnLocks) {
+                        MikrotikVpn::unlockAddressEdit($vpnLocks);
+                    }
+                    r2(getUrl('customers/edit/') . $id, 'e', Lang::T('This IP address is already saved for another customer') . ': ' . $pppoe_ip);
+                }
+            }
             if (!empty($_FILES['photo']['name']) && file_exists($_FILES['photo']['tmp_name'])) {
                 if (function_exists('imagecreatetruecolor')) {
                     $hash = md5_file($_FILES['photo']['tmp_name']);
@@ -712,40 +766,19 @@ switch ($action) {
                         }
                     }
                     if (file_exists($imgPath)) {
-                        if ($c['photo'] != '' && strpos($c['photo'], 'default') === false) {
-                            if (file_exists($UPLOAD_PATH . $c['photo'])) {
-                                unlink($UPLOAD_PATH . $c['photo']);
-                                if (file_exists($UPLOAD_PATH . $c['photo'] . '.thumb.jpg')) {
-                                    unlink($UPLOAD_PATH . $c['photo'] . '.thumb.jpg');
-                                }
-                            }
+                        // the previous photo is deleted only once the customer is saved with the new one
+                        if ($c['photo'] != '' && strpos($c['photo'], 'default') === false && $c['photo'] !== '/photos/' . $subfolder . '/' . $hash . '.jpg') {
+                            $oldPhoto = $c['photo'];
                         }
                         $c->photo = '/photos/' . $subfolder . '/' . $hash . '.jpg';
                     }
                     if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
                 } else {
-                    r2(getUrl('settings/app'), 'e', 'PHP GD is not installed');
-                }
-            }
-            // a changed address is checked and saved under the locks VPN provisioning takes (MikrotikVpn::lockAddressEdit()):
-            // the old one stays reserved until a provisioning that uses it has finished, and one another customer holds is refused
-            $vpnLocks = [];
-            if ($pppoeIpDiff) {
-                if (class_exists('MikrotikVpn') || DeviceLoader::load('MikrotikVpn')) {
-                    $vpnRouters = [];
-                    foreach (ORM::for_table('tbl_user_recharges')->select('routers')->where('customer_id', $c['id'])->find_array() as $row) {
-                        $vpnRouters[] = (string) $row['routers'];
-                    }
-                    $vpnLocks = MikrotikVpn::lockAddressEdit($c['id'], $vpnRouters);
-                    if ($vpnLocks === false) {
-                        r2(getUrl('customers/edit/') . $id, 'e', Lang::T('Another customer is being given an address from this pool. Try again in a moment.'));
-                    }
-                }
-                if ($pppoe_ip !== '' && ORM::for_table('tbl_customers')->where('pppoe_ip', $pppoe_ip)->where_not_equal('id', $c['id'])->find_one()) {
                     if ($vpnLocks) {
                         MikrotikVpn::unlockAddressEdit($vpnLocks);
                     }
-                    r2(getUrl('customers/edit/') . $id, 'e', Lang::T('This IP address is already saved for another customer') . ': ' . $pppoe_ip);
+                    Package::passwordLock((int) $id, false);
+                    r2(getUrl('settings/app'), 'e', 'PHP GD is not installed');
                 }
             }
             if ($userDiff) {
@@ -774,9 +807,24 @@ switch ($action) {
             $c->zip = $zip;
             try {
                 $c->save();
+                if ($vpnLocks && (string) $oldPppoeIp !== '' && (string) $oldPppoeIp !== $pppoe_ip) {
+                    // the old address is not free until the router's secret has let go of it: held (checkIpAddr() skips it)
+                    // past the unlock, until the device update below has finished cleanly
+                    MikrotikVpn::holdAddress($oldPppoeIp);
+                    $heldOld = true;
+                }
             } finally {
                 if ($vpnLocks) {
                     MikrotikVpn::unlockAddressEdit($vpnLocks);
+                }
+                Package::passwordLock((int) $id, false);
+            }
+            if ($oldPhoto !== '') {
+                if (file_exists($UPLOAD_PATH . $oldPhoto)) {
+                    unlink($UPLOAD_PATH . $oldPhoto);
+                }
+                if (file_exists($UPLOAD_PATH . $oldPhoto . '.thumb.jpg')) {
+                    unlink($UPLOAD_PATH . $oldPhoto . '.thumb.jpg');
                 }
             }
             if (class_exists('RedisCache')) {
@@ -832,8 +880,11 @@ switch ($action) {
                 }
             }
 
+            $keepHeld = false;
             $partialPlans = []; // plans whose router update was only partly done (code 207)
-            if ($userDiff || $pppoeDiff || $pppoeIpDiff || $passDiff) {
+            $renamed = []; // [plan, from, to] of the router renames that went through, to be undone if a later one is refused
+            $doneTurs = []; // recharges already moved to the new username
+            if ($userDiff || $pppoeDiff || $pppoeIpDiff || $passDiff || $pppoePassDiff) {
                 $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->findMany();
                 foreach ($turs as $tur) {
                     $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
@@ -843,20 +894,74 @@ switch ($action) {
                         if ($tur['status'] == 'on') {
                             if (file_exists($dvc)) {
                                 require_once $dvc;
-                                if ($userDiff) {
-                                    (new $p['device'])->change_username($p, $oldusername, $username);
-                                }
-                                if ($pppoeDiff && $tur['type'] == 'PPPOE') {
-                                    if (empty($oldPppoeUsername) && !empty($pppoe_username)) {
-                                        // admin just add pppoe username
-                                        (new $p['device'])->change_username($p, $username, $pppoe_username);
-                                    } else if (empty($pppoe_username) && !empty($oldPppoeUsername)) {
-                                        // admin want to use customer username
-                                        (new $p['device'])->change_username($p, $oldPppoeUsername, $username);
-                                    } else {
-                                        // regular change pppoe username
-                                        (new $p['device'])->change_username($p, $oldPppoeUsername, $pppoe_username);
+                                try {
+                                    if ($userDiff) {
+                                        (new $p['device'])->change_username($p, $oldusername, $username);
+                                        $renamed[] = [$p, $oldusername, $username];
                                     }
+                                    if ($pppoeDiff && $tur['type'] == 'PPPOE') {
+                                        if (empty($oldPppoeUsername) && !empty($pppoe_username)) {
+                                            // admin just add pppoe username
+                                            $from = $username;
+                                            $to = $pppoe_username;
+                                        } else if (empty($pppoe_username) && !empty($oldPppoeUsername)) {
+                                            // admin want to use customer username
+                                            $from = $oldPppoeUsername;
+                                            $to = $username;
+                                        } else {
+                                            // regular change pppoe username
+                                            $from = $oldPppoeUsername;
+                                            $to = $pppoe_username;
+                                        }
+                                        (new $p['device'])->change_username($p, $from, $to);
+                                        $renamed[] = [$p, $from, $to];
+                                    }
+                                } catch (Exception $e) {
+                                    // the router refused a rename (the new name is taken, say): the customer was already saved, so the
+                                    // saved values are put back and the renames that went through are undone, and the recharges keep
+                                    // their name: customer, recharges and routers stay under one name and the edit can be tried again
+                                    $undoFailed = [];
+                                    foreach (array_reverse($renamed) as [$rp, $rfrom, $rto]) {
+                                        try {
+                                            (new $rp['device'])->change_username($rp, $rto, $rfrom);
+                                        } catch (Exception $e2) {
+                                            $undoFailed[] = $rp['name_plan'];
+                                        }
+                                    }
+                                    foreach ($doneTurs as $dt) {
+                                        $dt->username = $oldusername;
+                                        $dt->save();
+                                    }
+                                    $lockTaken = Package::passwordLock((int) $id);
+                                    try {
+                                        $cb = ORM::for_table('tbl_customers')->find_one($id);
+                                        if ($cb) {
+                                            $cb->username = $oldusername;
+                                            $cb->pppoe_username = $oldPppoeUsername;
+                                            $cb->pppoe_password = $oldPppoePassword;
+                                            $cb->pppoe_ip = $oldPppoeIp;
+                                            if ($passDiff && (string) $cb['password'] === $password) {
+                                                $cb->password = $oldPassPassword; // not a password changed since
+                                            }
+                                            $cb->save();
+                                        }
+                                    } finally {
+                                        if ($lockTaken) {
+                                            Package::passwordLock((int) $id, false);
+                                        }
+                                    }
+                                    if ($heldOld) {
+                                        MikrotikVpn::releaseHeld($oldPppoeIp); // the customer is back on that address
+                                    }
+                                    if (class_exists('RedisCache')) {
+                                        RedisCache::forgetRadiusCustomer($oldusername);
+                                        RedisCache::forgetRadiusCustomer($username);
+                                        RedisCache::forgetRadiusCustomer($oldPppoeUsername);
+                                        RedisCache::forgetRadiusCustomer($pppoe_username);
+                                    }
+                                    _log('[' . $oldusername . '] edit not saved, rename refused: ' . $e->getMessage(), 'Router');
+                                    r2(getUrl('customers/edit/') . $id, 'e', Lang::T('The router did not accept the new username, nothing was changed') . ': ' . htmlspecialchars($e->getMessage(), ENT_QUOTES)
+                                        . ($undoFailed ? '. ' . Lang::T('The rename could not be undone on') . ': ' . htmlspecialchars(implode(', ', $undoFailed), ENT_QUOTES) : ''));
                                 }
                                 try {
                                     (new $p['device'])->add_customer($c, $p);
@@ -871,6 +976,8 @@ switch ($action) {
                                     _log('[' . $c['username'] . '] edit: ' . $e->getMessage()
                                         . ($cause && strpos($e->getMessage(), $cause->getMessage()) === false ? ' (' . $cause->getMessage() . ')' : ''), 'Router');
                                     $partialPlans[] = $p['name_plan'];
+                                    $heldOld = false; // not confirmed clean: the old address stays held until its time runs out
+                                    $keepHeld = true;
                                 }
                             } else {
                                 new Exception(Lang::T("Devices Not Found"));
@@ -879,7 +986,11 @@ switch ($action) {
                     }
                     $tur->username = $username;
                     $tur->save();
+                    $doneTurs[] = $tur;
                 }
+            }
+            if ($heldOld && !$keepHeld) {
+                MikrotikVpn::releaseHeld($oldPppoeIp); // every device update finished: no secret uses the old address any more
             }
             if ($partialPlans) {
                 r2(getUrl('customers/view/') . $id, 'w', Lang::T('User Updated, but the router update is incomplete for') . ': '
@@ -887,6 +998,7 @@ switch ($action) {
             }
             r2(getUrl('customers/view/') . $id, 's', 'User Updated Successfully');
         } else {
+            Package::passwordLock((int) $id, false);
             r2(getUrl('customers/edit/') . $id, 'e', $msg);
         }
         break;

@@ -29,7 +29,7 @@ class Rtl
     const OWN_RTL = ['sweetalert2', 'select2'];
 
     /** Bumped when the mirroring changes, so the copies already made are made again */
-    const VERSION = 9;
+    const VERSION = 10;
 
     /**
      * Put on what has been mirrored already. Smarty runs the filter on fetch() as well as display(), so a part fetched and then
@@ -236,8 +236,12 @@ class Rtl
                 // a local stylesheet it imports is mirrored as well, and imported from its copy
                 $deps = [];
                 $urls = [];
-                $css = preg_replace_callback('/@import\s+(?:url\(\s*(["\']?)([^"\')]+)\1\s*\)|(["\'])([^"\']+)\3)/i', function ($m) use ($rel, &$deps, &$urls) {
-                    $target = trim(isset($m[4]) && $m[4] !== '' ? $m[4] : $m[2]);
+                // (comments and strings are matched first, so text that only looks like an @import inside one is left as it is)
+                $css = preg_replace_callback('/(\/\*.*?\*\/)|("(?:[^"\\\\\n]|\\\\.)*"|\'(?:[^\'\\\\\n]|\\\\.)*\')|@import\s+(?:url\(\s*(["\']?)([^"\')]+)\3\s*\)|(["\'])([^"\']+)\5)/is', function ($m) use ($rel, &$deps, &$urls) {
+                    if (($m[1] ?? '') !== '' || ($m[2] ?? '') !== '') {
+                        return $m[0];
+                    }
+                    $target = trim(isset($m[6]) && $m[6] !== '' ? $m[6] : $m[4]);
                     if ($target === '') {
                         return $m[0];
                     }
@@ -549,7 +553,7 @@ class Rtl
             case $name === 'border-radius':
                 return self::radius($value);
             case in_array($name, ['background-position', 'background-position-x', 'object-position', 'transform-origin', 'perspective-origin', 'mask-position'], true):
-                return self::position($value);
+                return self::position($value, $name);
             case in_array($name, ['box-shadow', 'text-shadow'], true):
                 return self::shadow($value);
             case in_array($name, ['transform', 'translate'], true):
@@ -610,12 +614,31 @@ class Rtl
         return implode('/', $sides);
     }
 
-    /** left and right swapped; a horizontal percentage (the first value) counted from the other side */
-    private static function position($value)
+    /**
+     * left and right swapped; a horizontal percentage (the first value) counted from the other side. For transform-origin the
+     * horizontal value is found whichever order the keywords come in ("top 30%"), a zero counts as 0% (the left edge), and the
+     * vertical value and a z-offset are kept as written.
+     */
+    private static function position($value, $name = '')
     {
         $layers = self::split($value, ',');
         foreach ($layers as $i => $layer) {
             $t = self::tokens($layer);
+            if ($name === 'transform-origin' && $t && count($t) <= 3) {
+                $h = in_array(strtolower($t[0]), ['top', 'bottom'], true) ? 1 : 0;
+                if (isset($t[$h]) && preg_match('/^[+-]?(?:\d*\.?\d+)%$/', $t[$h])) {
+                    $t[$h] = (100 - (float) $t[$h]) . '%';
+                    $layers[$i] = self::lead($layer) . implode(' ', $t) . self::trail($layer);
+                    continue;
+                }
+                if (isset($t[$h]) && preg_match('/^[+-]?0*\.?0+(?:px)?$/i', $t[$h])) {
+                    $t[$h] = '100%'; // (0 is the left edge: the right one when mirrored)
+                    $layers[$i] = self::lead($layer) . implode(' ', $t) . self::trail($layer);
+                    continue;
+                }
+                $layers[$i] = self::swapWords($layer);
+                continue;
+            }
             if ($t && preg_match('/^(-?[\d.]+)%$/', $t[0], $m) && count($t) <= 2) {
                 $t[0] = (100 - (float) $m[1]) . '%';
                 $layers[$i] = self::lead($layer) . implode(' ', $t) . self::trail($layer);

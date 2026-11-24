@@ -102,13 +102,24 @@ class RouterApi
         if ($deadline - microtime(true) <= 0) {
             throw new Exception(Lang::T('The router did not answer in time'), 408);
         }
+        // a deadline already set on the client (this request is nested in another one's work) is never extended: the request ends
+        // by whichever deadline comes first, and the outer one is put back afterwards
+        $prior = method_exists($c, 'currentDeadline') ? $c->currentDeadline() : null;
+        if ($prior !== null) {
+            $deadline = min($deadline, $prior);
+            if ($deadline - microtime(true) <= 0) {
+                throw new Exception(Lang::T('The router did not answer in time'), 408);
+            }
+        }
         $tag = 'nb' . (++$n);
         $req->setTag($tag);
         self::transmit($c, $req, $deadline);
         $recvErr = null;
         $got = [];
-        $finished = function () use (&$got) {
-            foreach ($got as $r) {
+        $done = false;
+        // whether these (newly collected) replies hold the closing one: only the new ones are looked at, not everything so far
+        $closes = function (array $replies) {
+            foreach ($replies as $r) {
                 if (in_array($r->getType(), [Response::TYPE_FINAL, Response::TYPE_FATAL], true)) {
                     return true;
                 }
@@ -138,9 +149,11 @@ class RouterApi
                     // (isRequestActive() is no test of being finished: it stays true while a finished answer waits to be
                     // collected; once the closing reply is collected the request is gone, so nothing is asked for after it)
                     if ($c->isRequestActive($tag)) {
-                        $got = array_merge($got, $c->extractNewResponses($tag)->toArray());
+                        $new = $c->extractNewResponses($tag)->toArray();
+                        array_push($got, ...$new);
+                        $done = $done || $closes($new);
                     }
-                    if ($finished() || $c->getPendingRequestsCount() === 0) {
+                    if ($done || $c->getPendingRequestsCount() === 0) {
                         break; // done, or nothing is pending any more (the connection ended): no reply can still come
                     }
                 }
@@ -149,14 +162,16 @@ class RouterApi
                 $recvErr = $e;
             } finally {
                 if (method_exists($c, 'readDeadline')) {
-                    $c->readDeadline(null);
+                    $c->readDeadline($prior); // (null for a top-level request: the ordinary time limit)
                 }
             }
         }
-        if (!$finished() && $c->isRequestActive($tag)) {
-            $got = array_merge($got, $c->extractNewResponses($tag)->toArray());
+        if (!$done && $c->isRequestActive($tag)) {
+            $new = $c->extractNewResponses($tag)->toArray();
+            array_push($got, ...$new);
+            $done = $closes($new);
         }
-        if ($finished()) {
+        if ($done) {
             $res = new \PEAR2\Net\RouterOS\ResponseCollection($got);
             // at the first reply, so a caller's $res->getProperty() (which reads the current reply) sees it
             $res->rewind();
@@ -204,6 +219,7 @@ class RouterApi
         };
         // the deadline set before anything is written: the socket's time limit is narrowed to the time left (and put back when
         // the deadline is cleared), so a write that stalls ends by it too
+        $prior = $c->currentDeadline();
         $c->readDeadline($deadline);
         try {
             $left = $deadline - microtime(true);
@@ -219,7 +235,7 @@ class RouterApi
                 throw $fail($e);
             }
         } finally {
-            $c->readDeadline(null);
+            $c->readDeadline($prior);
         }
     }
 
@@ -398,9 +414,7 @@ class RouterApi
      * that is done is not touched again. Progress is kept per router row and address, so a router moved to another address
      * starts again. A save counts as made only once the router confirmed it and the file has something in it; that is recorded
      * before older backups are removed, so a retry after a failed clean-up only cleans up, as long as today's file is still
-     * listed as saved with something in it (otherwise it is saved again). A save never writes over a file (RouterOS replaces a
-     * file of the same name): when today's name is taken (by hand, or by a save that never answered) it goes to today's name
-     * with -2 to -9, and when all are taken none is made that day. The password is sent only over a protected connection (see backupTransportError()).
+     * listed as saved with something in it (otherwise it is saved again). A save never writes over a file (RouterOS replaces a file of the same name and has no way to refuse): each attempt saves to a name of its own, today's name with a random suffix (-r and 8 hex digits). The password is sent only over a protected connection (see backupTransportError()).
      * Never throws; returns lines for the cron's output.
      */
     public static function nightlyBackups()
@@ -409,7 +423,9 @@ class RouterApi
         $log = [];
         $lock = null;
         // a time budget of its own, not what the monitoring pass before it left over (each router gets its own again below)
-        @set_time_limit(120);
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(120);
+        }
         try {
             if (($config['router_backup'] ?? '0') !== '1') {
                 return [];
@@ -465,7 +481,7 @@ class RouterApi
                 $folder = self::backupFolder($files);
                 // only in the folder nightly backups are saved to on this router (flash/ or the root folder): a file of the same
                 // name anywhere else (a USB disk, a folder of copies) was not made here and is never removed
-                $own = '/^' . preg_quote($folder, '/') . 'phpnuxbill-auto-\d{8}(?:-\d{1,2})?\.backup$/';
+                $own = '/^' . preg_quote($folder, '/') . 'phpnuxbill-auto-\d{8}(?:-\d{1,2}|-r[0-9a-f]{8})?\.backup$/';
                 $auto = array_values(array_filter($files, function ($f) use ($own) {
                     return preg_match($own, (string) $f['name']);
                 }));
@@ -475,7 +491,9 @@ class RouterApi
                 return $auto;
             };
             foreach ($routers as $rid) {
-                @set_time_limit(120); // each router gets its own time, so a slow one does not stop the rest
+                if (function_exists('set_time_limit')) {
+                    @set_time_limit(120); // each router gets its own time, so a slow one does not stop the rest
+                }
                 // the row read again right before its turn: an earlier router can take minutes, and meanwhile this one may have been
                 // removed, disabled or given another address or login. A router no longer to be backed up is skipped (no try used)
                 $r = ORM::for_table('tbl_routers')->find_one($rid);
@@ -511,7 +529,8 @@ class RouterApi
                     // removed and replaced by another of the same name is not
                     $isOurs = function ($f) use (&$records) {
                         $m = $records[(string) $f['name']] ?? null;
-                        return is_array($m) && array_key_exists('id', $m) && $m['id'] === self::fileIdentity($f);
+                        $now = self::fileIdentity($f);
+                        return is_array($m) && $now !== null && is_string($m['id'] ?? null) && $m['id'] === $now;
                     };
                     $find = function ($path) use (&$auto) {
                         foreach ($auto as $f) {
@@ -530,27 +549,10 @@ class RouterApi
                     if (!$made) {
                         $s['saved'] = false;
                         $savedPath = '';
-                        // a save replaces a file of the same name, so it goes to a name that is free: today's name, or today's
-                        // name with -2 to -9 (still a nightly name, so it is kept and removed like the others). A file already
-                        // there is never written over, whoever made it (one left by a save that never answered included)
-                        $base = null;
-                        foreach (array_merge([''], array_map(function ($i) {
-                            return '-' . $i;
-                        }, range(2, 9))) as $suffix) {
-                            if ($find($folder . $name . $suffix . '.backup') === null) {
-                                $base = $name . $suffix;
-                                break;
-                            }
-                        }
-                        if ($base === null) {
-                            // every name for today is taken: nothing is overwritten, and the router is done for today (trying
-                            // again would find the same)
-                            $s['ok'] = true;
-                            $state['routers'][$key] = $s;
-                            $log[] = $r['name'] . ': ' . Lang::T('The backup was not made: every nightly backup name for today is already taken by a file on the router.');
-                            self::saveBackupState($state);
-                            continue; // (the connection is dropped in finally)
-                        }
+                        // a save replaces a file of the same name, and RouterOS has no way to refuse that, so each attempt gets a name of
+                        // its own (today's name with a random suffix, still a nightly name so it is kept and removed like the
+                        // others): a file made under it by anyone else meanwhile cannot be written over
+                        $base = $name . '-r' . bin2hex(random_bytes(4));
                         // checked on this very connection, right before the password would go out on it
                         if (($why = self::backupTransportError($c)) !== null) {
                             // counts as a try: a later run (up to the limit) looks again, in case the connection or the
@@ -577,7 +579,11 @@ class RouterApi
                         // ever removed
                         $s['saved'] = $savedPath;
                         $state['routers'][$key] = $s;
-                        $records[$savedPath] = ['name' => $savedPath, 'id' => self::fileIdentity($f)];
+                        $ident = self::fileIdentity($f);
+                        if ($ident === null) {
+                            throw new Exception(Lang::T('The backup file was not saved on the router')); // (no file ID: it could not be told apart later)
+                        }
+                        $records[$savedPath] = ['name' => $savedPath, 'id' => $ident];
                         $state['made'][$key] = array_values($records);
                         self::saveBackupState($state);
                     }
@@ -632,12 +638,21 @@ class RouterApi
     /** What identifies a file the router lists (its times and size): another file later saved under the same name differs */
     private static function fileIdentity(array $f)
     {
-        return (string) ($f['creation-time'] ?? '') . '|' . (string) ($f['last-modified'] ?? '') . '|' . (string) ($f['size'] ?? '');
+        // the router's own ID of the file comes first: with none there is no identity (null), so nothing is recorded as made or
+        // removed on it. A record saved before the ID was kept holds the three-part form, which never equals this four-part one
+        $rid = trim((string) ($f['.id'] ?? ''));
+        if ($rid === '') {
+            return null;
+        }
+        return $rid . '|' . (string) ($f['creation-time'] ?? '') . '|' . (string) ($f['last-modified'] ?? '') . '|' . (string) ($f['size'] ?? '');
     }
 
     /** A nightly backup file name as a key that sorts by its date, then by its -2 to -9 suffix (yyyymmddnn), or "" */
     private static function backupDate($name)
     {
+        if (preg_match('/phpnuxbill-auto-(\d{8})-r([0-9a-f]{8})\.backup$/', (string) $name, $m)) {
+            return $m[1] . '99' . $m[2]; // (a per-attempt name: after the plain and -2 to -9 names of its day)
+        }
         return preg_match('/phpnuxbill-auto-(\d{8})(?:-(\d{1,2}))?\.backup$/', (string) $name, $m)
             ? $m[1] . sprintf('%02d', isset($m[2]) && $m[2] !== '' ? (int) $m[2] : 1) : '';
     }

@@ -194,6 +194,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         if ($tur['status'] != 'on') {
             $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
             $dvc = Package::getDevice($p);
+            $extendPartial = false; // the router kept the change but a later step (a fixed IP, a port forward) was refused
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
@@ -207,7 +208,8 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                         if ($e->getCode() !== 207) {
                             throw $e;
                         }
-                        _log('[' . $user['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
+                        _log('[' . $user['username'] . '] extend' . ': ' . $e->getMessage() . ' (pending: a Sync customers run repairs it)', 'Router');
+                        $extendPartial = true;
                     }
                 } else {
                     r2(getUrl('home'), 'e', Lang::T("Devices Not Found"));
@@ -227,6 +229,10 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                 "\nLocation: " . $p['routers'] .
                 "\nCustomer: " . $user['fullname'] .
                 "\nNew Expired: " . Lang::dateAndTimeFormat($expiration, $tur['time']));
+            if ($extendPartial) {
+                // not reported as complete: the extension is saved, the router step is still pending until the next sync
+                r2(getUrl('home'), 'w', "Extend until $expiration. " . Lang::T('The router update is not complete yet; it will be finished shortly. Contact support if the connection does not work.'));
+            }
             r2(getUrl('home'), 's', "Extend until $expiration");
         } else {
             r2(getUrl('home'), 'e', "Plan is not expired");
@@ -245,7 +251,16 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         if ($_app_stage != 'demo') {
             if (file_exists($dvc)) {
                 require_once $dvc;
-                (new $p['device'])->remove_customer($user, $p);
+                try {
+                    (new $p['device'])->remove_customer($user, $p);
+                } catch (Exception $e) {
+                    // code 207: the plan was taken off but a later step was refused (a fixed IP not cleared, a port forward left): the
+                    // deactivation stands, and the admins are told in the log; any other error stops as before
+                    if ($e->getCode() !== 207) {
+                        throw $e;
+                    }
+                    _log('[' . $user['username'] . '] deactivate: ' . $e->getMessage(), 'Router');
+                }
             } else {
                 r2(getUrl('home'), 'e', Lang::T("Devices Not Found"));
             }

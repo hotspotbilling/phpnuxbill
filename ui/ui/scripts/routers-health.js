@@ -408,6 +408,9 @@
                 body.insertBefore(failEl, body.firstChild);
             }
             failEl.innerHTML = failText(d);
+            // the current download / upload speed goes (it is not the router's now); the chart and its focus stay
+            var tl = body.querySelector('[data-rt-chart="traffic"] .rt-legend');
+            if (tl) tl.innerHTML = legend([{ label: t.down, cls: 'rt-s1' }, { label: t.up, cls: 'rt-s2' }], [null, null]);
             return;
         }
         if (failEl) failEl.parentNode.removeChild(failEl);

@@ -642,6 +642,21 @@
             var dAddr = drop.getAttribute('data-address') || '', dMac = drop.getAttribute('data-mac') || '';
             var dStarted = drop.getAttribute('data-started') || '';
             var dCfg = dModel ? dModel.opts.cfg || '' : '', dKey = dropKey(dCfg, dKind, dSid, dUser, dAddr, dMac);
+            // a retry after a failed disconnect goes with the start of the session as it was first listed, not a later list's
+            var dPrev = dPane._drops && dPane._drops[dKey];
+            if (dPrev && dPrev.err) {
+                var dOrig = (dPane._dropStart || {})[dKey] || '';
+                if (dOrig === '') {
+                    // no start to tell this session from a replacement that got the same ID: not tried again from here
+                    dPane._drops[dKey] = { err: t.dropRefresh, user: dUser };
+                    var dRow0 = dModel && dModel.opts.rows.filter(function (r) {
+                        return dropKey(dCfg, r.kind, r.sid, r.user, r.address, r.mac) === dKey;
+                    })[0];
+                    if (dRow0) { dRow0.err = t.dropRefresh; listRender(dPane); }
+                    return;
+                }
+                dStarted = dOrig;
+            }
             var find = function (model) { // the row for this session (as listed: see dropKey()) in a list read with the same router settings
                 return model && (model.opts.cfg || '') === dCfg ? model.opts.rows.filter(function (r) {
                     return dropKey(dCfg, r.kind, r.sid, r.user, r.address, r.mac) === dKey && sameStart(r.started, dStarted);
@@ -693,7 +708,16 @@
                         if (d.ok) r.gone = true; else r.err = d.error || t.fail;
                     });
                     if (cur) {
+                        // a control that had the keyboard (this session's retry, or another session's Disconnect) keeps it
+                        var fe2 = document.activeElement, keep = fe2 && fe2 !== dPane && dPane.contains(fe2) && fe2.hasAttribute('data-rt-drop') ? fe2 : null;
+                        var kk = keep ? ['data-rt-drop', 'data-sid', 'data-user', 'data-address', 'data-mac', 'data-started'].map(function (a) { return keep.getAttribute(a) || ''; }) : null;
                         listRender(dPane);
+                        if (kk) {
+                            var again = Array.prototype.filter.call(dPane.querySelectorAll('[data-rt-drop]'), function (b) {
+                                return !b.disabled && ['data-rt-drop', 'data-sid', 'data-user', 'data-address', 'data-mac', 'data-started'].every(function (a, i) { return (b.getAttribute(a) || '') === kk[i]; });
+                            })[0];
+                            if (again) again.focus();
+                        }
                         if (!d.ok && parked && document.activeElement === dPane) {
                             var retry = Array.prototype.filter.call(dPane.querySelectorAll('[data-rt-drop]'), function (b) {
                                 return b.getAttribute('data-rt-drop') === dKind && b.getAttribute('data-sid') === dSid && b.getAttribute('data-user') === dUser

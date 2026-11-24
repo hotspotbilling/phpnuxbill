@@ -13,6 +13,8 @@
 class RouterClient extends PEAR2\Net\RouterOS\Client
 {
     private $aborted = false;
+    /** The deadline readDeadline() last set (the stream keeps its own copy out of reach), or null */
+    private $deadline = null;
     /** The !fatal reply the router sent before it closed the connection, if it did (it carries no tag, so no request gets it) */
     private $fatal = null;
 
@@ -105,10 +107,17 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
      */
     public function readDeadline($deadline)
     {
+        $this->deadline = $deadline === null ? null : (float) $deadline;
         try {
             $this->com->getTransmitter()->setDeadline($deadline);
         } catch (Throwable $e) {
         }
+    }
+
+    /** The deadline now set with readDeadline() (a microtime), or null when there is none */
+    public function currentDeadline()
+    {
+        return $this->deadline;
     }
 
     /** Whether the last read under a deadline ran out of time (false when the connection closed before the reply was complete) */
@@ -123,6 +132,19 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
 
     public function close()
     {
-        return $this->aborted ? true : parent::close();
+        if ($this->aborted) {
+            return true;
+        }
+        // the goodbye ("/quit") waits for the router's reply: with no limit set (a client from RouterApi::connect()) a router that
+        // does not answer it would hold the caller for ever, so it gets a few seconds and then the connection is dropped
+        if ($this->syncLimit === null) {
+            $this->syncLimit = 3;
+        }
+        try {
+            return parent::close();
+        } catch (Throwable $e) {
+            $this->abort();
+            return false;
+        }
     }
 }

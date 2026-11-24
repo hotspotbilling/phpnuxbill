@@ -36,6 +36,11 @@ $radiusProblem = function () {
     }
     try {
         ORM::for_table('nas', 'radius')->limit(1)->find_array();
+        // adding or changing a NAS writes its routers column (Radius::nasAdd / nasUpdate): a FreeRADIUS nas table made without it
+        // would fail on every save, so it is reported here with the one statement that adds it
+        if (!ORM::get_db('radius')->query("SHOW COLUMNS FROM `nas` LIKE 'routers'")->fetch()) {
+            return ['why' => 'columns', 'detail' => ''] + $state;
+        }
         return null;
     } catch (Throwable $e) {
         $msg = $e->getMessage();

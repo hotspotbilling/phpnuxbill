@@ -64,6 +64,9 @@ $joinAddress = function ($host, $port) {
         return $host;
     }
     if (preg_match('/^\[([^\[\]]+)\](?::\d+)?$/', $host, $m)) {
+        if (!filter_var($m[1], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return $host; // brackets hold only an IPv6 address: "[router.example]" is kept as typed and refused by the address checks
+        }
         $host = $m[1]; // "[v6]" or "[v6]:port" typed into the address: the port field wins
     } elseif ($host[0] === '[') {
         return $host; // brackets around something else ("[v6]:abc"): kept as typed, and refused by the address checks
@@ -126,6 +129,29 @@ $endpointLock = function ($on = true) {
         return (int) ORM::getDb()->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 15)")->fetchColumn() === 1;
     } catch (Throwable $e) {
         return !$on;
+    }
+};
+// whether a lock may be taken while another one is held (MikrotikVpn::nestedLocks(): false on a database that frees the held lock
+// when it takes another)
+$expLocksOk = function () {
+    if (DeviceLoader::load('MikrotikVpn') === null) {
+        return false;
+    }
+    return MikrotikVpn::nestedLocks();
+};
+// Cached health readings (system/cache/router_health) are dropped whenever a router's enabled state changes, and a reading that
+// began before the change is refused by the writer (it compares with the moment written here): a router disabled and enabled
+// again is read afresh, never from what was read before.
+$healthReset = function ($id) {
+    global $CACHE_PATH;
+    $dir = $CACHE_PATH . DIRECTORY_SEPARATOR . 'router_health';
+    $id = (int) $id;
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
+    }
+    @file_put_contents($dir . DIRECTORY_SEPARATOR . $id . '.reset', sprintf('%.6F', microtime(true)), LOCK_EX);
+    foreach ([$id . '.json', $id . '.live.json'] as $f) {
+        @unlink($dir . DIRECTORY_SEPARATOR . $f);
     }
 };
 $busyText = function () {
@@ -579,8 +605,12 @@ switch ($action) {
                 $taken[] = $r['name'];
                 continue;
             }
+            $changed = (int) $r['enabled'] !== ($op === 'enable' ? 1 : 0);
             $r->enabled = $op === 'enable' ? 1 : 0;
             $r->save();
+            if ($changed) {
+                $healthReset($r['id']);
+            }
             $n++;
         }
         $endpointLock(false);
@@ -643,42 +673,70 @@ switch ($action) {
                     $stoppedWhy = Lang::T('The router was changed during the sync, so the rest of its customers were not sent. Run the sync again.');
                     break;
                 }
-                // the list was read at the start: a recharge that has expired since (the cron) is not sent back to the router
-                // read again in full: its plan or router may have changed since too (a renewal, a move), and the current ones are used
-                $now = ORM::for_table('tbl_user_recharges')->find_one($tur['id']);
-                if (!$now || $now['status'] !== 'on') {
-                    continue;
-                }
-                $tur = $now;
-                if (strcasecmp(rtrim((string) $tur['routers']), rtrim((string) $d['name'])) !== 0) {
-                    continue; // moved to another router since the list was read: not this router's to sync
-                }
-                $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
-                $c = ORM::for_table('tbl_customers')->find_one($tur['customer_id']);
-                // the device sends a customer to its plan's router: a plan now on another router is not this router's to sync
-                if (!$p || !$c || strcasecmp(rtrim((string) $p['routers']), rtrim((string) $d['name'])) !== 0) {
-                    $failed[] = $tur['username'];
-                    continue;
+                // the cron's expiry of this customer's recharge takes the same per-customer lock (phpnuxbill_exp_c_<id>) across taking
+                // the access off the router and marking the recharge off: held here across the re-read and the device call, a sync
+                // cannot send access back after an expiry that read the recharge as on. A wait of a few seconds at most. Taken only
+                // where the database keeps the locks a connection already holds (the endpoint lock is held): on one that frees it
+                // when another is taken it is not nested
+                $expLock = null;
+                if ($expLocksOk()) {
+                    $expLock = 'phpnuxbill_exp_c_' . (int) $tur['customer_id'];
+                    try {
+                        $gotExp = (int) ORM::getDb()->query('SELECT GET_LOCK(' . ORM::getDb()->quote($expLock) . ', 5)')->fetchColumn() === 1;
+                    } catch (Throwable $e) {
+                        $gotExp = false;
+                    }
+                    if (!$gotExp) {
+                        $expLock = null;
+                        $failed[] = $tur['username']; // expiring right now (or the lock is unavailable): not sent, run the sync again
+                        continue;
+                    }
                 }
                 try {
-                    $dvc = Package::getDevice($p);
-                    if (!file_exists($dvc)) {
-                        throw new Exception(Lang::T('Devices Not Found'));
+                    // the list was read at the start: a recharge that has expired since (the cron) is not sent back to the router
+                    // read again in full: its plan or router may have changed since too (a renewal, a move), and the current ones are used
+                    $now = ORM::for_table('tbl_user_recharges')->find_one($tur['id']);
+                    if (!$now || $now['status'] !== 'on') {
+                        continue;
                     }
-                    require_once $dvc;
-                    $dev = new $p['device'];
-                    if (method_exists($dev, 'sync_customer')) {
-                        $dev->sync_customer($c, $p); // a change the router refuses is thrown (caught below)
-                        $done++;
-                    } else {
-                        $dev->add_customer($c, $p);
-                        $unsure[] = $tur['username'];
+                    $tur = $now;
+                    if (strcasecmp(rtrim((string) $tur['routers']), rtrim((string) $d['name'])) !== 0) {
+                        continue; // moved to another router since the list was read: not this router's to sync
                     }
-                } catch (Throwable $e) {
-                    if ($e->getCode() === 207) { // the Mikrotik drivers' "saved, but a follow-up step failed" (MikrotikPppoe::PARTIAL)
-                        $partial[] = $tur['username'];
-                    } else {
+                    $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
+                    $c = ORM::for_table('tbl_customers')->find_one($tur['customer_id']);
+                    // the device sends a customer to its plan's router: a plan now on another router is not this router's to sync
+                    if (!$p || !$c || strcasecmp(rtrim((string) $p['routers']), rtrim((string) $d['name'])) !== 0) {
                         $failed[] = $tur['username'];
+                        continue;
+                    }
+                    try {
+                        $dvc = Package::getDevice($p);
+                        if (!file_exists($dvc)) {
+                            throw new Exception(Lang::T('Devices Not Found'));
+                        }
+                        require_once $dvc;
+                        $dev = new $p['device'];
+                        if (method_exists($dev, 'sync_customer')) {
+                            $dev->sync_customer($c, $p); // a change the router refuses is thrown (caught below)
+                            $done++;
+                        } else {
+                            $dev->add_customer($c, $p);
+                            $unsure[] = $tur['username'];
+                        }
+                    } catch (Throwable $e) {
+                        if ($e->getCode() === 207) { // the Mikrotik drivers' "saved, but a follow-up step failed" (MikrotikPppoe::PARTIAL)
+                            $partial[] = $tur['username'];
+                        } else {
+                            $failed[] = $tur['username'];
+                        }
+                    }
+                } finally {
+                    if ($expLock !== null) {
+                        try {
+                            ORM::getDb()->query('SELECT RELEASE_LOCK(' . ORM::getDb()->quote($expLock) . ')');
+                        } catch (Throwable $e) {
+                        }
                     }
                 }
             }
@@ -689,6 +747,14 @@ switch ($action) {
                 . ($partial ? '. ' . Lang::T('Saved, but a follow-up step failed') . ': ' . htmlspecialchars(implode(', ', array_slice($partial, 0, 20))) . (count($partial) > 20 ? ' …' : '') : '')
                 . ($failed ? '. ' . Lang::T('Not sent') . ': ' . htmlspecialchars(implode(', ', array_slice($failed, 0, 20))) . (count($failed) > 20 ? ' …' : '') : '')
                 . ($unsure ? '. ' . Lang::T('Sent, but the router did not confirm them') . ': ' . htmlspecialchars(implode(', ', array_slice($unsure, 0, 20))) . (count($unsure) > 20 ? ' …' : '') : ''));
+        }
+        // checked again right before the connection: a disable or a move (name, address, user or password changed) saved since the
+        // router was read cancels the action, and an unchanged router goes on with what it has now
+        $liveR = ORM::for_table('tbl_routers')->find_one($d['id']);
+        if (!$liveR || (int) $liveR['enabled'] !== 1 || trim((string) $liveR['ip_address']) === ''
+            || [(string) $liveR['name'], $endpointKey($liveR['ip_address']), (string) $liveR['username'], (string) $liveR['password']]
+            !== [(string) $d['name'], $endpointKey($d['ip_address']), (string) $d['username'], (string) $d['password']]) {
+            r2($back, 'e', Lang::T('The router was changed just now, so nothing was done. Try again.'));
         }
         [$c, $err] = $rosConnect($d['ip_address'], $d['username'], $d['password'], 8);
         if (!$c) {
@@ -860,12 +926,15 @@ switch ($action) {
                 $totalHs = 0;
                 $totalPp = 0;
                 // when each list was read: a session's start is that moment less the uptime the router gave then
+                // the moment each list was observed is the middle of the time its read took (the router builds the answer somewhere
+                // between the request and the end of it), so a start is worked out against its own list's time, not the other's
                 $hsAt = $ppAt = time();
                 $readErrors = [];
                 $read = ['hotspot' => true, 'pppoe' => true]; // whether each list was read (a missing package counts: nobody there)
                 try {
+                    $hsFrom = microtime(true);
                     [$hs, $totalHs] = $rowsCapped($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address', 'uptime', 'bytes-in', 'bytes-out', 'server'], $until, 5000);
-                    $hsAt = time();
+                    $hsAt = (int) round(($hsFrom + microtime(true)) / 2);
                 } catch (Throwable $e) {
                     if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
@@ -876,9 +945,10 @@ switch ($action) {
                     }
                 }
                 try {
+                    $ppFrom = microtime(true);
                     // PPPoE only: L2TP, SSTP and the other tunnels are not customers
                     [$pp, $totalPp] = $rowsCapped($c, '/ppp/active/print', ['.id', 'name', 'service', 'caller-id', 'address', 'uptime'], $until, 5000, ['service' => 'pppoe']);
-                    $ppAt = time();
+                    $ppAt = (int) round(($ppFrom + microtime(true)) / 2);
                 } catch (Throwable $e) {
                     if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
@@ -964,20 +1034,25 @@ switch ($action) {
                     return strcasecmp((string) $got, (string) $listed) === 0;
                 };
                 if ($kind === 'pppoe') {
+                    $liveFrom = microtime(true);
                     $live = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service', 'address', 'caller-id', 'uptime'], $until, [], ['.id' => $sid]);
-                    $same = $live && (string) $live[0]['name'] === (string) _post('user') && (string) $live[0]['service'] === 'pppoe'
+                    $same = count($live) === 1 && (string) $live[0]['name'] === (string) _post('user') && (string) $live[0]['service'] === 'pppoe'
                         && $match($live[0]['address'], _post('address')) && $match($live[0]['caller-id'], _post('mac'));
                 } else {
+                    $liveFrom = microtime(true);
                     $live = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address', 'uptime'], $until, [], ['.id' => $sid]);
-                    $same = $live && (string) $live[0]['user'] === (string) _post('user')
+                    $same = count($live) === 1 && (string) $live[0]['user'] === (string) _post('user')
                         && $match($live[0]['address'], _post('address')) && $match($live[0]['mac-address'], _post('mac'));
                 }
                 // and it began when the listed one did (a few seconds apart at most: both are worked out from an uptime read at
-                // a different moment). A list without a start, or a live session without one, is not held to it
-                $listedStart = _post('started');
-                if ($same && is_numeric($listedStart)) {
+                // a different moment). Without a start on both sides (the list's, and the live session's) nothing proves it is the
+                // same session, so it is not removed
+                $listedStart = trim((string) _post('started'));
+                if ($same) {
                     $liveSecs = RouterMonitor::seconds($live[0]['uptime']);
-                    $same = $liveSecs === null || abs((time() - $liveSecs) - (int) $listedStart) <= 5;
+                    $liveAt = (int) round(($liveFrom + microtime(true)) / 2);
+                    $same = preg_match('/^\d{9,11}$/', $listedStart) === 1 && $liveSecs !== null
+                        && abs(($liveAt - $liveSecs) - (int) $listedStart) <= 5;
                 }
                 if (!$same) {
                     $say(['ok' => false, 'stale' => true, 'error' => Lang::T('That session has ended or changed. Refresh the list and try again.')]);
@@ -1105,7 +1180,8 @@ switch ($action) {
                         if ($pat === '' || $pat[0] === ':') {
                             return null;
                         }
-                        $hit = $pat === $host || fnmatch($pat, $host) || ($pat[0] === '*' && substr($host, -strlen(ltrim($pat, '*'))) === ltrim($pat, '*'));
+                        // only "*" (any run of characters) and "?" (one character) are wildcards, all else literal: no bracket expressions
+                        $hit = (bool) preg_match('/^' . str_replace(['\\*', '\\?'], ['.*', '.'], preg_quote($pat, '/')) . '$/Ds', $host);
                         return $neg ? !$hit : $hit;
                     };
                     // HTTPS is encrypted: the hotspot sees no path or method in it, so a rule that needs one never matches it
@@ -1530,7 +1606,11 @@ switch ($action) {
                 // or login) is not stored over the entry for the present ones. Among readings of the present details, whichever
                 // began last stays.
                 $now = ORM::for_table('tbl_routers')->find_one($id);
-                $current = $now && hash('sha256', $now['ip_address'] . "\n" . $now['username'] . "\n" . $now['password']) === $key;
+                // and only while the router is enabled (a disabled one has no reading), and not when its enabled state changed since
+                // this reading began
+                $resetAt = (float) @file_get_contents($dir . DIRECTORY_SEPARATOR . $id . '.reset');
+                $current = $now && (int) $now['enabled'] === 1 && trim((string) $now['ip_address']) !== '' && $resetAt <= $observed
+                    && hash('sha256', $now['ip_address'] . "\n" . $now['username'] . "\n" . $now['password']) === $key;
                 $newer = is_array($old) && ($old['key'] ?? '') === $key && isset($old['observed']) && (float) $old['observed'] > $observed;
                 if ($current && !$newer) {
                     ftruncate($fh, 0);
@@ -1698,9 +1778,22 @@ switch ($action) {
             // another router answers at a new address: what the last check said (Online, last seen) was about the old one, and
             // the history's readings and alert states are too (RouterMonitor starts again from the change)
             $moved = $endpointKey($d['ip_address']) !== $endpointKey($ip_address);
+            $enabledChanged = (int) $d['enabled'] !== (int) $enabled;
             if ($moved) {
                 $d->status = null;
                 $d->last_seen = null;
+                // with Router Check off nothing else ever writes the status, and the dashboard counts only routers that are
+                // Online: an enabled router whose new endpoint answers is marked Online here (a plain connect, no login).
+                // With Router Check on the cron's next check sets it.
+                if ($enabled && empty($config['router_check']) && strcasecmp(trim((string) $_app_stage), 'demo') !== 0) {
+                    [$pHost, $pPort] = RouterAddress::split($ip_address);
+                    $sock = $pHost !== '' ? @stream_socket_client('tcp://' . (strpos($pHost, ':') !== false ? '[' . $pHost . ']' : $pHost) . ':' . ((int) $pPort ?: 8728), $pe, $ps, 2) : false;
+                    if ($sock) {
+                        fclose($sock);
+                        $d->status = 'Online';
+                        $d->last_seen = date('Y-m-d H:i:s');
+                    }
+                }
             }
             $d->name = $name;
             $d->ip_address = $ip_address;
@@ -1739,6 +1832,9 @@ switch ($action) {
             } catch (Throwable $e) {
                 $db->rollBack();
                 throw $e;
+            }
+            if ($enabledChanged || $moved) {
+                $healthReset($d['id']);
             }
             $endpointLock(false);
             if ($shared) {

@@ -35,10 +35,96 @@ class RouterMonitor
     // NTP corrects the server): 0.0002 per second elapsed covers readings days apart (a week adds about 2 minutes)
     const BOOT_DRIFT = 0.0002;
 
+    /** More time for the work that follows, where the host allows it (set_time_limit() can be disabled: then the work just goes on) */
+    private static function timeLimit($seconds)
+    {
+        if (function_exists('set_time_limit')) {
+            @set_time_limit($seconds);
+        }
+    }
+
+    /**
+     * Times are kept as UTC (so a change of the timezone setting or of daylight saving never shifts or doubles an hour). Rows
+     * saved before that are in the server's local time: the first write (under the router edit lock) notes in tbl_appconfig
+     * the newest reading and event IDs at that moment, and rows with a higher ID are UTC, the others local. Null: no note yet
+     * (or none could be saved), and then everything is still read and written as local time.
+     */
+    private static function cut($create = false)
+    {
+        static $cut = null, $looked = false;
+        if ($cut !== null || ($looked && !$create)) {
+            return $cut;
+        }
+        try {
+            $looked = true;
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'router_monitor_utc_since')->find_one();
+            if ($d && preg_match('/^(\d+),(\d+)$/', (string) $d['value'], $m)) {
+                return $cut = ['s' => (int) $m[1], 'e' => (int) $m[2]];
+            }
+            if (!$create || $d) {
+                return null;
+            }
+            $s = (int) ORM::for_table('tbl_router_samples')->max('id');
+            $e = (int) ORM::for_table('tbl_router_events')->max('id');
+            $n = ORM::for_table('tbl_appconfig')->create();
+            $n->setting = 'router_monitor_utc_since';
+            $n->value = $s . ',' . $e;
+            if ($n->save() === false) {
+                return null;
+            }
+            return $cut = ['s' => $s, 'e' => $e];
+        } catch (Throwable $x) {
+            return null;
+        }
+    }
+
+    /** A time as it is stored (UTC once the note of cut() exists, otherwise local); call cut(true) before writing */
+    private static function stamp($t)
+    {
+        return self::cut() ? gmdate('Y-m-d H:i:s', $t) : date('Y-m-d H:i:s', $t);
+    }
+
+    /** The time of a stored row ($table 's' readings, 'e' events) as a timestamp */
+    private static function ts($table, $row)
+    {
+        $cut = self::cut();
+        return $cut && (int) $row['id'] > $cut[$table] ? strtotime($row['at'] . ' UTC') : strtotime($row['at']);
+    }
+
+    /** SQL (and its values) for "at $op the time $t" in the table's mixed local and UTC rows (see cut()) */
+    private static function atSql($table, $op, $t)
+    {
+        $cut = self::cut();
+        if (!$cut) {
+            return ['at ' . $op . ' ?', [date('Y-m-d H:i:s', $t)]];
+        }
+        return ['((id <= ? AND at ' . $op . ' ?) OR (id > ? AND at ' . $op . ' ?))', [$cut[$table], date('Y-m-d H:i:s', $t), $cut[$table], gmdate('Y-m-d H:i:s', $t)]];
+    }
+
+    private static function atWhere($q, $table, $op, $t)
+    {
+        [$sql, $vals] = self::atSql($table, $op, $t);
+        return $q->where_raw($sql, $vals);
+    }
+
+    /** Whether tbl_router_samples has the column for when the interface counters were read (added by an update; an older table lacks it) */
+    private static function hasIfat()
+    {
+        static $has = null;
+        if ($has === null) {
+            try {
+                $has = (bool) ORM::getDb()->query("SHOW COLUMNS FROM tbl_router_samples LIKE 'ifat'")->fetch();
+            } catch (Throwable $e) {
+                $has = false;
+            }
+        }
+        return $has;
+    }
+
     /** Two readings follow on from each other (no gap in the collection between them, a late cron allowed for) */
     private static function follows($prev, $at)
     {
-        return $prev && $at - strtotime($prev['at']) <= self::GAP;
+        return $prev && $at - self::ts('s', $prev) <= self::GAP;
     }
 
     /**
@@ -94,10 +180,11 @@ class RouterMonitor
             // the newest reading so far: the readings after the change are the ones with a higher ID. A time cannot tell them
             // apart from the old device's readings in the same second. (Called with the router edit lock held, which keep()
             // holds too, so no reading is saved between this and the event.)
+            self::cut(true);
             $cut = (int) ORM::for_table('tbl_router_samples')->where('router_id', (int) $id)->max('id');
             $e = ORM::for_table('tbl_router_events')->create();
             $e->router_id = (int) $id;
-            $e->at = date('Y-m-d H:i:s');
+            $e->at = self::stamp(time());
             $e->type = 'moved';
             $e->detail = 'sample:' . $cut;
             // (the connection throws on a database error; a save that reports failure without one counts as failed too, so
@@ -114,7 +201,7 @@ class RouterMonitor
 
     /**
      * The router's last address change, or null: readings and states from before it do not count. ['id' => the event's ID,
-     * 'at' => 'Y-m-d H:i:s', 'sample' => the ID of the last reading before it, or null for a change saved before that was kept]
+     * 'at' => the change's time as a timestamp, 'sample' => the ID of the last reading before it, or null for a change saved before that was kept]
      */
     private static function movedAt($id)
     {
@@ -122,7 +209,7 @@ class RouterMonitor
         if (!$m) {
             return null;
         }
-        return ['id' => (int) $m['id'], 'at' => $m['at'], 'sample' => preg_match('/^sample:(\d+)$/', (string) $m['detail'], $x) ? (int) $x[1] : null];
+        return ['id' => (int) $m['id'], 'at' => self::ts('e', $m), 'sample' => preg_match('/^sample:(\d+)$/', (string) $m['detail'], $x) ? (int) $x[1] : null];
     }
 
     /** Only the readings after the address change $since (see movedAt()) */
@@ -131,7 +218,7 @@ class RouterMonitor
         if (!$since) {
             return $q;
         }
-        return $since['sample'] !== null ? $q->where_gt('id', $since['sample']) : $q->where_gt('at', $since['at']);
+        return $since['sample'] !== null ? $q->where_gt('id', $since['sample']) : self::atWhere($q, 's', '>', $since['at']);
     }
 
     /** From the cron. Returns lines for its output. */
@@ -176,7 +263,7 @@ class RouterMonitor
             }
             // each router gets its own time (a reading is at most about 15 seconds), so a slow one does not use up what the
             // rest of the cron run (the other routers, the nightly backups) needs; set_time_limit() starts the count again
-            @set_time_limit(60);
+            self::timeLimit(60);
             try {
                 $log[] = $r['name'] . ': ' . self::check($r);
             } catch (Throwable $e) {
@@ -228,7 +315,7 @@ class RouterMonitor
         $prev = $q()->order_by_desc('at')->find_one();
         // the uplink chosen before: from the last reading that had one (a failed reading has none, and must not switch it)
         $lastIf = $q()->where_not_null('iface')->order_by_desc('at')->find_one();
-        $s = ['online' => 0, 'cpu' => null, 'mem' => null, 'disk' => null, 'users' => null, 'uptime' => null, 'iface' => null, 'rx' => null, 'tx' => null];
+        $s = ['online' => 0, 'cpu' => null, 'mem' => null, 'disk' => null, 'users' => null, 'uptime' => null, 'iface' => null, 'rx' => null, 'tx' => null, 'ifat' => null];
         $why = '';
         $readAt = null; // when the router answered /system/resource: the reading's time (see keep())
         [$c, $err] = RouterApi::connect($r['ip_address'], $r['username'], $r['password'], 5);
@@ -283,6 +370,7 @@ class RouterMonitor
                     try {
                         // the uplink: the interface used before if it is still there, otherwise the busiest one
                         $ifs = RouterApi::rows($c, '/interface/print', ['name', 'rx-byte', 'tx-byte', 'running'], $until);
+                        $ifAt = time();
                         $pick = null;
                         foreach ($ifs as $i) {
                             // (only an interface that is running and has both counters: one that is down or unread is no uplink)
@@ -301,6 +389,7 @@ class RouterMonitor
                             $s['iface'] = mb_substr((string) $pick['name'], 0, 64);
                             $s['rx'] = $pick['rx-byte'];
                             $s['tx'] = $pick['tx-byte'];
+                            $s['ifat'] = $ifAt; // (when the counters were read: not when /system/resource was)
                         }
                     } catch (Throwable $e) {
                     }
@@ -325,7 +414,7 @@ class RouterMonitor
         }
         self::$pending = [];
         try {
-            $now = ORM::for_table('tbl_routers')->select_many('ip_address', 'username', 'password', 'enabled')->find_one($id);
+            $now = ORM::for_table('tbl_routers')->select_many('name', 'ip_address', 'username', 'password', 'enabled')->find_one($id);
             $then = self::movedAt($id);
             if (!$now || (string) $now['ip_address'] !== (string) $r['ip_address'] || ($then ? $then['id'] : null) !== ($since ? $since['id'] : null)) {
                 return Lang::T('address changed during the reading, not kept');
@@ -338,6 +427,8 @@ class RouterMonitor
             if ((int) $now['enabled'] !== 1) {
                 return Lang::T('router disabled during the reading, not kept');
             }
+            // the name as it is now (it may have been renamed while the router was read): the alert says it
+            $r['name'] = (string) $now['name'];
             return self::keep($r, $s, $prev, $why, $since, $readAt);
         } finally {
             try {
@@ -367,10 +458,17 @@ class RouterMonitor
         // one time for the reading: kept with the row and used for the restart test against it. The time the router answered when
         // it did (not now: the other reads and the wait for the lock come between), so its uptime and this time go together
         $at = $readAt ?: time();
+        self::cut(true); // (before the first time is written: see cut())
         $row = ORM::for_table('tbl_router_samples')->create();
         $row->router_id = $id;
-        $row->at = date('Y-m-d H:i:s', $at);
+        $row->at = self::stamp($at);
         foreach ($s as $k => $v) {
+            if ($k === 'ifat') {
+                if ($v !== null && self::hasIfat()) {
+                    $row->ifat = self::stamp($v);
+                }
+                continue;
+            }
             $row->$k = $v;
         }
         // the reading and its events are saved together or not at all: a reading kept without its events would be the "previous"
@@ -408,11 +506,12 @@ class RouterMonitor
         return ORM::for_table('tbl_router_events')->where('router_id', $id)->where_in('type', $types)->order_by_desc('id')->find_one();
     }
 
+    /** $at: a timestamp (now when null) */
     private static function event($r, $type, $detail, $alert, $at = null)
     {
         $e = ORM::for_table('tbl_router_events')->create();
         $e->router_id = (int) $r['id'];
-        $e->at = $at ?: date('Y-m-d H:i:s');
+        $e->at = self::stamp($at ?: time());
         $e->type = $type;
         $e->detail = mb_substr($detail, 0, 255);
         if ($e->save() === false) {
@@ -435,20 +534,20 @@ class RouterMonitor
             // are not in a row), dated from the first one: that is when the outage began, and the event keeps it (readings are
             // pruned sooner than events) for the duration at recovery. An outage already confirmed stays so across any gap.
             if (!$isDown && self::follows($prev, $now) && !(int) $prev['online']) {
-                self::event($r, 'offline', $why, Lang::T('router is offline') . ' (' . Lang::T('no answer since') . ' ' . date('H:i', strtotime($prev['at'])) . ')', $prev['at']);
+                self::event($r, 'offline', $why, Lang::T('router is offline') . ' (' . Lang::T('no answer since') . ' ' . date('H:i', self::ts('s', $prev)) . ')', self::ts('s', $prev));
             }
             return;
         }
         if ($isDown) {
             // the offline event is dated from the first missed reading
-            $mins = max(1, (int) round(($now - strtotime($state['at'])) / 60));
+            $mins = max(1, (int) round(($now - self::ts('e', $state)) / 60));
             self::event($r, 'online', '', Lang::T('router is back online after about') . ' ' . self::duration($mins));
         }
         // a restart: the router's start time moved on since the last reading that had an uptime (failed readings in between have none)
         $lastUp = ORM::for_table('tbl_router_samples')->where('router_id', $id)->where('online', 1)->where_not_null('uptime')
             ->where_lt('id', $sampleId);
         $lastUp = self::sinceMove($lastUp, $since)->order_by_desc('id')->find_one();
-        if ($lastUp && self::restarted(strtotime($lastUp['at']), $lastUp['uptime'], $now, $s['uptime'])) {
+        if ($lastUp && self::restarted(self::ts('s', $lastUp), $lastUp['uptime'], $now, $s['uptime'])) {
             self::event($r, 'reboot', '', Lang::T('router restarted') . ' (' . Lang::T('up for') . ' ' . self::duration((int) round($s['uptime'] / 60)) . ')');
         }
         // high load: two readings in a row over the line to alert, and well under it to say it is fine again
@@ -507,7 +606,7 @@ class RouterMonitor
         $phone = preg_replace('/[^0-9+]/', '', (string) ($config['router_alert_phone'] ?? ''));
         foreach ($queue as $text) {
             // each alert gets its own time, like each router reading (a shutdown function still counts against the limit)
-            @set_time_limit(60);
+            self::timeLimit(60);
             try {
                 if (($config['router_alert_telegram'] ?? '1') === '1') {
                     // a short time limit (the default is minutes)
@@ -530,7 +629,7 @@ class RouterMonitor
         // emails last: SMTP has no overall time limit and sendEmail() takes none, so a stalled mail server cannot hold up the rest
         if (($config['router_alert_email'] ?? '0') === '1' && !empty($config['mail_from'])) {
             foreach ($queue as $text) {
-                @set_time_limit(120);
+                self::timeLimit(120);
                 try {
                     Message::sendEmail($config['mail_from'], Lang::T('Router alert'), $text);
                 } catch (Throwable $e) {
@@ -549,15 +648,18 @@ class RouterMonitor
         }
         try {
             $db = ORM::getDb();
-            $db->prepare('DELETE FROM tbl_router_samples WHERE at < ?')->execute([date('Y-m-d H:i:s', time() - self::KEEP_SAMPLES * 86400)]);
+            // (the cut-off on the same basis as the stored times: UTC for the rows saved as UTC, local for the older ones)
+            [$sql, $vals] = self::atSql('s', '<', time() - self::KEEP_SAMPLES * 86400);
+            $db->prepare('DELETE FROM tbl_router_samples WHERE ' . $sql)->execute($vals);
             // old events go, but never the newest state of a router that still exists (online/offline, CPU, memory, disk): that one
             // stops a repeated alert and sends the "back to normal" one, however long ago it began. Restarts and the events of a
             // deleted router age out like the rest.
-            $db->prepare("DELETE FROM tbl_router_events WHERE at < ? AND id NOT IN (SELECT id FROM (SELECT MAX(e.id) AS id FROM tbl_router_events e
+            [$sql, $vals] = self::atSql('e', '<', time() - self::KEEP_EVENTS * 86400);
+            $db->prepare("DELETE FROM tbl_router_events WHERE " . $sql . " AND id NOT IN (SELECT id FROM (SELECT MAX(e.id) AS id FROM tbl_router_events e
                 JOIN tbl_routers r ON r.id = e.router_id
                 WHERE e.type IN ('offline', 'online', 'cpu_high', 'cpu_ok', 'mem_high', 'mem_ok', 'disk_high', 'disk_ok', 'moved')
                 GROUP BY e.router_id, CASE WHEN e.type IN ('offline', 'online') THEN 'state' ELSE SUBSTRING_INDEX(e.type, '_', 1) END) AS keep_newest)")
-                ->execute([date('Y-m-d H:i:s', time() - self::KEEP_EVENTS * 86400)]);
+                ->execute($vals);
             @touch($mark); // only once both are done: a failure is tried again on the next run
         } catch (Throwable $e) {
         }
@@ -572,17 +674,23 @@ class RouterMonitor
         $spans = ['24h' => 86400, '7d' => 7 * 86400, '30d' => 30 * 86400];
         $span = $spans[$range] ?? 86400;
         $from = time() - $span;
-        $rows = ORM::for_table('tbl_router_samples')->where('router_id', (int) $id)->where_gte('at', date('Y-m-d H:i:s', $from))
-            ->order_by_asc('at')->find_array();
+        // (oldest first by ID: the same order as the time, whichever of local time or UTC a row was saved in)
+        $rows = self::atWhere(ORM::for_table('tbl_router_samples')->where('router_id', (int) $id), 's', '>=', $from)
+            ->order_by_asc('id')->find_array();
         $bucket = max(300, (int) ceil($span / 300));
         // address changes in the period: no speed between a reading from before one and a reading from after it
-        $moves = array_map('strtotime', array_column(ORM::for_table('tbl_router_events')->select('at')->where('router_id', (int) $id)
-            ->where('type', 'moved')->where_gte('at', date('Y-m-d H:i:s', $from))->find_array(), 'at'));
+        $moves = array_map(function ($m) {
+            return self::ts('e', $m);
+        }, self::atWhere(ORM::for_table('tbl_router_events')->select_many('id', 'at')->where('router_id', (int) $id)
+            ->where('type', 'moved'), 'e', '>=', $from)->find_array());
         $points = [];
         $online = 0;
         $prev = null;
         foreach ($rows as $r) {
-            $t = strtotime($r['at']);
+            $t = self::ts('s', $r);
+            // when the interface counters were read (a moment after the resource reading): the speeds use it, the restart test the
+            // reading time above. A row without it (an older one) uses the reading time.
+            $ti = !empty($r['ifat']) ? self::ts('s', ['id' => $r['id'], 'at' => $r['ifat']]) : $t;
             $online += (int) $r['online'];
             $down = $up = null;
             // a restart between the two readings resets the counters: no speed across it (the same test as the restart event)
@@ -599,8 +707,8 @@ class RouterMonitor
                     $restarted = true; // (another device, or the same one reached another way: its counters do not follow on)
                 }
             }
-            if ($prev && !$restarted && $prev['iface'] === $r['iface'] && $r['rx'] !== null && $prev['rx'] !== null && $t > $prev['t']) {
-                $sec = $t - $prev['t'];
+            if ($prev && !$restarted && $prev['iface'] === $r['iface'] && $r['rx'] !== null && $prev['rx'] !== null && $ti > $prev['ti']) {
+                $sec = $ti - $prev['ti'];
                 $dRx = (float) $r['rx'] - (float) $prev['rx'];
                 $dTx = (float) $r['tx'] - (float) $prev['tx'];
                 if ($dRx >= 0 && $dTx >= 0 && $sec <= self::GAP) { // a reset counter or a break in the readings gives no speed
@@ -608,7 +716,7 @@ class RouterMonitor
                     $up = $dTx * 8 / $sec;
                 }
             }
-            $prev = ['t' => $t, 'iface' => $r['iface'], 'rx' => $r['rx'], 'tx' => $r['tx'], 'uptime' => $r['uptime']];
+            $prev = ['t' => $t, 'ti' => $ti, 'iface' => $r['iface'], 'rx' => $r['rx'], 'tx' => $r['tx'], 'uptime' => $r['uptime']];
             $b = (int) floor($t / $bucket) * $bucket;
             if (!isset($points[$b])) {
                 $points[$b] = ['n' => 0, 'on' => 0, 'cpu' => [], 'mem' => [], 'users' => [], 'down' => [], 'up' => []];
@@ -637,7 +745,7 @@ class RouterMonitor
             $out[] = ['at' => $b + $bucket / 2, 'online' => $p['on'] > 0 ? 1 : 0, 'n' => $p['n'], 'on' => $p['on'], 'cpu' => $avg($p['cpu']), 'mem' => $avg($p['mem']),
                 'users' => $avg($p['users']), 'down' => $avg($p['down']), 'up' => $avg($p['up'])];
         }
-        $events = ORM::for_table('tbl_router_events')->where('router_id', (int) $id)->where_gte('at', date('Y-m-d H:i:s', $from))
+        $events = self::atWhere(ORM::for_table('tbl_router_events')->where('router_id', (int) $id), 'e', '>=', $from)
             ->order_by_desc('id')->limit(50)->find_array();
         // step: how long a stretch each point stands for (its 'at' is the middle); gap: how far apart two readings can be and
         // still follow on from each other, so the charts break their lines across a stretch with no readings
@@ -645,7 +753,7 @@ class RouterMonitor
             'uptime' => $rows ? round($online / count($rows) * 100, 2) : null,
             'events' => array_map(function ($e) {
                 // (a change of address keeps where its readings stop in its detail: nothing to show)
-                return ['at' => strtotime($e['at']), 'type' => $e['type'], 'detail' => $e['type'] === 'moved' ? '' : $e['detail']];
+                return ['at' => self::ts('e', $e), 'type' => $e['type'], 'detail' => $e['type'] === 'moved' ? '' : $e['detail']];
             }, $events)];
     }
 }

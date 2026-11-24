@@ -414,6 +414,17 @@ class Radius
         return true;
     }
 
+    /**
+     * Only the account's sign-in password (the Cleartext-Password row), for a password change: the plan's other attributes
+     * (Simultaneous-Use, Port-Limit, limits, expiry, group) and the accounting are left as they are
+     */
+    public function customerPassword($customer, $plan)
+    {
+        $pass = ($plan['type'] == 'PPPOE' && !empty($customer['pppoe_password'])) ? $customer['pppoe_password'] : $customer['password'];
+        $this->upsertCustomer($customer['username'], 'Cleartext-Password', $pass);
+        return true;
+    }
+
     private function delAtribute($table, $attribute, $key, $value)
     {
         $r = $table->where_equal($key, $value)->whereEqual('attribute', $attribute)->findOne();

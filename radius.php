@@ -133,6 +133,8 @@ try {
                 // the status changes only for a known type; the start fields stay as first written
                 'acctstatustype' => in_array($acctStatusType, ['Start', 'Stop', 'Interim-Update'], true) ? $acctStatusType : null,
                 'macaddr' => (string) $macAddr, 'dateAdded' => $now, 'dateUpdated' => $now,
+                // when it was received, to the microsecond: the order of packets that arrive within one second
+                'receivedAt' => (int) round(microtime(true) * 1000000),
             ];
             try {
                 RadiusSessions::saveAccounting($packet);
@@ -162,12 +164,21 @@ try {
 } catch (Throwable $e) {
     radius_alert("System Error.\n" . $e->getMessage() . "\n" . $e->getTraceAsString());
     // accounting is answered either way (see above); a login that failed is refused
-    show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], $action === 'accounting' ? 200 : 401);
+    // except a Stop that may not have been recorded: a failure status makes FreeRADIUS/the NAS send it again
+    $unsavedStop = false;
+    if ($action === 'accounting') {
+        try {
+            $type = (string) ($_REQUEST['acctStatusType'] ?? $_REQUEST['acctstatustype'] ?? '');
+            $unsavedStop = strcasecmp(trim($type), 'Stop') === 0;
+        } catch (Throwable $ignored) {
+        }
+    }
+    show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], $action === 'accounting' ? ($unsavedStop ? 500 : 200) : 401);
 }
 
 /**
- * An error while answering FreeRADIUS: written to the log, and told on Telegram at most once every 5 minutes, with a short
- * time limit (Message::sendTelegram keeps it short in a RADIUS request). A burst of errors, or a Telegram that is slow or
+ * An error while answering FreeRADIUS: written to the log, and told on Telegram at most once every 5 minutes, after the answer is
+ * sent and within a short time limit (Message::sendTelegram keeps it short in a RADIUS request). A burst of errors, or a Telegram that is slow or
  * blocked, must never hold the requests FreeRADIUS and the routers are waiting for. Never throws.
  */
 function radius_alert($text)
@@ -197,8 +208,42 @@ function radius_alert($text)
         }
         fclose($fh);
         if ($send) {
-            Message::sendTelegram(mb_substr((string) $text, 0, 3000));
+            // Not now: the answer goes out first. After the response is finished (fastcgi_finish_request) the Telegram call can
+            // take its few seconds without holding FreeRADIUS (its rest module gives up after 4 seconds). Without FastCGI the
+            // response cannot be released early, so only the time left of that window is spent (Message::sendTelegram
+            // honours $GLOBALS['radius_alert_budget_ms']).
+            $GLOBALS['radius_alert_text'] = mb_substr((string) $text, 0, 3000);
+            if (empty($GLOBALS['radius_alert_registered'])) {
+                $GLOBALS['radius_alert_registered'] = true;
+                register_shutdown_function('radius_alert_deliver');
+            }
         }
+    } catch (Throwable $e) {
+    }
+}
+
+/** Shutdown step of radius_alert(): sends the pending alert once the RADIUS answer is out. Never throws. */
+function radius_alert_deliver()
+{
+    try {
+        $text = (string) ($GLOBALS['radius_alert_text'] ?? '');
+        if ($text === '') {
+            return;
+        }
+        $GLOBALS['radius_alert_text'] = '';
+        if (function_exists('fastcgi_finish_request')) {
+            @fastcgi_finish_request();
+            $GLOBALS['radius_alert_budget_ms'] = 3000;
+        } else {
+            @flush();
+            $elapsed = microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
+            $left = (int) floor((3.5 - $elapsed) * 1000); // FreeRADIUS gives up after 4 s
+            if ($left < 500) {
+                return; // no time left to send without holding the answer: it is in the log
+            }
+            $GLOBALS['radius_alert_budget_ms'] = $left;
+        }
+        Message::sendTelegram($text);
     } catch (Throwable $e) {
     }
 }

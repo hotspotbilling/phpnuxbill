@@ -48,6 +48,7 @@
 <form method="post" enctype="multipart/form-data" role="form" action="{Text::url('customers/edit-post')}">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <input type="hidden" name="id" value="{$d['id']}">
+    <input type="hidden" name="pppoe_password_seen" value="{$pppoe_password_seen}">
 
     <div class="row">
         <!-- LEFT COLUMN: ACCOUNT DETAILS & SECURITY -->

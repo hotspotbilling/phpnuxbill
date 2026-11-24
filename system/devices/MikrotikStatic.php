@@ -48,7 +48,7 @@ class MikrotikStatic
         global $isChangePlan;
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        $cid = self::getIdByCustomer($customer, $client);
+        $cid = $this->getIdByCustomer($customer, $client, true); // a refused lookup is thrown, never taken for a missing queue
         $isExp = ORM::for_table('tbl_plans')->select("id")->where('plan_expired', $plan['id'])->find_one();
         if (empty($cid)) {
             //customer not exists, add it
@@ -117,19 +117,47 @@ class MikrotikStatic
         if (!empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
             if ($p) {
+                // the address goes on the Expired list even when the expired plan's queue was refused (thrown below)
+                $queueErr = null;
                 try {
                     $this->add_customer($customer, $p);
-                } finally {
-                    // the address goes on the Expired list even when the expired plan's queue was refused (now thrown)
-                    $this->addIpToAddressList($client, $customer['pppoe_ip'], $listName = 'Expired', $customer['username']);
+                } catch (Exception $e) {
+                    $queueErr = $e;
                 }
+                $listErr = $this->expiredListAdd($client, $customer);
+                if ($queueErr !== null) {
+                    if ($listErr !== null) {
+                        // both refused: both are said
+                        throw new Exception($queueErr->getMessage() . '; ' . Lang::T('the address could not be put on the Expired list') . ': ' . $listErr, (int) $queueErr->getCode(), $queueErr);
+                    }
+                    throw $queueErr;
+                }
+                $this->throwListPartial($listErr);
                 return;
             }
         }
-        $this->addIpToAddressList($client, $customer['pppoe_ip'], $listName = 'Expired', $customer['username']);
+        $listErr = $this->expiredListAdd($client, $customer);
         $this->removeStaticUser($client, $customer['username']);
         if (!empty($customer['pppoe_username'])) {
             $this->removeStaticUser($client, $customer['pppoe_username']);
+        }
+        $this->throwListPartial($listErr); // the queues are gone, only the address is not blocked: a partial result
+    }
+
+    /** The router's refusal of the address-list add (or the lost connection's message), null when the address is on the list */
+    private function expiredListAdd($client, $customer)
+    {
+        try {
+            return $this->addIpToAddressList($client, $customer['pppoe_ip'], 'Expired', $customer['username']);
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
+    private function throwListPartial($listErr)
+    {
+        if ($listErr !== null) {
+            throw new Exception(Lang::T('Saved, but the address could not be put on the Expired list') . ': ' . $listErr, 207);
         }
     }
 
@@ -139,14 +167,13 @@ class MikrotikStatic
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         //check if customer exists
-        $printRequest = new RouterOS\Request('/queue/simple/print');
-        $printRequest->setQuery(RouterOS\Query::where('name', $from));
-        $cid = $client->sendSync($printRequest)->getProperty('.id');
+        $cid = $this->queueId($client, $from, true);
         if (!empty($cid)) {
             $setRequest = new RouterOS\Request('/queue/simple/set');
             $setRequest->setArgument('numbers', $cid);
             $setRequest->setArgument('name', $to);
-            $client->sendSync($setRequest);
+            // a refused rename is thrown, so the caller does not go on as if it had worked
+            $this->queueWritten($client->sendSync($setRequest));
         }
     }
 
@@ -155,21 +182,31 @@ class MikrotikStatic
     }
 
     /**
-     * Function to ID by username from Mikrotik
+     * Function to ID by username from Mikrotik. A lookup the router refuses (a !trap) is thrown (unless $checked is false), so a
+     * refusal is never taken for "no such queue" and no queue is made on it; empty means the router answered and has none.
      */
-    public function getIdByCustomer($customer, $client)
+    public function getIdByCustomer($customer, $client, $checked = true)
     {
-        $printRequest = new RouterOS\Request('/queue/simple/print');
-        $printRequest->setQuery(RouterOS\Query::where('name', $customer['username']));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
-        if (empty($id)) {
-            if (!empty($customer['pppoe_username'])) {
-                $printRequest = new RouterOS\Request('/queue/simple/print');
-                $printRequest->setQuery(RouterOS\Query::where('name', $customer['pppoe_username']));
-                $id = $client->sendSync($printRequest)->getProperty('.id');
-            }
+        $id = $this->queueId($client, $customer['username'], $checked);
+        if (empty($id) && !empty($customer['pppoe_username'])) {
+            $id = $this->queueId($client, $customer['pppoe_username'], $checked);
         }
         return $id;
+    }
+
+    /** The .id of the queue with this name (empty when none); with $checked, the router's refusal is thrown */
+    private function queueId($client, $name, $checked)
+    {
+        $printRequest = new RouterOS\Request('/queue/simple/print');
+        $printRequest->setQuery(RouterOS\Query::where('name', $name));
+        $res = $client->sendSync($printRequest);
+        if ($checked && ($err = RouterApi::error($res)) !== null) {
+            throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+        }
+        if ($res instanceof RouterOS\ResponseCollection) {
+            $res->rewind(); // error() iterated the replies: back to the first, for getProperty()
+        }
+        return $res->getProperty('.id');
     }
 
     public function update_plan($old_name, $new_plan)
@@ -324,12 +361,17 @@ class MikrotikStatic
             return null;
         }
         $addRequest = new RouterOS\Request('/ip/firewall/address-list/add');
-        $client->sendSync(
+        $err = RouterApi::error($client->sendSync(
             $addRequest
                 ->setArgument('address', $ip)
                 ->setArgument('comment', $comment)
                 ->setArgument('list', $listName)
-        );
+        ));
+        // an address already on the list is what was asked for
+        if ($err !== null && stripos($err, 'already have') !== false) {
+            return null;
+        }
+        return $err; // the router's refusal, or null when added
     }
 
     public function removeIpFromAddressList($client, $ip, $listName = 'Expired')
