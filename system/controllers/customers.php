@@ -252,17 +252,26 @@ switch ($action) {
                 $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
                 $c = User::_info($id_customer);
                 $dvc = Package::getDevice($p);
-                if ($_app_stage != 'demo') {
+                if ($_app_stage != 'Demo') {
                     if (file_exists($dvc)) {
                         require_once $dvc;
+                        $partial = null;
                         try {
-                            (new $p['device'])->remove_customer($c, $p);
+                            $r = (new $p['device'])->remove_customer($c, $p);
+                            if (is_string($r) && $r !== '') {
+                                $partial = $r; // MikrotikPppoe returns its partial result
+                            }
                         } catch (Exception $e) {
-                            // code 207: the plan is taken off the router, one later step was refused: logged, the change stands
+                            // code 207: a later step was refused, and not every driver has taken the access off by then (a static
+                            // address that could not be put on the Expired list is still open): the recharge is not marked off
                             if ($e->getCode() !== 207) {
                                 throw $e;
                             }
-                            _log('[' . $c['username'] . '] deactivate: ' . $e->getMessage(), 'Router');
+                            $partial = $e->getMessage();
+                        }
+                        if ($partial !== null) {
+                            _log('[' . $c['username'] . '] deactivate incomplete: ' . $partial, 'Router');
+                            r2(getUrl('customers/view/') . $id_customer, 'w', Lang::T('The router did not finish taking the access off, so the plan was not marked as expired') . ': ' . htmlspecialchars($partial, ENT_QUOTES));
                         }
                     } else {
                         new Exception(Lang::T("Devices Not Found"));
@@ -297,7 +306,7 @@ switch ($action) {
                 if ($p) {
                     $routers[] = $b['routers'];
                     $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'demo') {
+                    if ($_app_stage != 'Demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             if (method_exists($p['device'], 'sync_customer')) {
@@ -311,7 +320,9 @@ switch ($action) {
                     }
                 }
             }
-            r2(getUrl('customers/view/') . $id_customer, 's', 'Sync success to ' . implode(", ", $routers));
+            if ($routers) { // nothing applied (every recharge expired or without a plan) is no success
+                r2(getUrl('customers/view/') . $id_customer, 's', 'Sync success to ' . implode(", ", $routers));
+            }
         }
         r2(getUrl('customers/view/') . $id_customer, 'e', 'Cannot find active plan');
         break;
@@ -448,18 +459,26 @@ switch ($action) {
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 if ($p) {
                     $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'demo') {
+                    if ($_app_stage != 'Demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             $p['plan_expired'] = 0;
+                            $partial = null;
                             try {
-                                (new $p['device'])->remove_customer($c, $p);
+                                $r = (new $p['device'])->remove_customer($c, $p);
+                                if (is_string($r) && $r !== '') {
+                                    $partial = $r;
+                                }
                             } catch (Exception $e) {
-                                // code 207: removed from the router, one later step was refused: logged, the delete goes on
+                                // code 207: not every driver has taken the access off by then: the customer is kept until it is
                                 if ($e->getCode() !== 207) {
                                     throw $e;
                                 }
-                                _log('[' . $c['username'] . '] delete: ' . $e->getMessage(), 'Router');
+                                $partial = $e->getMessage();
+                            }
+                            if ($partial !== null) {
+                                _log('[' . $c['username'] . '] delete incomplete: ' . $partial, 'Router');
+                                r2(getUrl('customers/view/') . $id, 'e', Lang::T('The router did not finish taking the access off, so the customer was not deleted') . ': ' . htmlspecialchars($partial, ENT_QUOTES));
                             }
                         } else {
                             new Exception(Lang::T("Devices Not Found"));
@@ -892,7 +911,7 @@ switch ($action) {
                 foreach ($turs as $tur) {
                     $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                     $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'demo') {
+                    if ($_app_stage != 'Demo') {
                         // if has active package
                         if ($tur['status'] == 'on') {
                             if (file_exists($dvc)) {
@@ -936,6 +955,7 @@ switch ($action) {
                                         $dt->save();
                                     }
                                     $lockTaken = Package::passwordLock((int) $id);
+                                    $cb = null;
                                     try {
                                         // without the lock another request may be changing the customer: nothing is written then
                                         $cb = $lockTaken ? ORM::for_table('tbl_customers')->find_one($id) : null;
@@ -967,7 +987,14 @@ switch ($action) {
                                         }
                                     }
                                     if ($heldOld) {
-                                        MikrotikVpn::releaseHeld($oldPppoeIp); // the customer is back on that address
+                                        // released only once the customer's row reserves that address again: otherwise the hold
+                                        // stays (it runs out by itself) and the recovery is reported as incomplete
+                                        if ($cb && (string) $cb['pppoe_ip'] === (string) $oldPppoeIp) {
+                                            MikrotikVpn::releaseHeld($oldPppoeIp);
+                                        } else {
+                                            _log('[' . $oldusername . '] edit rollback: address ' . $oldPppoeIp . ' is still held, the customer row does not reserve it again', 'Router');
+                                            $undoFailed[] = Lang::T('the address') . ' ' . $oldPppoeIp;
+                                        }
                                     }
                                     if (class_exists('RedisCache')) {
                                         RedisCache::forgetRadiusCustomer($oldusername);

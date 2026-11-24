@@ -402,7 +402,7 @@ class Radius
 
     public function customerUpsert($customer, $plan) //Update or Insert customer plan
     {
-        if ($plan['type'] == 'PPPOE') {
+        if (in_array($plan['type'], ['PPPOE', 'VPN'], true)) { // a dialled connection: the dial password
             $this->upsertCustomer($customer['username'], 'Cleartext-Password', (empty($customer['pppoe_password'])) ? $customer['password'] : $customer['pppoe_password']);
         } else {
             $this->upsertCustomer($customer['username'], 'Cleartext-Password',  $customer['password']);
@@ -420,7 +420,7 @@ class Radius
      */
     public function customerPassword($customer, $plan)
     {
-        $pass = ($plan['type'] == 'PPPOE' && !empty($customer['pppoe_password'])) ? $customer['pppoe_password'] : $customer['password'];
+        $pass = (in_array($plan['type'], ['PPPOE', 'VPN'], true) && !empty($customer['pppoe_password'])) ? $customer['pppoe_password'] : $customer['password'];
         $this->upsertCustomer($customer['username'], 'Cleartext-Password', $pass);
         return true;
     }

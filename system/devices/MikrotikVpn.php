@@ -153,7 +153,8 @@ class MikrotikVpn
                 $customer['pppoe_ip'] = (string) $fresh['pppoe_ip'];
             }
         }
-        $cid = self::getIdByCustomer($customer, $client);
+        // the lookup must have been accepted in every mode: a refused one is thrown, never taken for "no secret" (and one made on it)
+        $cid = self::getIdByCustomer($customer, $client, true);
         if (empty($cid)) {
             $this->addVpnUser($client, $plan, $customer);
         } else {
@@ -963,11 +964,20 @@ class MikrotikVpn
         $onlineRequest = new RouterOS\Request('/ppp/active/print');
         $onlineRequest->setArgument('.proplist', '.id');
         $onlineRequest->setQuery(RouterOS\Query::where('name', $username));
-        $id = $client->sendSync($onlineRequest)->getProperty('.id');
-
+        $res = $client->sendSync($onlineRequest);
+        // a refusal is reported as a partial update (the secret was saved before this), never taken for done
+        if (($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err, self::PARTIAL);
+        }
+        $id = self::prop($res, '.id');
+        if (empty($id)) {
+            return; // no active session: nothing to remove
+        }
         $removeRequest = new RouterOS\Request('/ppp/active/remove');
         $removeRequest->setArgument('numbers', $id);
-        $client->sendSync($removeRequest);
+        if (($err = RouterApi::error($client->sendSync($removeRequest))) !== null) {
+            throw new Exception($err, self::PARTIAL);
+        }
     }
 
 

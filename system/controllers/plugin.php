@@ -10,7 +10,7 @@
 //
 // plugin_routes_mode (Settings > General Settings > Security): 'warn' (the default) still runs an undeclared plugin function and logs it once
 // a day; 'enforce' refuses it. See PLUGINS.md.
-global $PLUGIN_PATH, $config, $_app_stage;
+global $PLUGIN_PATH, $config, $_app_stage, $menu_registered, $admin;
 $pluginFunction = (string) ($routes[1] ?? '');
 $pluginRunnable = false;
 $pluginRefusal = 'Function not found';
@@ -37,8 +37,42 @@ if ($pluginRunnable) {
         _admin();
     } elseif ($routeAccess === 'customer') {
         _auth();
+    } elseif ($routeAccess === 'menu') {
+        // A menu function is as open as the menu entries that name it: their audience (admin or customer) must be signed in, and an
+        // entry limited to some roles ($auth) is for those roles only. Hiding the entry from the sidebar is not access control.
+        $menuFn = strtolower($pluginFunction);
+        $menuOk = false;
+        $menuAdmin = false;
+        $menuCustomer = false;
+        foreach ((array) $menu_registered as $menuEntry) {
+            if (strtolower((string) strtok((string) ($menuEntry['function'] ?? ''), '/')) !== $menuFn) {
+                continue;
+            }
+            if (!empty($menuEntry['admin'])) {
+                $menuAdmin = true;
+                if (_admin(false) && (empty($menuEntry['auth']) || in_array($admin['user_type'] ?? '', (array) $menuEntry['auth'], true))) {
+                    $menuOk = true;
+                }
+            } else {
+                $menuCustomer = true;
+                if (_auth(false)) {
+                    $menuOk = true;
+                }
+            }
+        }
+        if (!$menuOk) {
+            if (($menuAdmin && !_admin(false)) || ($menuCustomer && !$menuAdmin && !_auth(false))) {
+                r2(getUrl('login')); // not signed in
+            }
+            r2(getUrl('dashboard'), 'e', Lang::T('You do not have permission to access this page'));
+        }
+        if ($menuAdmin && _admin(false)) {
+            _admin();
+        } elseif ($menuCustomer) {
+            _auth();
+        }
     }
-    // 'public' and 'menu': the function does its own checks
+    // 'public': the function does its own checks
 }
 if ($pluginRunnable) {
     call_user_func($pluginFunction);

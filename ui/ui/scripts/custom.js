@@ -446,7 +446,12 @@ $(document).ready(function () {
     root.querySelectorAll(".st-cmd").forEach(function (cmd) {
       if (cmd.querySelector(".st-copy")) { return; }
       var code = cmd.querySelector("code") || cmd;
-      cmd.appendChild(makeBtn("st-copy st-copy--cmd", function () { return code.textContent.trim(); }, true));
+      cmd.appendChild(makeBtn("st-copy st-copy--cmd", function () {
+        // the Copy button sits inside the block (inside the code itself when it is the block): its label is not part of the command
+        var c = code.cloneNode(true);
+        c.querySelectorAll(".st-copy").forEach(function (n) { n.remove(); });
+        return c.textContent.trim();
+      }, true));
     });
 
     root.querySelectorAll(".bs-callout > p").forEach(function (p) {

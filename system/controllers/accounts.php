@@ -77,7 +77,7 @@ switch ($action) {
                 _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
                 // the session is gone: a failed device update is carried in the login alert
                 _alert(Lang::T('Password changed successfully, Please login again')
-                    . ($deviceFailed ? '. ' . Lang::T('Your portal password was changed, but it could not be applied to your internet connection. Your internet service may not accept the new password: if it stops working, reconnect with your previous password or contact support.') : ''),
+                    . ($deviceFailed ? '. ' . Lang::T('Your portal password was changed, but it could not be applied to your internet connection. Your internet service may not accept the new password: keep your existing connection settings as they are, and contact support if your access stops working.') : ''),
                     ($deviceFailed && empty($GLOBALS['isApi'])) ? 'warning' : 'success', "login", $deviceFailed ? 20 : 3); // the API still reports the saved change
             } else {
                 r2(getUrl('accounts/change-password'), 'e', Lang::T('Incorrect Current Password'));

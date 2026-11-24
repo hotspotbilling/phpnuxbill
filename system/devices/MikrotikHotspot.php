@@ -167,7 +167,7 @@ class MikrotikHotspot
             }
             // disconnect then: the rename stands if this fails (the session ends by itself on its next login)
             try {
-                $this->removeHotspotActiveUser($client, $from);
+                $this->removeHotspotActiveUser($client, $from, true);
             } catch (Exception $e) {
                 _log('Hotspot ' . $from . ': ' . $e->getMessage(), 'Router');
             }
@@ -415,7 +415,7 @@ class MikrotikHotspot
         $client->sendSync($setRequest);
     }
 
-    function removeHotspotActiveUser($client, $username)
+    function removeHotspotActiveUser($client, $username, $throw = false)
     {
         global $_app_stage;
         if ($_app_stage == 'Demo') {
@@ -425,14 +425,23 @@ class MikrotikHotspot
         $onlineRequest->setArgument('.proplist', '.id');
         $onlineRequest->setQuery(RouterOS\Query::where('user', $username));
         // in a sync a refused lookup or removal is thrown (checked()), so a later success cannot mask it
-        $id = $this->checked($client->sendSync($onlineRequest))->getProperty('.id');
+        $res = $client->sendSync($onlineRequest);
+        // $throw: the router's refusal of the lookup or the removal is thrown, whatever the mode (the caller logs it)
+        if ($throw && ($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err);
+        }
+        $id = $this->checked($res)->getProperty('.id');
         if (empty($id)) {
             return; // no active session: nothing to remove
         }
 
         $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
         $removeRequest->setArgument('numbers', $id);
-        $this->checked($client->sendSync($removeRequest));
+        $res = $client->sendSync($removeRequest);
+        if ($throw && ($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err);
+        }
+        $this->checked($res);
     }
 
     function getIpHotspotUser($client, $username)

@@ -15,6 +15,15 @@ use PEAR2\Net\RouterOS\Response;
  */
 class RouterApi
 {
+    /**
+     * The clock of every deadline here and in RouterClient and the transmitter: monotonic seconds, so a change of the system
+     * clock cannot stretch or cut a time budget. Build a deadline as RouterApi::now() + seconds; it is not a calendar time.
+     */
+    public static function now()
+    {
+        return \PEAR2\Net\Transmitter\Stream::now();
+    }
+
     /** One answer as plain text (a long value can arrive as a stream). */
     public static function text($v)
     {
@@ -99,7 +108,7 @@ class RouterApi
         static $n = 0;
         // a deadline shared by several requests that has already passed: nothing more is sent (a command that changes something
         // must not go out once the time for the whole operation is up)
-        if ($deadline - microtime(true) <= 0) {
+        if ($deadline - self::now() <= 0) {
             throw new Exception(Lang::T('The router did not answer in time'), 408);
         }
         // a deadline already set on the client (this request is nested in another one's work) is never extended: the request ends
@@ -107,7 +116,7 @@ class RouterApi
         $prior = method_exists($c, 'currentDeadline') ? $c->currentDeadline() : null;
         if ($prior !== null) {
             $deadline = min($deadline, $prior);
-            if ($deadline - microtime(true) <= 0) {
+            if ($deadline - self::now() <= 0) {
                 throw new Exception(Lang::T('The router did not answer in time'), 408);
             }
         }
@@ -127,7 +136,7 @@ class RouterApi
             }
             return false;
         };
-        if ($deadline - microtime(true) > 0) {
+        if ($deadline - self::now() > 0) {
             // every read inside the reply (not only the wait for it to start) ends by the deadline
             if (method_exists($c, 'readDeadline')) {
                 $c->readDeadline($deadline);
@@ -145,7 +154,7 @@ class RouterApi
                         }
                     }
                 }, $c, \PEAR2\Net\RouterOS\Client::class);
-                while (($left = $deadline - microtime(true)) > 0) {
+                while (($left = $deadline - self::now()) > 0) {
                     $next((int) floor($left), (int) (($left - floor($left)) * 1000000));
                     // (isRequestActive() is no test of being finished: it stays true while a finished answer waits to be
                     // collected; once the closing reply is collected the request is gone, so nothing is asked for after it)
@@ -203,13 +212,13 @@ class RouterApi
     private static function transmit($c, $req, $deadline)
     {
         $t = self::transmitter($c);
-        if ($t === null) {
-            $c->sendAsync($req); // (a client without the deadline support: sent as the library does)
-            return;
+        if ($t === null || !method_exists($c, 'readDeadline')) {
+            // a client without the deadline support would send and then wait for the reply with no limit: not used
+            throw new Exception(Lang::T('The router connection cannot be time-limited, so nothing was sent'), 500);
         }
         $fail = function ($e = null) use ($c, $t, $deadline) {
             // out of time: the deadline passed, or a write ran past the socket's own time limit (which the deadline narrowed)
-            $timedOut = microtime(true) >= $deadline || $t->timedOut() || \Closure::bind(function () {
+            $timedOut = self::now() >= $deadline || $t->timedOut() || \Closure::bind(function () {
                 return $this->readTimedOut();
             }, $t, \PEAR2\Net\Transmitter\Stream::class)();
             $c->readDeadline(null);
@@ -225,7 +234,7 @@ class RouterApi
         $prior = $c->currentDeadline();
         $c->readDeadline($deadline);
         try {
-            $left = $deadline - microtime(true);
+            $left = $deadline - self::now();
             $narrowed = $left > 0 && \Closure::bind(function () {
                 return $this->limitToDeadline();
             }, $t, \PEAR2\Net\Transmitter\Stream::class)();
@@ -457,8 +466,8 @@ class RouterApi
             // 'blocked' => the last try was not sent over an unprotected connection (it counts as a try)]
             $entry = function ($key) use (&$state) {
                 $s = $state['routers'][$key] ?? null;
-                return is_array($s) ? $s + ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false]
-                    : ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false];
+                return is_array($s) ? $s + ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false, 'pending' => '']
+                    : ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false, 'pending' => ''];
             };
             $pending = function ($key) use ($entry) {
                 $s = $entry($key);
@@ -480,7 +489,7 @@ class RouterApi
             $name = 'phpnuxbill-auto-' . str_replace('-', '', $today); // the same day as the progress kept above, across midnight too
             $autoFiles = function ($c, &$folder = null) {
                 // the times and size are what tells a file the nightly backup made from another later given the same name
-                $files = self::rows($c, '/file/print', ['.id', 'name', 'type', 'size', 'creation-time', 'last-modified'], microtime(true) + 15);
+                $files = self::rows($c, '/file/print', ['.id', 'name', 'type', 'size', 'creation-time', 'last-modified'], self::now() + 15);
                 $folder = self::backupFolder($files);
                 // only in the folder nightly backups are saved to on this router (flash/ or the root folder): a file of the same
                 // name anywhere else (a USB disk, a folder of copies) was not made here and is never removed
@@ -522,6 +531,7 @@ class RouterApi
                     // what nightly backups made on this router: each file with what identified it when it was saved (a name
                     // recorded before identities were kept has none, so it never matches and is never removed)
                     $records = [];
+                    $pendingPath = is_string($s['pending'] ?? null) ? $s['pending'] : '';
                     foreach ((is_array($state['made'][$key] ?? null) ? $state['made'][$key] : []) as $m) {
                         $m = is_array($m) ? $m : ['name' => (string) $m];
                         if (isset($m['name'])) {
@@ -549,6 +559,23 @@ class RouterApi
                     $savedPath = $s['saved'] === true ? $folder . $name . '.backup' : (is_string($s['saved']) ? $s['saved'] : '');
                     $f = $savedPath !== '' ? $find($savedPath) : null;
                     $made = $f !== null && $isOurs($f) && self::hasData($f['size'] ?? null);
+                    // A save the router acknowledged whose file could not be listed afterwards (the listing failed): its name was kept
+                    // before listing. Used only once that very file is listed, with something in it and an identity; otherwise
+                    // saved again (an unacknowledged save is never taken as made)
+                    if (!$made && $pendingPath !== '') {
+                        $pf = $find($pendingPath);
+                        $pid = $pf !== null ? self::fileIdentity($pf) : null;
+                        $s['pending'] = '';
+                        if ($pf !== null && $pid !== null && self::hasData($pf['size'] ?? null)) {
+                            $savedPath = $pendingPath;
+                            $records[$savedPath] = ['name' => $savedPath, 'id' => $pid];
+                            $state['made'][$key] = array_values($records);
+                            $s['saved'] = $savedPath;
+                            $state['routers'][$key] = $s;
+                            self::saveBackupState($state);
+                            $made = true;
+                        }
+                    }
                     if (!$made) {
                         $s['saved'] = false;
                         $savedPath = '';
@@ -569,9 +596,14 @@ class RouterApi
                         }
                         $s['blocked'] = false;
                         // encrypted with the backup password (never written to the log or the output)
-                        self::run($c, '/system/backup/save', ['name' => $folder . $base, 'password' => $password], microtime(true) + 60);
-                        $auto = $autoFiles($c);
+                        self::run($c, '/system/backup/save', ['name' => $folder . $base, 'password' => $password], self::now() + 60);
                         $savedPath = $folder . $base . '.backup';
+                        // the router acknowledged the save: its name is kept before the files are listed again, so a failed listing
+                        // does not lose it (the next try confirms that file instead of saving another)
+                        $s['pending'] = $savedPath;
+                        $state['routers'][$key] = $s;
+                        self::saveBackupState($state);
+                        $auto = $autoFiles($c);
                         $f = $find($savedPath);
                         // the router said the save is done: the file must be there, with something in it, before older ones go
                         if ($f === null || !self::hasData($f['size'] ?? null)) {
@@ -581,6 +613,7 @@ class RouterApi
                         // goes on this router's list of files nightly backups made (with what identifies it), the only ones
                         // ever removed
                         $s['saved'] = $savedPath;
+                        $s['pending'] = '';
                         $state['routers'][$key] = $s;
                         $ident = self::fileIdentity($f);
                         if ($ident === null) {
@@ -599,7 +632,24 @@ class RouterApi
                     }));
                     $foreign = count($auto) - count($ours);
                     foreach (array_slice($older, $keep - 1) as $old) {
-                        self::run($c, '/file/remove', ['numbers' => $old['.id']], microtime(true) + 15);
+                        // listed again right before the removal: a file written over the listed one since (same name, other times,
+                        // size or ID) is not ours any more and is left alone; an unchanged one is removed by its current ID
+                        $current = null;
+                        foreach ($autoFiles($c) as $f) {
+                            if ((string) $f['name'] === (string) $old['name']) {
+                                $current = $f;
+                                break;
+                            }
+                        }
+                        if ($current === null) {
+                            unset($records[(string) $old['name']]); // already gone
+                            $state['made'][$key] = array_values($records);
+                            continue;
+                        }
+                        if (!$isOurs($current)) {
+                            continue;
+                        }
+                        self::run($c, '/file/remove', ['numbers' => $current['.id']], self::now() + 15);
                         unset($records[(string) $old['name']]);
                         $state['made'][$key] = array_values($records);
                         self::saveBackupState($state);

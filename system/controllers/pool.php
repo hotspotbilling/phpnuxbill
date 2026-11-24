@@ -10,14 +10,19 @@ _admin();
 /** A "start-end" range wider than this many addresses is refused: the allocator walks it, and a typo (10.0.0.1-200.0.0.1) would make it huge */
 function pool_range_error($range)
 {
-    if (preg_match('/^\s*([0-9.]+)\s*-\s*([0-9.]+)\s*$/', (string) $range, $m)) {
-        $a = filter_var($m[1], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? ip2long($m[1]) : false;
-        $b = filter_var($m[2], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? ip2long($m[2]) : false;
-        if ($a === false || $b === false) {
-            return Lang::T('The range must be two valid IPv4 addresses');
-        }
-        if (abs((float) sprintf('%u', $b) - (float) sprintf('%u', $a)) >= 1048576) {
-            return Lang::T('The range is too large: use at most 1,048,576 addresses');
+    // a RouterOS pool can be given several ranges separated by commas: each "start-end" part is checked, and the sizes add up
+    $total = 0;
+    foreach (explode(',', (string) $range) as $part) {
+        if (preg_match('/^\s*([0-9.]+)\s*-\s*([0-9.]+)\s*$/', $part, $m)) {
+            $a = filter_var($m[1], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? ip2long($m[1]) : false;
+            $b = filter_var($m[2], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? ip2long($m[2]) : false;
+            if ($a === false || $b === false) {
+                return Lang::T('The range must be two valid IPv4 addresses');
+            }
+            $total += abs((float) sprintf('%u', $b) - (float) sprintf('%u', $a)) + 1;
+            if ($total > 1048576) {
+                return Lang::T('The range is too large: use at most 1,048,576 addresses');
+            }
         }
     }
     return '';

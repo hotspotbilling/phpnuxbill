@@ -17,7 +17,7 @@ require "{$root_path}system/autoload/mail/SMTP.php";
 class Message
 {
 
-    /** $timeout: seconds to connect and to wait for Telegram's answer (the default is the long one Http uses everywhere) */
+    /** $timeout: seconds to connect and to wait for Telegram's answer (3000 and up is read as milliseconds, the default Http uses everywhere) */
     public static function sendTelegram($txt, $chat_id = null, $topik = '', $timeout = 3000)
     {
         global $config;
@@ -25,9 +25,16 @@ class Message
         // while answering FreeRADIUS (radius.php) the router is waiting: 3 seconds at most, whatever the caller asked for
         // (a voucher login's purchase alert comes from Package::rechargeUser, in the middle of the login)
         if (!empty($GLOBALS['radius_request'])) {
-            // milliseconds; never more than the time radius.php left for it (and 3 s), 0 or less would mean no limit at all
-            $budget = (int) ($GLOBALS['radius_alert_budget_ms'] ?? 3000);
-            // milliseconds. Under 500 ms left nothing usable can be sent: the alert is skipped, never sent with more time than is left
+            // milliseconds. Without a budget set by radius.php (an alert sent in the middle of a login, e.g. a voucher's purchase
+            // alert) it is what is left of the 3.5 s FreeRADIUS waits, counted from the start of the request: the send_telegram
+            // hook above has already used part of it, so one deadline covers both
+            if (isset($GLOBALS['radius_alert_budget_ms'])) {
+                $budget = (int) $GLOBALS['radius_alert_budget_ms'];
+            } else {
+                $elapsed = microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
+                $budget = (int) floor((3.5 - $elapsed) * 1000);
+            }
+            // never more than 3 s; 0 or less would mean no limit at all. Under 500 ms left nothing usable can be sent
             $timeout = min(Http::timeoutMs($timeout), $budget, 3000);
             if ($timeout < 500) {
                 return false;
@@ -40,7 +47,9 @@ class Message
             if (!empty($topik)) {
                 $topik = "message_thread_id=$topik&";
             }
-            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?' . $topik . 'chat_id=' . $chat_id . '&text=' . urlencode($txt), [], $timeout, $timeout);
+            // one conversion to milliseconds, here (a caller's seconds, or the milliseconds of the RADIUS budget above)
+            $ms = Http::timeoutMs($timeout);
+            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?' . $topik . 'chat_id=' . $chat_id . '&text=' . urlencode($txt), [], $ms, $ms);
         }
     }
 
@@ -77,9 +86,10 @@ class Message
         $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
         $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
         try {
-            $response = Http::getData($smsurl, [], $timeout, $timeout, $httpError, $httpStatus);
-            if ($httpError === '' && $httpStatus >= 400) {
-                $httpError = 'HTTP ' . $httpStatus; // the gateway refused the message (an empty body is no answer)
+            $ms = Http::timeoutMs($timeout);
+            $response = Http::getData($smsurl, [], $ms, $ms, $httpError, $httpStatus);
+            if ($httpError === '' && ($httpStatus < 200 || $httpStatus > 299)) {
+                $httpError = 'HTTP ' . $httpStatus; // the gateway did not accept the message: any status but 2xx (an empty 204 is fine)
             }
             if ($httpError !== '') {
                 // the gateway was not reached or did not answer in time: the text is cURL's error, not the gateway's answer
@@ -151,9 +161,10 @@ class Message
         $waurl = str_replace('[text]', urlencode($txt), $waurl);
 
         try {
-            $response = Http::getData($waurl, [], $timeout, $timeout, $httpError, $httpStatus);
-            if ($httpError === '' && $httpStatus >= 400) {
-                $httpError = 'HTTP ' . $httpStatus; // the gateway refused the message (an empty body is no answer)
+            $ms = Http::timeoutMs($timeout);
+            $response = Http::getData($waurl, [], $ms, $ms, $httpError, $httpStatus);
+            if ($httpError === '' && ($httpStatus < 200 || $httpStatus > 299)) {
+                $httpError = 'HTTP ' . $httpStatus; // the gateway did not accept the message: any status but 2xx (an empty 204 is fine)
             }
             if ($httpError !== '') {
                 // the gateway was not reached or did not answer in time: the text is cURL's error, not the gateway's answer

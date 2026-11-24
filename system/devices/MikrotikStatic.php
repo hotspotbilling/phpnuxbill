@@ -121,7 +121,11 @@ class MikrotikStatic
         // the queue lookups and removals are read: an absent queue is a removal done, a refused one is not
         $queueErr = $this->removeStaticUser($client, $customer['username']);
         if (!empty($customer['pppoe_username'])) {
-            $queueErr = $queueErr ?? $this->removeStaticUser($client, $customer['pppoe_username']);
+            // tried whatever the first one answered; both refusals are said
+            $second = $this->removeStaticUser($client, $customer['pppoe_username']);
+            if ($second !== null) {
+                $queueErr = $queueErr === null ? $second : $queueErr . '; ' . $second;
+            }
         }
         if ($queueErr !== null) {
             // not a partial result (207): the queue is still there. Both results are said when the list add failed too

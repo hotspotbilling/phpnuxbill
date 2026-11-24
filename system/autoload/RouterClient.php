@@ -33,7 +33,7 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
         // the deadline keeps a fractional time limit as it is (0.5 is half a second, not none and not one); the library reads each
         // login reply with whole seconds, so it is given the limit rounded up (never shorter than the deadline, which ends it)
         $limit = null == $timeout ? max(1, (int) ini_get('default_socket_timeout')) : ((float) $timeout > 0 ? (float) $timeout : 1);
-        $this->readDeadline(microtime(true) + $limit);
+        $this->readDeadline(\PEAR2\Net\Transmitter\Stream::now() + $limit);
         try {
             if (!static::login($this->com, $username, $password, (int) ceil($limit))) {
                 throw new PEAR2\Net\RouterOS\DataFlowException('Invalid username or password supplied.', PEAR2\Net\RouterOS\DataFlowException::CODE_INVALID_CREDENTIALS);
@@ -50,11 +50,16 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
         }
     }
 
+    /** Set while close() says goodbye: the !fatal reply to /quit is then the expected end of the connection, not a failure */
+    private $quitting = false;
+
     protected function dispatchNextResponse($sTimeout = 0, $usTimeout = 0)
     {
         $response = parent::dispatchNextResponse($sTimeout, $usTimeout);
         if ($response->getType() === PEAR2\Net\RouterOS\Response::TYPE_FATAL) {
-            $this->fatal = $response;
+            if (!$this->quitting) {
+                $this->fatal = $response;
+            }
             $this->aborted = true; // the library has closed the connection: no goodbye on it
         }
         return $response;
@@ -82,10 +87,12 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
 
     public function sendSync(PEAR2\Net\RouterOS\Request $request)
     {
-        if ($this->syncLimit === null) {
+        if ($this->quitting || $this->syncLimit === null) {
+            // the goodbye is sent by the library as it is: its end is the router's !fatal reply, which RouterApi::send() would take
+            // for a failure and clear the connection's buffers for. close() holds a deadline on the stream meanwhile
             return parent::sendSync($request);
         }
-        return RouterApi::send($this, $request, microtime(true) + $this->syncLimit);
+        return RouterApi::send($this, $request, \PEAR2\Net\Transmitter\Stream::now() + $this->syncLimit);
     }
 
     public function abort()
@@ -136,15 +143,19 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
             return true;
         }
         // the goodbye ("/quit") waits for the router's reply: with no limit set (a client from RouterApi::connect()) a router that
-        // does not answer it would hold the caller for ever, so it gets a few seconds and then the connection is dropped
-        if ($this->syncLimit === null) {
-            $this->syncLimit = 3;
-        }
+        // does not answer it would hold the caller for ever, so it gets a few seconds (a deadline on the stream, which also bounds
+        // each read) and then the connection is dropped
+        $limit = $this->syncLimit === null ? 3 : $this->syncLimit;
+        $this->quitting = true;
+        $this->readDeadline(\PEAR2\Net\Transmitter\Stream::now() + $limit);
         try {
             return parent::close();
         } catch (Throwable $e) {
             $this->abort();
             return false;
+        } finally {
+            $this->quitting = false;
+            $this->readDeadline(null);
         }
     }
 }

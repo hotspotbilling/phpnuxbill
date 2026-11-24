@@ -49,17 +49,26 @@ class RouterMonitor
      * the newest reading and event IDs at that moment, and rows with a higher ID are UTC, the others local. Null: no note yet
      * (or none could be saved), and then everything is still read and written as local time.
      */
+    private static $cutValue = null;
+    private static $cutLooked = false;
+
+    /** Forget the boundary read before: the next cut() reads it again (history() starts its snapshot with this) */
+    private static function resetCut()
+    {
+        self::$cutValue = null;
+        self::$cutLooked = false;
+    }
+
     private static function cut($create = false)
     {
-        static $cut = null, $looked = false;
-        if ($cut !== null || ($looked && !$create)) {
-            return $cut;
+        if (self::$cutValue !== null || (self::$cutLooked && !$create)) {
+            return self::$cutValue;
         }
         try {
-            $looked = true;
+            self::$cutLooked = true;
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'router_monitor_utc_since')->find_one();
             if ($d && preg_match('/^(\d+),(\d+)$/', (string) $d['value'], $m)) {
-                return $cut = ['s' => (int) $m[1], 'e' => (int) $m[2]];
+                return self::$cutValue = ['s' => (int) $m[1], 'e' => (int) $m[2]];
             }
             if (!$create || $d) {
                 return null;
@@ -72,7 +81,7 @@ class RouterMonitor
             if ($n->save() === false) {
                 return null;
             }
-            return $cut = ['s' => $s, 'e' => $e];
+            return self::$cutValue = ['s' => $s, 'e' => $e];
         } catch (Throwable $x) {
             return null;
         }
@@ -322,7 +331,7 @@ class RouterMonitor
         if ($c) {
             // done with the router either way: the connection is dropped (no goodbye, which can wait for ever) before the reading is kept
             try {
-                $until = microtime(true) + 10;
+                $until = RouterApi::now() + 10;
                 try {
                     $res = RouterApi::rows($c, '/system/resource/print', ['cpu-load', 'free-memory', 'total-memory', 'free-hdd-space', 'total-hdd-space', 'uptime'], $until);
                     $readAt = time();
@@ -541,14 +550,14 @@ class RouterMonitor
         if ($isDown) {
             // the offline event is dated from the first missed reading
             $mins = max(1, (int) round(($now - self::ts('e', $state)) / 60));
-            self::event($r, 'online', '', Lang::T('router is back online after about') . ' ' . self::duration($mins));
+            self::event($r, 'online', '', Lang::T('router is back online after about') . ' ' . self::duration($mins), $now);
         }
         // a restart: the router's start time moved on since the last reading that had an uptime (failed readings in between have none)
         $lastUp = ORM::for_table('tbl_router_samples')->where('router_id', $id)->where('online', 1)->where_not_null('uptime')
             ->where_lt('id', $sampleId);
         $lastUp = self::sinceMove($lastUp, $since)->order_by_desc('id')->find_one();
         if ($lastUp && self::restarted(self::ts('s', $lastUp), $lastUp['uptime'], $now, $s['uptime'])) {
-            self::event($r, 'reboot', '', Lang::T('router restarted') . ' (' . Lang::T('up for') . ' ' . self::duration((int) round($s['uptime'] / 60)) . ')');
+            self::event($r, 'reboot', '', Lang::T('router restarted') . ' (' . Lang::T('up for') . ' ' . self::duration((int) round($s['uptime'] / 60)) . ')', $now);
         }
         // high load: two readings in a row over the line to alert, and well under it to say it is fine again
         foreach ([['cpu', 'cpu_high', 'cpu_ok', 90, 80, 'CPU'], ['mem', 'mem_high', 'mem_ok', 90, 80, Lang::T('memory')], ['disk', 'disk_high', 'disk_ok', 95, 90, Lang::T('disk')]] as [$k, $hi, $ok, $over, $under, $label]) {
@@ -559,9 +568,9 @@ class RouterMonitor
             $high = $last && $last['type'] === $hi;
             $twice = $k === 'disk' || (self::follows($prev, $now) && $prev[$k] !== null && (int) $prev[$k] >= $over);
             if (!$high && $s[$k] >= $over && $twice) {
-                self::event($r, $hi, $s[$k] . '%', $label . ' ' . Lang::T('at') . ' ' . $s[$k] . '%');
+                self::event($r, $hi, $s[$k] . '%', $label . ' ' . Lang::T('at') . ' ' . $s[$k] . '%', $now);
             } elseif ($high && $s[$k] < $under) {
-                self::event($r, $ok, $s[$k] . '%', $label . ' ' . Lang::T('back to normal') . ' (' . $s[$k] . '%)');
+                self::event($r, $ok, $s[$k] . '%', $label . ' ' . Lang::T('back to normal') . ' (' . $s[$k] . '%)', $now);
             }
         }
     }
@@ -670,6 +679,31 @@ class RouterMonitor
      * download and upload speed of the uplink between readings, the share of readings it was online, and its events.
      */
     public static function history($id, $range)
+    {
+        // the boundary, the readings and the events are read in one transaction (one snapshot of the database), the boundary
+        // first and read afresh: a first write that creates it meanwhile cannot make rows be filtered by one boundary and decoded
+        // by another
+        $db = ORM::getDb();
+        $own = !$db->inTransaction();
+        if ($own) {
+            try {
+                $db->beginTransaction();
+            } catch (Throwable $e) {
+                $own = false;
+            }
+        }
+        try {
+            self::resetCut();
+            self::cut();
+            return self::historyRead($id, $range);
+        } finally {
+            if ($own && $db->inTransaction()) {
+                $db->commit();
+            }
+        }
+    }
+
+    private static function historyRead($id, $range)
     {
         $spans = ['24h' => 86400, '7d' => 7 * 86400, '30d' => 30 * 86400];
         $span = $spans[$range] ?? 86400;

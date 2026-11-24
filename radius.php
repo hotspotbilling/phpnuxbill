@@ -111,6 +111,19 @@ try {
             $acctSessionTime = intval(_req('acctSessionTime', _req('acctsessiontime', 0)));
             $framedIPAddress = _req('framedIPAddress', _req('framedipaddress'));
             $nasIpAddress = _req('nasIpAddress', _req('nasipaddress'));
+            if ((string) $nasIpAddress === '') {
+                // A NAS that sends no NAS-IP-Address still needs its own key: (username, session id, NAS) is the unique key, and the
+                // session id is only unique per NAS. Its NAS-Identifier is stable and its own; failing that, the address the
+                // request came from (FreeRADIUS or the NAS itself). Never empty, so two NASes cannot share one row.
+                $nasIpAddress = trim((string) _req('nasid'));
+                if ($nasIpAddress === '') {
+                    $nasIpAddress = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+                }
+                if (strlen($nasIpAddress) > 15) {
+                    // the column is varchar(15): a longer identity becomes a short stable one of its own
+                    $nasIpAddress = 'h' . substr(md5($nasIpAddress), 0, 14);
+                }
+            }
             $nasPortId = _req('nasPortId', _req('nasportid'));
             $nasPortType = _req('nasPortType', _req('nasporttype'));
             $macAddr = _req('macAddr', _req('macaddr'));
@@ -238,10 +251,14 @@ function radius_alert_deliver()
         }
         $lines = (array) ($GLOBALS['radius_alert_log'] ?? []);
         $GLOBALS['radius_alert_log'] = [];
-        foreach ($lines as $line) {
-            try {
-                _log($line, 'RADIUS');
-            } catch (Throwable $e) {
+        // Database logging only once the answer is released: a slow or down database is the usual reason for an alert, and a
+        // write made while the router still waits would hold it. Unreleased, the lines are in the error log already (radius_alert).
+        if ($released) {
+            foreach ($lines as $line) {
+                try {
+                    _log($line, 'RADIUS');
+                } catch (Throwable $e) {
+                }
             }
         }
         $text = (string) ($GLOBALS['radius_alert_text'] ?? '');

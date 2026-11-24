@@ -91,6 +91,17 @@ class Stream
     protected $isBlocking = true;
 
     /**
+     * PHPNuxBill: the clock every deadline is made and compared with: monotonic (seconds, as a float), so a change of the system
+     * clock (NTP step, manual change) can neither stretch nor cut a time budget. Not a calendar time: never store or print it.
+     *
+     * @return float
+     */
+    public static function now()
+    {
+        return hrtime(true) / 1e9;
+    }
+
+    /**
      * PHPNuxBill: the moment after which nothing more is read, or NULL. See setDeadline().
      *
      * @var float|null
@@ -252,7 +263,7 @@ class Stream
     }
 
     /**
-     * PHPNuxBill: an optional moment (microtime(true)) after which no more is read. The socket's own time limit starts again
+     * PHPNuxBill: an optional moment (self::now(), the monotonic clock) after which no more is read. The socket's own time limit starts again
      * with every read, so a reply that keeps trickling in could run far past it; with a deadline, each read only waits for
      * the time left. NULL removes it.
      *
@@ -294,7 +305,7 @@ class Stream
         if (null === $this->deadline) {
             return true;
         }
-        $left = $this->deadline - microtime(true);
+        $left = $this->deadline - self::now();
         if ($left <= 0) {
             $this->timedOut = true;
             $this->close();
@@ -332,7 +343,7 @@ class Stream
         $done = 0;
         $len = strlen($data);
         while ($done < $len) {
-            if ($this->deadline - microtime(true) <= 0) {
+            if ($this->deadline - self::now() <= 0) {
                 $this->timedOut = true;
                 $this->close();
                 throw $this->createException('Ran out of time while sending.', 6, null, $bytes + $done);
@@ -372,7 +383,7 @@ class Stream
         if (null === $this->deadline) {
             return $this->isAcceptingData(null);
         }
-        $left = $this->deadline - microtime(true);
+        $left = $this->deadline - self::now();
         if ($left > 0) {
             $sTimeout = (int) floor($left);
             $usTimeout = min(999999, max(0, (int) (($left - $sTimeout) * 1000000)));
@@ -385,7 +396,7 @@ class Stream
                 return true;
             }
         }
-        if (microtime(true) >= $this->deadline) {
+        if (self::now() >= $this->deadline) {
             $this->timedOut = true;
             $this->close();
             throw $this->createException('Ran out of time while sending.', 6, null, $bytes);
@@ -549,7 +560,22 @@ class Stream
                     ) {
                         break;
                     }
+                    // PHPNuxBill: under a deadline the time is checked before each read of the source too, so a source that
+                    // blocks, or keeps answering with nothing, cannot hold the send past it
+                    if (null !== $this->deadline && $this->deadline - self::now() <= 0) {
+                        $this->timedOut = true;
+                        $this->close();
+                        throw $this->createException('Ran out of time while sending.', 6, null, $bytes);
+                    }
                     $contentsToSend = fread($contents, $chunkSize);
+                    if (false === $contentsToSend || '' === $contentsToSend) {
+                        // nothing came and the source is not at its end: not a busy loop (the deadline above ends it; without one
+                        // the pause keeps the wait cheap, as the blocking read of an ordinary file never gets here)
+                        if (!feof($contents)) {
+                            usleep(3000);
+                        }
+                        continue;
+                    }
                     if ('' != $contentsToSend) {
                         // PHPNuxBill: the wait for the stream to take more comes before each chunk after the first, so it runs
                         // only while more is to be sent (never after the last chunk, even before feof() has noticed the end)
@@ -763,7 +789,7 @@ class Stream
     {
         if (self::isStream($this->stream)) {
             // a deadline that has passed ends the wait before the shortcut for a non-blocking stream is taken
-            if (null !== $this->deadline && $this->deadline - microtime(true) <= 0) {
+            if (null !== $this->deadline && $this->deadline - self::now() <= 0) {
                 return false;
             }
             if (null === $sTimeout && !$this->isBlocking) {
@@ -773,7 +799,7 @@ class Stream
             // PHPNuxBill: under a deadline, no wait for data goes past it (the library asks for the full time again for each
             // reply, so a login challenge or a reply that is not the last would otherwise start the wait over)
             if (null !== $this->deadline) {
-                $left = $this->deadline - microtime(true);
+                $left = $this->deadline - self::now();
                 if ($left <= 0) {
                     return false;
                 }

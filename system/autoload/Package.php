@@ -15,6 +15,9 @@ class Package
     /** Whether the recharge running has gone past its checks to where it changes anything (a device, the recharge or the transaction) */
     private static $wrote = false;
 
+    /** How many rechargeUser() calls are running inside each other (a hook of the finished recharge can start another) */
+    private static $depth = 0;
+
     /** True once the last recharge started to change things: a voucher it was for must then stay used, whatever happened after */
     public static function rechargeWrote()
     {
@@ -38,6 +41,10 @@ class Package
         // The wait is bounded: a password change holds it for the time its devices take, and never waits for a recharge. Not got
         // in time, the device is not written (said as the failure to sync by hand, like any device error), the recharge is saved.
         $was = self::$pwState;
+        // a recharge started from a hook of another one must not clear what the outer one already wrote: the outer voucher
+        // is released at shutdown by that flag, and an inner refusal would otherwise give back a voucher already saved
+        $outerWrote = self::$depth > 0 && self::$wrote;
+        self::$depth++;
         self::$wrote = false;
         self::$pwState = 'none';
         $voucher = trim((string) $gateway) == 'Voucher' && $id_customer == 0;
@@ -47,6 +54,10 @@ class Package
         try {
             return self::rechargeUserRun($id_customer, $router_name, $plan_id, $gateway, $channel, $note);
         } finally {
+            self::$depth--;
+            if ($outerWrote) {
+                self::$wrote = true;
+            }
             if (self::$pwState === 'held') {
                 self::passwordLock($id_customer, false);
             }
@@ -75,10 +86,15 @@ class Package
         $release = function () use (&$finished, $db, $id) {
             // only a refusal before anything was changed gives the voucher back; once the recharge began to write it stays used
             if (!$finished && !self::rechargeWrote()) {
-                $finished = true;
                 try {
                     $db->prepare("UPDATE `tbl_voucher` SET `status` = '0', `used_date` = NULL, `user` = '0' WHERE `id` = ? AND `status` = '1'")->execute([$id]);
+                    $finished = true; // only once it is given back: a failed reset is tried again by the next call
                 } catch (Throwable $e) {
+                    $finished = true; // not tried again at shutdown after an error, but never silent
+                    try {
+                        _log("Voucher #{$id} could not be given back after a refused recharge: " . $e->getMessage(), 'Voucher');
+                    } catch (Throwable $ignored) {
+                    }
                 }
             }
         };
@@ -242,8 +258,25 @@ class Package
         // the router by its id when it is known: renamed since the caller read its name, its active recharge was moved to the new
         // name with it, so it is found there and extended (followRename then moves this save to the new name too) rather than a
         // second one; and a router that took the old name afterwards is not mistaken for it
-        $renamed = self::renamedTo($router_name, $router_id, $plan_id);
-        $b = $findActive($renamed !== null ? $renamed : $router_name);
+        // both reads in one transaction (one snapshot): a rename between them would find no active recharge and make a second one
+        // with a fresh expiry. Without a known router id the name is used as given
+        $snapDb = ORM::get_db();
+        $snapOwn = !$snapDb->inTransaction();
+        if ($snapOwn) {
+            try {
+                $snapDb->beginTransaction();
+            } catch (Throwable $e) {
+                $snapOwn = false;
+            }
+        }
+        try {
+            $renamed = self::renamedTo($router_name, $router_id, $plan_id);
+            $b = $findActive($renamed !== null ? $renamed : $router_name);
+        } finally {
+            if ($snapOwn && $snapDb->inTransaction()) {
+                $snapDb->commit();
+            }
+        }
 
         run_hook("recharge_user");
 
@@ -1008,8 +1041,8 @@ class Package
     /**
      * A router renamed while this recharge was being saved: the rename moves every row saved before it to the new name, but a
      * row written after it with the name read earlier would keep the old one. Checked once the row is saved, so one or the
-     * other catches it: a row whose router name no longer exists follows its plan to the router the plan names now.
-     * Rows on a router that still has the name are left as they are. $id is one row's id or a list of them (a voucher batch).
+     * other catches it: a row on the old name follows its plan to the router the plan names now, as long as that router is the one
+     * (by id) the caller read, even when another router has taken the old name since. $id is one row's id or a list of them (a voucher batch).
      * $router_id is the id the router had under $router_name when the caller read it: the row follows only that router
      * (renamed), never a plan moved to another router while the old one was deleted. Without it nothing is moved (the two
      * cannot be told apart, see renamedTo), so the row keeps the router it was made for.
@@ -1025,7 +1058,6 @@ class Package
         try {
             ORM::raw_execute("UPDATE `$table` t JOIN `tbl_plans` p ON p.id = ? SET t.routers = p.routers
                 WHERE t.id IN (" . implode(',', $ids) . ") AND t.routers = ? AND p.routers <> t.routers
-                AND NOT EXISTS (SELECT 1 FROM `tbl_routers` r WHERE r.name = t.routers)
                 AND EXISTS (SELECT 1 FROM `tbl_routers` r2 WHERE r2.name = p.routers AND r2.id = ?)", $args);
         } catch (Throwable $e) {
             // the recharge itself is saved: a failed check leaves it as it was
@@ -1147,12 +1179,15 @@ class Package
                 }
                 require_once $dvc;
                 $dev = new $p['device'];
+                // a recharge past its expiry (the cron has not switched it off yet) has no account to bring back: a missing secret
+                // or user is not created for it, only one that exists gets the new password
+                $mayAdd = strtotime($tur['expiration'] . ' ' . $tur['time']) > time();
                 if ($p['device'] === 'MikrotikHotspot') {
-                    self::hotspotPassword($dev, $customer, $p);
+                    self::hotspotPassword($dev, $customer, $p, $mayAdd);
                 } elseif ($p['device'] === 'MikrotikPppoe') {
-                    self::pppoePassword($dev, $customer, $p);
+                    self::pppoePassword($dev, $customer, $p, $mayAdd);
                 } elseif ($p['device'] === 'MikrotikVpn') {
-                    self::vpnPassword($dev, $customer, $p);
+                    self::vpnPassword($dev, $customer, $p, $mayAdd);
                 } elseif (method_exists($dev, 'customerUpsert') || method_exists($dev, 'customerPassword')) {
                     self::radiusPassword($dev, ($hsCustomer !== null && self::radiusShare($p) === 'other') ? $hsCustomer : $customer, $p, $tur);
                 } else {
@@ -1243,11 +1278,14 @@ class Package
      * by removing one first (add_customer does): when the router refuses the add because a user of that name was made since
      * the lookup, that user is looked up again and changed in place, so the usage it has recorded meanwhile is kept
      */
-    private static function hotspotPassword($dev, $customer, $plan)
+    private static function hotspotPassword($dev, $customer, $plan, $mayAdd = true)
     {
         $client = self::deviceClient($dev, $plan);
         $id = self::hotspotUserId($client, $customer['username']);
         if ($id === '') {
+            if (!$mayAdd) {
+                return;
+            }
             if (!method_exists($dev, 'addHotspotUserChecked')) {
                 throw new Exception(Lang::T('Devices Not Found'));
             }
@@ -1278,11 +1316,14 @@ class Package
      * A missing one is created; when the router refuses that because a secret of that name was made since the lookup, that
      * secret is looked up again and given only its password (never a profile change or its address cleared)
      */
-    private static function pppoePassword($dev, $customer, $plan)
+    private static function pppoePassword($dev, $customer, $plan, $mayAdd = true)
     {
         $client = self::deviceClient($dev, $plan);
         $id = $dev->getIdByCustomer($customer, $client, true); // a refused lookup is thrown: nothing is made then
         if (empty($id)) {
+            if (!$mayAdd) {
+                return;
+            }
             if (!method_exists($dev, 'addPpoeUserChecked')) {
                 throw new Exception(Lang::T('Devices Not Found'));
             }
@@ -1306,12 +1347,15 @@ class Package
      * MikrotikVpn::nestedLocks) that would free the caller's passwordLock, so there it is not made here: said as an error, and
      * Sync customers (or the next recharge) makes it.
      */
-    private static function vpnPassword($dev, $customer, $plan)
+    private static function vpnPassword($dev, $customer, $plan, $mayAdd = true)
     {
         $client = self::deviceClient($dev, $plan);
         $id = $dev->getIdByCustomer($customer, $client, true); // a refused lookup is thrown: nothing is made then
         if (!empty($id)) {
             self::secretPassword($client, $id, $customer);
+            return;
+        }
+        if (!$mayAdd) {
             return;
         }
         if (!MikrotikVpn::nestedLocks()) {

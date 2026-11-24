@@ -113,7 +113,7 @@ class MikrotikPppoe
                         $client = null;
                     }
                 }
-                $discErr = $client ? $this->dropSessions($client, $customer) : null;
+                $discErr = $client ? $this->dropSessions($client, $customer, $mikrotik) : null;
                 if ($discErr !== null) {
                     if ($unsetErr === null) {
                         _log('PPPoE ' . $customer['username'] . ': ' . Lang::T('the active session could not be disconnected') . ': ' . $discErr->getMessage(), 'Router');
@@ -170,7 +170,7 @@ class MikrotikPppoe
                     $pending = $e->getMessage();
                     _log('PPPoE ' . $customer['username'] . ': ' . $pending, 'Router');
                 }
-                $e = $this->dropSessions($client, $customer);
+                $e = $this->dropSessions($client, $customer, $mikrotik);
                 if ($e !== null) {
                     if ($pending === null) {
                         throw $e;
@@ -218,14 +218,26 @@ class MikrotikPppoe
      * Ends the sessions of the customer's distinct names, each one tried whatever the other did; the first failure comes back
      * (null when none), after every attempt
      */
-    private function dropSessions($client, $customer)
+    private function dropSessions($client, $customer, $mikrotik = null)
     {
         $first = null;
         foreach (array_unique(array_filter([(string) $customer['username'], (string) ($customer['pppoe_username'] ?? '')])) as $name) {
+            if ($client === null) {
+                break; // no connection to use any more: the first error says it
+            }
             try {
                 $this->removePpoeActive($client, $name);
             } catch (Exception $e) {
                 $first = $first ?? $e;
+                // the connection was dropped (no answer, or closed: 408 and 503 from RouterApi): the next name gets a new one. A
+                // refusal (a trap, 403) leaves the connection as it was.
+                if ($mikrotik && in_array($e->getCode(), [408, 503], true)) {
+                    try {
+                        $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    } catch (Exception $e2) {
+                        $client = null;
+                    }
+                }
             }
         }
         return $first;
@@ -519,15 +531,26 @@ class MikrotikPppoe
         if (($err = RouterApi::error($res)) !== null) {
             throw new Exception($err);
         }
-        $id = $res->getProperty('.id');
-        if (empty($id)) {
-            return;
+        // every matching session (a customer can be connected more than once), not only the reply the collection points at
+        $ids = [];
+        foreach ($res as $r) {
+            if ($r->getType() === RouterOS\Response::TYPE_DATA) {
+                $one = RouterApi::text($r->getProperty('.id'));
+                if ($one !== null && $one !== '') {
+                    $ids[] = $one;
+                }
+            }
         }
-
-        $removeRequest = new RouterOS\Request('/ppp/active/remove');
-        $removeRequest->setArgument('numbers', $id);
-        if (($err = RouterApi::error($client->sendSync($removeRequest))) !== null) {
-            throw new Exception($err);
+        $first = null;
+        foreach ($ids as $one) {
+            $removeRequest = new RouterOS\Request('/ppp/active/remove');
+            $removeRequest->setArgument('numbers', $one);
+            if (($err = RouterApi::error($client->sendSync($removeRequest))) !== null) {
+                $first = $first ?? $err; // the others are still tried
+            }
+        }
+        if ($first !== null) {
+            throw new Exception($first);
         }
     }
 

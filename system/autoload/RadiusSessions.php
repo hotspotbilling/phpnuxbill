@@ -114,12 +114,16 @@ class RadiusSessions
             $set['acctstatustype'] = "IF(acctstatustype = 'Stop', acctstatustype, {$set['acctstatustype']})";
         }
         $newer = 'IF(receivedAt IS NOT NULL, VALUES(receivedAt) >= receivedAt, VALUES(dateUpdated) >= COALESCE(dateUpdated, dateAdded))';
+        // Live and replayed packets alike only change a row they are newer than (by receivedAt): a Start retried by the NAS or an
+        // older packet that arrives late never turns the counters back
         $parts = [];
         foreach ($set as $col => $expr) {
-            $parts[] = $replay ? "{$col} = IF({$newer}, {$expr}, {$col})" : "{$col} = {$expr}";
+            $parts[] = "{$col} = IF({$newer}, {$expr}, {$col})";
         }
+        $parts[] = "receivedAt = IF({$newer}, VALUES(receivedAt), receivedAt)";
+        // last: the tests above compare with the row as it was, and the legacy test (a row with no receivedAt) reads dateAdded; the
+        // earlier start is restored independently of which packet owns the counters
         $parts[] = 'dateAdded = LEAST(dateAdded, VALUES(dateAdded))';
-        $parts[] = 'receivedAt = ' . ($replay ? "IF({$newer}, VALUES(receivedAt), receivedAt)" : 'VALUES(receivedAt)'); // last
         $values = [];
         foreach ($cols as $col) {
             $values[] = $p[$col] ?? null;
@@ -193,36 +197,87 @@ class RadiusSessions
     }
 
     /**
-     * Write the queued accounting packets, oldest first, at most $max per run. Meant for the cron. The queue is read line by
-     * line (never loaded whole); what is not processed stays on disk, in the same order, for the next run: packets beyond the
-     * bound, packets that failed (retried with a growing delay, and the later packets of the same session wait behind them,
-     * while other sessions go on), and packets queued meanwhile. A line that is not a packet is dropped. Returns
-     * ['replayed' => n, 'failed' => n]. Never throws; a second run at the same time returns at once.
+     * Write the queued accounting packets, oldest first, at most $max per run. Meant for the cron. What radius.php queued is
+     * moved, by one rename under the queue's lock, into a snapshot file of its own (never appended to an older one, so an
+     * interrupted handoff leaves every accepted record in an intact file); the snapshots are replayed oldest first, each read
+     * line by line (never loaded whole). What is not processed stays on disk, in the same order, in its own snapshot for the next
+     * run: packets beyond the bound or after a run of failures (streamed on, their sessions not held back), packets that failed
+     * (retried with a growing delay, and the later packets of the same session wait behind them, while other sessions go on),
+     * and packets queued meanwhile. A line that is not a packet is dropped. Returns ['replayed' => n, 'failed' => n]. Never
+     * throws; a second run at the same time returns at once.
      */
     public static function replayAccounting(int $max = 20000): array
     {
         $out = ['replayed' => 0, 'failed' => 0];
         $file = self::queueFile();
-        $work = $file . '.replay';
         clearstatcache(true);
-        if ((int) @filesize($file) === 0 && (int) @filesize($work) === 0) {
+        if ((int) @filesize($file) === 0 && !self::snapshots($file)) {
             return $out;
         }
         $run = null;
-        $in = null;
-        $tmp = $work . '.new';
         try {
             $run = @fopen($file . '.run', 'c');
             if (!$run || !flock($run, LOCK_EX | LOCK_NB)) {
-                return $out; // another run is working on the snapshot
+                return $out; // another run is working on the snapshots
             }
-            if (!self::takeIncoming($file, $work)) {
+            if (!self::takeIncoming($file)) {
                 return $out;
             }
-            $in = @fopen($work, 'rb');
+            $state = ['blocked' => [], 'tried' => 0, 'streak' => 0, 'now' => time(), 'max' => $max, 'stop' => false];
+            foreach (self::snapshots($file) as $snap) {
+                self::replaySnapshot($snap, $state, $out);
+                if ($state['stop']) {
+                    break;
+                }
+            }
+            if ($out['replayed'] > 0 || $out['failed'] > 0) {
+                try {
+                    _log("RADIUS accounting queue: {$out['replayed']} packet(s) written, {$out['failed']} still waiting", 'CRON');
+                } catch (Throwable $ignored) {
+                }
+            }
+        } catch (Throwable $e) {
+        } finally {
+            if (is_resource($run)) {
+                flock($run, LOCK_UN);
+                fclose($run);
+            }
+        }
+        return $out;
+    }
+
+    /** The snapshot files of the queue, oldest first (a snapshot of the former single-file format first) */
+    private static function snapshots(string $file): array
+    {
+        $dir = dirname($file);
+        $base = basename($file);
+        $names = @scandir($dir) ?: [];
+        $snaps = [];
+        foreach ($names as $n) {
+            if (strpos($n, $base . '.snap.') === 0 && substr($n, -4) !== '.new') {
+                $snaps[] = $n;
+            }
+        }
+        sort($snaps, SORT_STRING); // the names carry the time they were taken
+        if (is_file($file . '.replay')) {
+            array_unshift($snaps, $base . '.replay');
+        }
+        return array_map(function ($n) use ($dir) {
+            return $dir . DIRECTORY_SEPARATOR . $n;
+        }, $snaps);
+    }
+
+    /** Replays one snapshot, leaving what was not written in it (see replayAccounting()). $state is shared by all snapshots of the run */
+    private static function replaySnapshot(string $snap, array &$state, array &$out): void
+    {
+        $tmp = $snap . '.new';
+        $in = $left = null;
+        try {
+            $in = @fopen($snap, 'rb');
             $left = @fopen($tmp, 'wb');
             if (!$in || !$left) {
-                return $out;
+                $state['stop'] = true;
+                return;
             }
             $kept = 0;       // bytes written to $left
             $keepOk = true;  // every write to it complete
@@ -234,10 +289,6 @@ class RadiusSessions
                 }
                 $kept += (int) $n;
             };
-            $blocked = [];   // sessions with a record held back: their later records wait too
-            $tried = 0;
-            $streak = 0;     // failures in a row: the database is most likely down, stop hammering it
-            $now = time();
             while (($line = fgets($in, 1048576)) !== false) {
                 if (substr($line, -1) !== "\n" && !feof($in)) {
                     // longer than any packet: not one. Drop it up to its end.
@@ -253,28 +304,33 @@ class RadiusSessions
                     continue;
                 }
                 $key = ($p['nasipaddress'] ?? '') . '|' . $p['username'] . '|' . $p['acctsessionid'];
-                // held back: an earlier packet of the session is waiting, still backing off, over the bound, or the database is down
-                if (isset($blocked[$key]) || $tried >= $max || $streak >= 25) {
-                    $blocked[$key] = true;
+                // held back behind an earlier packet of its session that is waiting
+                if (isset($state['blocked'][$key])) {
                     $keep($line);
                     continue;
                 }
-                if ((int) ($p['_next'] ?? 0) > $now) {
-                    $blocked[$key] = true;
+                // over the bound, or the database is most likely down: streamed on unchanged, and its session is not held back
+                // (nothing is being replayed any more, so there is no later packet to keep in order)
+                if ($state['tried'] >= $state['max'] || $state['streak'] >= 25) {
                     $keep($line);
                     continue;
                 }
-                $tried++; // a Stop counts like any other: the bound holds for every packet
+                if ((int) ($p['_next'] ?? 0) > $state['now']) {
+                    $state['blocked'][$key] = true; // still backing off: this session's later packets wait too
+                    $keep($line);
+                    continue;
+                }
+                $state['tried']++; // a Stop counts like any other: the bound holds for every packet
                 try {
                     self::saveAccounting($p, true);
                     $out['replayed']++;
-                    $streak = 0;
+                    $state['streak'] = 0;
                 } catch (Throwable $e) {
                     $out['failed']++;
-                    $streak++;
-                    $blocked[$key] = true;
+                    $state['streak']++;
+                    $state['blocked'][$key] = true;
                     $p['_tries'] = (int) ($p['_tries'] ?? 0) + 1;
-                    $p['_next'] = $now + min(3600, 60 * (2 ** min(6, $p['_tries'] - 1)));
+                    $p['_next'] = $state['now'] + min(3600, 60 * (2 ** min(6, $p['_tries'] - 1)));
                     $again = json_encode($p, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
                     $keep($again !== false ? $again : $line); // kept, a Stop included
                 }
@@ -284,95 +340,55 @@ class RadiusSessions
             $in = null;
             if (!$complete) {
                 // part of the snapshot was never read: it stays as it is (replaying it again is harmless), nothing is replaced
+                $state['stop'] = true;
                 fclose($left);
                 $left = null;
                 @unlink($tmp);
-                return $out;
+                return;
             }
             $synced = $keepOk && @fflush($left) && (!function_exists('fsync') || @fsync($left));
             fclose($left);
             $left = null;
             if (!$synced) {
+                $state['stop'] = true;
                 @unlink($tmp); // the snapshot stays as it was: its packets are tried again (a replay is harmless to repeat)
-                return $out;
+                return;
             }
             if ($kept === 0) {
                 @unlink($tmp);
-                @unlink($work);
-            } elseif (!@rename($tmp, $work)) {
+                @unlink($snap);
+            } elseif (!@rename($tmp, $snap)) {
+                $state['stop'] = true;
                 @unlink($tmp);
             }
-            if ($out['replayed'] > 0 || $out['failed'] > 0) {
-                try {
-                    _log("RADIUS accounting queue: {$out['replayed']} packet(s) written, {$out['failed']} still waiting", 'CRON');
-                } catch (Throwable $ignored) {
-                }
-            }
-        } catch (Throwable $e) {
         } finally {
-            foreach ([$in ?? null, $left ?? null] as $h) {
+            foreach ([$in, $left] as $h) {
                 if (is_resource($h)) {
                     fclose($h);
                 }
             }
-            if (is_resource($run)) {
-                flock($run, LOCK_UN);
-                fclose($run);
-            }
         }
-        return $out;
     }
 
     /**
-     * Move what radius.php queued behind the packets already in the snapshot file, under the queue's lock (so no packet is
-     * being appended meanwhile). Copied first and emptied only when the whole copy is verified; on a failed copy the snapshot
-     * goes back to its old length and the queue is untouched. False when it could not be done.
+     * Move what radius.php queued into a snapshot file of its own, under the queue's lock (so no packet is being appended
+     * meanwhile): one rename, so the record file is either still whole in the queue or whole in the snapshot, and later packets
+     * start a new queue file at once. Nothing is copied under the lock. False when it could not be done.
      */
-    private static function takeIncoming(string $file, string $work): bool
+    private static function takeIncoming(string $file): bool
     {
         $lock = @fopen($file . '.lock', 'c');
         if (!$lock || !flock($lock, LOCK_EX)) {
             return false;
         }
-        $src = $dst = null;
         try {
             clearstatcache(true);
-            $size = (int) @filesize($file);
-            if ($size === 0) {
+            if ((int) @filesize($file) === 0) {
                 return true;
             }
-            $src = @fopen($file, 'rb');
-            $dst = @fopen($work, 'ab');
-            if (!$src || !$dst) {
-                return false;
-            }
-            $before = (int) (fstat($dst)['size'] ?? 0);
-            $copied = stream_copy_to_stream($src, $dst, $size);
-            $ok = $copied === $size && fflush($dst) && (!function_exists('fsync') || fsync($dst));
-            if (!$ok) {
-                @ftruncate($dst, $before);
-                return false;
-            }
-            fclose($src);
-            $src = null;
-            $trunc = @fopen($file, 'r+b');
-            $emptied = $trunc && ftruncate($trunc, 0);
-            if ($trunc) {
-                fclose($trunc);
-            }
-            if (!$emptied) {
-                // the queue could not be emptied: the copy is taken back (the lock is still held), or the same packets would be
-                // replayed twice from two files
-                @ftruncate($dst, $before);
-                return false;
-            }
-            return true;
+            $snap = $file . '.snap.' . sprintf('%020d', (int) round(microtime(true) * 1000000)) . bin2hex(random_bytes(3));
+            return @rename($file, $snap);
         } finally {
-            foreach ([$src, $dst] as $h) {
-                if (is_resource($h)) {
-                    fclose($h);
-                }
-            }
             flock($lock, LOCK_UN);
             fclose($lock);
         }

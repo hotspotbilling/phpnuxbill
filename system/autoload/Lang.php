@@ -54,8 +54,14 @@ class Lang
     public static function valid($name)
     {
         global $root_path;
-        return is_string($name) && preg_match('/^[a-z][a-z0-9_]{0,31}$/', $name) === 1 && $name !== 'country'
+        return self::validName($name) && $name !== 'country'
             && is_file($root_path . File::pathFixer('system/lan/' . $name . '.json'));
+    }
+
+    /** The one rule for a language name that may become a file name: letters, digits, "_" and "-" (portuguese-brazil), no path characters */
+    public static function validName($name)
+    {
+        return is_string($name) && preg_match('/^[a-z][a-z0-9_-]{0,31}$/', $name) === 1;
     }
 
     public static function sanitize($str)
@@ -247,9 +253,9 @@ class Lang
     public static function translate($txt, $to = 'id')
     {
         global $CACHE_PATH;
-        static $down = false;
+        static $downUntil = 0; // when the pause after a failure ends (not for ever: a long-running worker asks again after it)
         $pause = ($CACHE_PATH ?: sys_get_temp_dir()) . DIRECTORY_SEPARATOR . 'lang_translate_pause';
-        if ($down || (is_file($pause) && time() - filemtime($pause) < 900)) {
+        if (time() < $downUntil || (is_file($pause) && time() - filemtime($pause) < 900)) {
             return null;
         }
         $ch = curl_init();
@@ -265,13 +271,17 @@ class Lang
         curl_close($ch);
         if (is_string($hasil) && $code === 200 && ($p = strpos($hasil, '<div class="result-container">')) !== false) {
             $rest = substr($hasil, $p + strlen('<div class="result-container">'));
-            // decoded first, then stripped: a translation that comes back entity-encoded ("&lt;b&gt;") must not become markup
-            $out = trim(strip_tags(html_entity_decode(substr($rest, 0, (int) strpos($rest, '</div')), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+            // real markup is stripped first, while entity-encoded text such as the placeholder "&lt;Class&gt;" is still text;
+            // decoded after that, and when the English text had no "<" the result gets none either (never markup from a service)
+            $out = trim(html_entity_decode(strip_tags(substr($rest, 0, (int) strpos($rest, '</div'))), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            if (strpos($txt, '<') === false) {
+                $out = str_replace(['<', '>'], ['&lt;', '&gt;'], $out);
+            }
             if ($out !== '') {
                 return $out;
             }
         }
-        $down = true;
+        $downUntil = time() + 900;
         @touch($pause);
         return null;
     }

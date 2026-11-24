@@ -1482,7 +1482,11 @@ switch ($action) {
                     // same three, and then the expiry is the one first worked out (not worked out again on the retry)
                     $mark = $provKey !== '' ? ($_SESSION[$provKey] ?? null) : null;
                     $alreadyProvisioned = is_array($mark) && (string) $mark['id'] === (string) $id
-                        && (string) $mark['plan'] === (string) $tur['plan_id'] && (string) $mark['router'] === (string) $p['routers'];
+                        && (string) $mark['plan'] === (string) $tur['plan_id'] && (string) $mark['router'] === (string) $p['routers']
+                        && strtotime($mark['expiration'] . ' ' . $tur['time']) > time(); // a mark whose expiry has passed is not reused
+                    if (!$alreadyProvisioned && $provKey !== '') {
+                        unset($_SESSION[$provKey]);
+                    }
                     if ($alreadyProvisioned) {
                         $expiration = $mark['expiration'];
                     }

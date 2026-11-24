@@ -177,7 +177,7 @@ if ($radiusLight) {
     }
 }
 
-if (empty($config['language']) || !preg_match('/^[a-z][a-z0-9_]{0,31}$/', (string) $config['language'])) {
+if (empty($config['language']) || !Lang::validName($config['language'])) {
     $config['language'] = 'english';
 }
 if (!$radiusLight) {

@@ -286,7 +286,7 @@ $rowsCapped = function ($c, $command, array $props, $deadline, $cap, array $wher
 // What a router says about itself: identity, board, RouterOS version, uptime, load, memory, disk, temperature and users online.
 // Each part is asked for separately, so a router without one (no hotspot, no health sensor) still answers the rest.
 $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime, $rosSend, $rosError) {
-    $until = microtime(true) + 8; // every part shares one deadline
+    $until = RouterApi::now() + 8; // every part shares one deadline
     $h = ['identity' => '', 'board' => '', 'version' => '', 'uptime' => '', 'cpu' => null, 'cores' => null,
         'mem_used' => null, 'mem_total' => null, 'disk_used' => null, 'disk_total' => null, 'temp' => null,
         'hotspot' => null, 'pppoe' => null];
@@ -790,7 +790,7 @@ switch ($action) {
                 $req->setTag('reboot');
                 // one limit of five seconds for the whole of it: writing the command, waiting for the reply and every read
                 // inside a reply that arrives in parts (as RouterApi::send does)
-                $deadline = microtime(true) + 5;
+                $deadline = RouterApi::now() + 5;
                 $limited = method_exists($c, 'readDeadline');
                 $confirmed = false;
                 if ($limited) {
@@ -800,7 +800,7 @@ switch ($action) {
                     $c->sendAsync($req); // a failure here is thrown to the error below: the command did not go out whole
                     $res = [];
                     try {
-                        $left = $deadline - microtime(true);
+                        $left = $deadline - RouterApi::now();
                         if ($left > 0) {
                             $c->loop((int) floor($left), (int) (($left - floor($left)) * 1000000));
                         }
@@ -836,7 +836,7 @@ switch ($action) {
                 $q = new \PEAR2\Net\RouterOS\Request('/ip/hotspot/active/print');
                 $q->setArgument('.proplist', '.id');
                 $ids = [];
-                $list = $rosSend($c, $q, microtime(true) + 15);
+                $list = $rosSend($c, $q, RouterApi::now() + 15);
                 if (($err = $rosError($list)) !== null) {
                     throw new Exception($err);
                 }
@@ -853,7 +853,7 @@ switch ($action) {
                     $rm = new \PEAR2\Net\RouterOS\Request('/ip/hotspot/active/remove');
                     $rm->setArgument('numbers', implode(',', $chunk));
                     try {
-                        $stopped = $rosError($rosSend($c, $rm, microtime(true) + 15));
+                        $stopped = $rosError($rosSend($c, $rm, RouterApi::now() + 15));
                     } catch (Throwable $e) {
                         $stopped = $e->getMessage();
                         $unsure = count($chunk);
@@ -887,11 +887,11 @@ switch ($action) {
                     r2($back, 'e', htmlspecialchars($d['name'] . ': ' . $why));
                 }
                 // on boards whose root folder is emptied by a restart, saved in flash/ so it survives one
-                $file = RouterApi::backupFolder(RouterApi::rows($c, '/file/print', ['name', 'type'], microtime(true) + 15)) . 'phpnuxbill-' . date('Ymd-His');
+                $file = RouterApi::backupFolder(RouterApi::rows($c, '/file/print', ['name', 'type'], RouterApi::now() + 15)) . 'phpnuxbill-' . date('Ymd-His');
                 $b = new \PEAR2\Net\RouterOS\Request('/system/backup/save');
                 $b->setArgument('name', $file);
                 $b->setArgument('password', $password);
-                if (($err = $rosError($rosSend($c, $b, microtime(true) + 30))) !== null) {
+                if (($err = $rosError($rosSend($c, $b, RouterApi::now() + 30))) !== null) {
                     throw new Exception($err);
                 }
                 _log($who . 'Backup saved on ' . $d['name'] . ': ' . $file . '.backup', $admin['user_type'], $admin['id']);
@@ -946,7 +946,7 @@ switch ($action) {
                 $say(['ok' => false, 'stale' => true, 'error' => Lang::T('The router was changed just now, so nothing was done. Try again.')]);
             }
         }
-        $until = microtime(true) + 15;
+        $until = RouterApi::now() + 15;
         try {
             if ($action === 'sessions') {
                 // who is connected now, hotspot and PPPoE, each matched to a customer when the name is one
@@ -1494,14 +1494,14 @@ switch ($action) {
                 // RouterOS and firmware versions. "Check for updates" (POST) asks MikroTik's server first; nothing is installed.
                 if ($posting) {
                     try {
-                        RouterApi::run($c, '/system/package/update/check-for-updates', [], microtime(true) + 20);
+                        RouterApi::run($c, '/system/package/update/check-for-updates', [], RouterApi::now() + 20);
                     } catch (Throwable $e) {
                         if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                             throw $e;
                         }
                         $checkErr = $e->getMessage();
                     }
-                    $until = microtime(true) + 5; // the check used its own time: the versions are read after it, within the budget
+                    $until = RouterApi::now() + 5; // the check used its own time: the versions are read after it, within the budget
                 }
                 $u = RouterApi::rows($c, '/system/package/update/print', ['channel', 'installed-version', 'latest-version', 'status'], $until);
                 $fw = [];

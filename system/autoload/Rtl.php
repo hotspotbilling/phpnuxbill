@@ -71,6 +71,12 @@ class Rtl
             $extra = false;
             foreach ($parts as $i => $part) {
                 if ($i % 2 === 1) {
+                    // a textarea's start tag is mirrored like any other (its style="" and so on); what it holds is text being
+                    // edited and is left exactly as it is. A script block is left whole.
+                    if (preg_match('/^(<textarea\b(?:[^>"\']|"[^"]*"|\'[^\']*\')*>)(.*)$/is', $part, $ta)) {
+                        $open = self::styleAttributes($ta[1]);
+                        $parts[$i] = ($open === null ? $ta[1] : $open) . $ta[2];
+                    }
                     continue;
                 }
                 // a step that fails (a regular expression that gives up on very large input returns null) keeps the page as it was
@@ -85,7 +91,7 @@ class Rtl
                     $flipped = self::flip($m[2]);
                     return $flipped === null ? $m[0] : $m[1] . self::MARK . $flipped . $m[3];
                 }, $part);
-                $part = $part === null ? null : self::styleAttributes($part);
+                $part = $part === null ? null : self::outsideStyleBlocks($part);
                 if ($part === null) {
                     return $html;
                 }
@@ -102,6 +108,26 @@ class Rtl
         } catch (Throwable $e) {
             return $html; // a page shown left to right is better than no page
         }
+    }
+
+    /** style="" attributes mirrored on the real tags only: the text of a <style> block (already mirrored) is never read as tags */
+    private static function outsideStyleBlocks($part)
+    {
+        $pieces = preg_split('/(<style\b[^>]*>.*?<\/style\s*>)/is', $part, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if ($pieces === false) {
+            return null;
+        }
+        foreach ($pieces as $i => $piece) {
+            if ($i % 2 === 1) {
+                continue;
+            }
+            $piece = self::styleAttributes($piece);
+            if ($piece === null) {
+                return null;
+            }
+            $pieces[$i] = $piece;
+        }
+        return implode('', $pieces);
     }
 
     /**
@@ -143,15 +169,34 @@ class Rtl
     /** dir="rtl" and the language code on <html>, unless the template set a direction itself */
     private static function htmlTag($part)
     {
-        return preg_replace_callback('/<html\b([^>]*)>/i', function ($m) {
+        // the start tag is read to its real end (a ">" inside a quoted value does not end it), and its attributes by name
+        return preg_replace_callback('/<html\b((?:[^>"\']|"[^"]*"|\'[^\']*\')*)>/i', function ($m) {
             $attrs = $m[1];
-            if (!preg_match('/\sdir\s*=/i', $attrs)) {
-                $attrs .= ' dir="rtl"';
+            $attr = '/(\s+)([^\s"\'>\/=]+)(?:(\s*=\s*)("[^"]*"|\'[^\']*\'|[^\s"\'>]+))?/';
+            $hasDir = false;
+            $hasLang = false;
+            if (preg_match_all($attr, $attrs, $all)) {
+                foreach ($all[2] as $name) {
+                    $hasDir = $hasDir || strcasecmp($name, 'dir') === 0;
+                    $hasLang = $hasLang || strcasecmp($name, 'lang') === 0;
+                }
             }
             $lang = htmlspecialchars(self::iso(), ENT_QUOTES);
-            $attrs = preg_match('/\slang\s*=/i', $attrs)
-                ? preg_replace('/\slang\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', ' lang="' . $lang . '"', $attrs, 1)
-                : $attrs . ' lang="' . $lang . '"';
+            if ($hasLang) {
+                $done = false;
+                $attrs = preg_replace_callback($attr, function ($a) use ($lang, &$done) {
+                    if (!$done && strcasecmp($a[2], 'lang') === 0) {
+                        $done = true;
+                        return $a[1] . 'lang="' . $lang . '"';
+                    }
+                    return $a[0];
+                }, $attrs);
+            } else {
+                $attrs .= ' lang="' . $lang . '"';
+            }
+            if (!$hasDir) {
+                $attrs .= ' dir="rtl"';
+            }
             return '<html' . $attrs . '>';
         }, $part, 1);
     }
@@ -225,7 +270,7 @@ class Rtl
             // to one of them makes this copy again, with the new address of the import's own copy
             $head = self::readStamp($out);
             $stamp = $head ? self::stamp($mtime, self::depUrls($head['deps'])) : null;
-            if (!$head || filemtime($out) < $mtime || $head['stamp'] !== $stamp) {
+            if (!$head || !is_file($out) || filemtime($out) < $mtime || $head['stamp'] !== $stamp) {
                 if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
                     return null;
                 }
@@ -257,7 +302,17 @@ class Rtl
                     }
                     $url = self::mirrored($site);
                     $file = self::localPath($site);
-                    $dep = $file === null ? '' : str_replace(DIRECTORY_SEPARATOR, '/', substr($file, strlen(rtrim(realpath($GLOBALS['root_path']), DIRECTORY_SEPARATOR)) + 1));
+                    if ($file === null) {
+                        // a local import that is not there (yet): listed with the missing mark, so the copy is made again once the
+                        // file appears; the import itself is kept (rebased below) in the copy
+                        $missing = self::sitePath($site);
+                        if ($missing !== null && !preg_match('/[\s,*]/', $missing)) {
+                            $deps[] = $missing;
+                            $urls[] = '-';
+                        }
+                        return $m[0];
+                    }
+                    $dep = str_replace(DIRECTORY_SEPARATOR, '/', substr($file, strlen(rtrim(realpath($GLOBALS['root_path']), DIRECTORY_SEPARATOR)) + 1));
                     if ($dep === '' || preg_match('/[\s,*]/', $dep)) {
                         return $m[0]; // (a name the first line of the copy cannot list: imported unmirrored)
                     }
@@ -283,8 +338,12 @@ class Rtl
                     return null; // a step failed: the page keeps the original stylesheet, and no copy is written
                 }
                 $tmp = $out . '.' . getmypid() . '.tmp';
-                if (@file_put_contents($tmp, self::stampLine($stamp, $deps) . $flipped) === false || !@rename($tmp, $out)) {
+                // the stamp goes after the copy: a copy with no matching stamp is simply made again
+                if (@file_put_contents($tmp, $flipped) === false || !@rename($tmp, $out)
+                    || @file_put_contents($tmp . '.stamp', self::stampLine($stamp, $deps)) === false || !@rename($tmp . '.stamp', $out . '.stamp')) {
                     @unlink($tmp);
+                    @unlink($tmp . '.stamp');
+                    @unlink($out . '.stamp');
                     return null;
                 }
             }
@@ -317,7 +376,8 @@ class Rtl
     /** The stamp and imports written on a copy's first line, or null when the copy is missing or from before this format */
     private static function readStamp($file)
     {
-        $fh = @fopen($file, 'r');
+        // the stamp is kept beside the copy (a first line in the copy would push a leading @charset or byte order mark out of place)
+        $fh = @fopen($file . '.stamp', 'r');
         if (!$fh) {
             return null;
         }
@@ -352,13 +412,49 @@ class Rtl
             $sitePath = rtrim((string) parse_url($base, PHP_URL_PATH), '/');
             if ($path[0] === '/') {
                 if ($sitePath === '' || strpos($path, $sitePath . '/') !== 0) {
-                    return $sitePath === '' ? self::inside($root_path . ltrim($path, '/')) : null;
+                    return $sitePath === '' ? self::inside($root_path . rawurldecode(ltrim($path, '/'))) : null;
                 }
                 $path = substr($path, strlen($sitePath) + 1);
             }
             $path = preg_replace('#^\./#', '', $path);
         }
         return self::inside($root_path . rawurldecode($path));
+    }
+
+    /** The path inside the install a local address names, dots resolved, or null when it leaves the install or is not local */
+    private static function sitePath($site)
+    {
+        $path = rawurldecode(preg_replace('/[?#].*$/', '', (string) $site));
+        $base = rtrim(APP_URL, '/');
+        if (stripos($path, $base . '/') === 0) {
+            $path = substr($path, strlen($base) + 1);
+        } elseif (preg_match('#^([a-z][a-z0-9+.-]*:)?//#i', $path)) {
+            return null;
+        } else {
+            $sitePath = rtrim((string) parse_url($base, PHP_URL_PATH), '/');
+            if (($path[0] ?? '') === '/') {
+                if ($sitePath !== '' && strpos($path, $sitePath . '/') === 0) {
+                    $path = substr($path, strlen($sitePath) + 1);
+                } elseif ($sitePath !== '') {
+                    return null;
+                }
+            }
+        }
+        $out = [];
+        foreach (explode('/', ltrim($path, '/')) as $seg) {
+            if ($seg === '' || $seg === '.') {
+                continue;
+            }
+            if ($seg === '..') {
+                if (!$out) {
+                    return null;
+                }
+                array_pop($out);
+                continue;
+            }
+            $out[] = $seg;
+        }
+        return $out ? implode('/', $out) : null;
     }
 
     /** The real path of a .css file inside the install, or null */
@@ -671,7 +767,7 @@ class Rtl
                     || preg_match('/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix|light-dark)\(/i', $bare)) {
                     continue; // a keyword or a colour, which can come before the offsets
                 }
-                if (preg_match('/^-?(\d*\.)?\d+([a-z%]*)$/i', $bare) || preg_match('/^calc\(/i', $bare)) {
+                if (preg_match('/^[+-]?(\d*\.)?\d+([a-z%]*)$/i', $bare) || preg_match('/^calc\(/i', $bare)) {
                     $t[$k] = $cm[1] . self::negate($bare) . $cm[3];
                     $layers[$i] = self::lead($layer) . implode(' ', $t) . self::trail($layer);
                 }
@@ -725,16 +821,17 @@ class Rtl
         if (preg_match('/^calc\((.*)\)$/is', $v, $m)) {
             return 'calc(-1 * (' . $m[1] . '))'; // the whole expression, its own grouping kept
         }
-        if (preg_match('/^-?0+(\.0+)?([a-z%]*)$/i', $v)) {
-            return $v;
+        if (preg_match('/^[+-]?0+(\.0+)?([a-z%]*)$/i', $v)) {
+            return ltrim($v, '+');
         }
         if (preg_match('/^(var|env)\(.*\)$/is', $v)) {
             return 'calc(-1 * ' . $v . ')'; // a length held in a variable: negated, the name kept
         }
-        if (!preg_match('/^-?(\d*\.)?\d+[a-z%]*$/i', $v)) {
+        if (!preg_match('/^[+-]?(\d*\.)?\d+[a-z%]*$/i', $v)) {
             return $v; // keywords: left as they are
         }
-        return $v[0] === '-' ? substr($v, 1) : '-' . $v;
+        // an explicit plus is dropped: "+4px" mirrors to "-4px", never "-+4px"
+        return $v[0] === '-' ? substr($v, 1) : '-' . ltrim($v, '+');
     }
 
     /** Split on a separator, not inside brackets */
@@ -762,14 +859,31 @@ class Rtl
         return $out;
     }
 
-    /** The space-separated values, brackets kept whole; comment and string placeholders count as part of a value */
+    /**
+     * The space-separated values, brackets kept whole; a string placeholder counts as a value, a comment placeholder does not:
+     * it is kept with the value next to it (before it, or after the last one), so the count of values is the CSS's own
+     */
     private static function tokens($s)
     {
         $t = [];
+        $carry = '';
         foreach (self::split(preg_replace('/\s+/', ' ', trim($s)), ' ') as $x) {
-            if ($x !== '') {
-                $t[] = $x;
+            if ($x === '') {
+                continue;
             }
+            if (preg_match('/^(?:\x01\d+[nc]\x01)+$/', $x)) {
+                if ($t) {
+                    $t[count($t) - 1] .= $x;
+                } else {
+                    $carry .= $x;
+                }
+                continue;
+            }
+            $t[] = $carry . $x;
+            $carry = '';
+        }
+        if ($carry !== '') {
+            $t[] = $carry; // only comments: kept as they were
         }
         return $t;
     }

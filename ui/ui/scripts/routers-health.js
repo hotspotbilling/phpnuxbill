@@ -162,13 +162,15 @@
         // L.rate, so it is there again if the interface comes back
         // L.ifs is the list shown in the picker: kept apart from L.prev, the counter baseline, which a pause, a failed reading or
         // a hidden page clears, so the traffic graph stays shown (with its history) while it waits for two new readings
-        if (d.ifaces) {
+        // PHP gives a keyed object when filtering left gaps in the keys (two interfaces at keys 1 and 3): one list either way
+        var ifaces = d.ifaces ? (Array.isArray(d.ifaces) ? d.ifaces : Object.keys(d.ifaces).map(function (k) { return d.ifaces[k]; })) : null;
+        if (ifaces) {
             var now = Object.create(null); // (an interface may be called "constructor": no inherited names here)
-            d.ifaces.forEach(function (i) { now[i.name] = { type: i.type, total: i.rx + i.tx }; });
+            ifaces.forEach(function (i) { now[i.name] = { type: i.type, total: i.rx + i.tx }; });
             Object.keys(L.prev).forEach(function (n) { if (!now[n]) delete L.prev[n]; });
             L.ifs = now;
         }
-        (d.ifaces || []).forEach(function (i) {
+        (ifaces || []).forEach(function (i) {
             var p = L.prev[i.name];
             if (!p && L.rate[i.name] && L.rate[i.name].length) {
                 // a new baseline after a failed reading or a pause: a gap in the graph, so the next speed is not joined to the
@@ -708,6 +710,15 @@
                 // without routers-tools.js (it failed to load) no tab is ever chosen: the Live panel, the only one shown, starts now
                 // (a panel paused by hand before the row was closed stays paused until Resume)
                 if (box && (sel ? sel.getAttribute('data-rt-tab') === 'live' : !window.rtToolsReady) && (!live[id] || live[id].suspended)) start(id);
+                if (!sel && !window.rtToolsReady) {
+                    // routers-tools.js is not there to pick a tab: the Live tab is marked as the selected one, and is the tab stop
+                    var liveTab = row.querySelector('[data-rt-tab="live"]');
+                    if (liveTab) {
+                        liveTab.classList.add('is-on');
+                        liveTab.setAttribute('aria-selected', 'true');
+                        liveTab.tabIndex = 0;
+                    }
+                }
             } else {
                 stop(id);
             }
