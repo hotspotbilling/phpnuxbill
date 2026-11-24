@@ -425,6 +425,14 @@ switch ($action) {
             if ($oldPlanID != $id_plan) {
                 $d->plan_id = $newPlan['id'];
                 $d->namebp = $newPlan['name_plan'];
+                // the new plan's router by its id, taken before the device is called: a rename meanwhile is followed from this
+                $newRouterId = Package::routerId($newPlan['routers']);
+                // the router the recharge is saved with, active or not (provisioning below is only for an active one); a change
+                // between plans of the same router keeps the value the recharge has
+                if ((string) $newPlan['routers'] !== (string) $d['routers']) {
+                    $d->routers = $newPlan['routers'];
+                    $routerMoved = true;
+                }
 
                 if ($d['status'] == 'on') {
                     $p = ORM::for_table('tbl_plans')->find_one($oldPlanID);
@@ -461,13 +469,6 @@ switch ($action) {
                                 }
                                 _log('[' . $customer['username'] . '] change plan' . ': ' . $e->getMessage(), 'Router');
                             }
-                            // The new plan is on the device now (fully, or partly: code 207), so the recharge is saved with the
-                            // plan's id and name (set above) and, only when the new plan is on a different router, that router.
-                            // A change between plans of the same router keeps the router value the recharge has.
-                            if ((string) $newPlan['routers'] !== (string) $d['routers']) {
-                                $d->routers = $newPlan['routers'];
-                                $routerMoved = true;
-                            }
                         } else {
                             throw new Exception(Lang::T("Devices Not Found"));
                         }
@@ -479,7 +480,7 @@ switch ($action) {
             $d->save();
             if ($routerMoved) {
                 // the router was renamed while this was saved: the row follows it (by id, see Package)
-                Package::followRename('tbl_user_recharges', $d->id(), (string) $newPlan['routers'], (int) $newPlan['id'], Package::routerId($newPlan['routers']));
+                Package::followRename('tbl_user_recharges', $d->id(), (string) $newPlan['routers'], (int) $newPlan['id'], $newRouterId ?? null);
             }
 
             // Send  Notifications
@@ -1477,7 +1478,14 @@ switch ($action) {
             if ($c) {
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 if ($p) {
-                    $alreadyProvisioned = $provKey !== '' && ($_SESSION[$provKey] ?? null) == $id;
+                    // the marker holds what was provisioned (recharge, plan, router) and the expiry it was given: valid only for the
+                    // same three, and then the expiry is the one first worked out (not worked out again on the retry)
+                    $mark = $provKey !== '' ? ($_SESSION[$provKey] ?? null) : null;
+                    $alreadyProvisioned = is_array($mark) && (string) $mark['id'] === (string) $id
+                        && (string) $mark['plan'] === (string) $tur['plan_id'] && (string) $mark['router'] === (string) $tur['routers'];
+                    if ($alreadyProvisioned) {
+                        $expiration = $mark['expiration'];
+                    }
                     if ($_app_stage != 'Demo' && !$alreadyProvisioned) {
                         try {
                             $dvc = Package::getDevice($p);
@@ -1500,7 +1508,7 @@ switch ($action) {
                             _log('[' . $c['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
                         }
                         if ($provKey !== '') {
-                            $_SESSION[$provKey] = $id;
+                            $_SESSION[$provKey] = ['id' => $id, 'plan' => $tur['plan_id'], 'router' => $tur['routers'], 'expiration' => $expiration];
                         }
                     }
                     $tur->expiration = $expiration;

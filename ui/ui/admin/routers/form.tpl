@@ -276,7 +276,8 @@
         // colon and no brackets, so it stays whole with the port field as typed
         host.addEventListener('change', function () {
             var v = host.value.trim();
-            var m = /^\[([^\]]+)\]:(\d+)$/.exec(v) || /^([^:\[\]]+):(\d+)$/.exec(v);
+            var b = /^(\[[^\]]+\]):(\d+)$/.exec(v); // an IPv6 address keeps its brackets: the host and port are joined again on save
+            var m = b || /^([^:\[\]]+):(\d+)$/.exec(v);
             if (m) {
                 host.value = m[1];
                 port.value = m[2];

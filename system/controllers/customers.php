@@ -289,6 +289,9 @@ switch ($action) {
         if ($bs) {
             $routers = [];
             foreach ($bs as $b) {
+                if (strtotime($b['expiration'] . ' ' . $b['time']) <= time()) {
+                    continue; // expired (the cron may still be retrying a clean-up): access is not sent back
+                }
                 $c = ORM::for_table('tbl_customers')->find_one($id_customer);
                 $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
                 if ($p) {
@@ -934,12 +937,25 @@ switch ($action) {
                                     }
                                     $lockTaken = Package::passwordLock((int) $id);
                                     try {
-                                        $cb = ORM::for_table('tbl_customers')->find_one($id);
+                                        // without the lock another request may be changing the customer: nothing is written then
+                                        $cb = $lockTaken ? ORM::for_table('tbl_customers')->find_one($id) : null;
+                                        if (!$lockTaken) {
+                                            _log('[' . $oldusername . '] edit rollback skipped, customer locked by another request', 'Router');
+                                        }
                                         if ($cb) {
-                                            $cb->username = $oldusername;
-                                            $cb->pppoe_username = $oldPppoeUsername;
-                                            $cb->pppoe_password = $oldPppoePassword;
-                                            $cb->pppoe_ip = $oldPppoeIp;
+                                            // each field is put back only while it still holds what this edit saved (not a newer change)
+                                            if ((string) $cb['username'] === $username) {
+                                                $cb->username = $oldusername;
+                                            }
+                                            if ((string) $cb['pppoe_username'] === $pppoe_username) {
+                                                $cb->pppoe_username = $oldPppoeUsername;
+                                            }
+                                            if ((string) $cb['pppoe_password'] === $pppoe_password) {
+                                                $cb->pppoe_password = $oldPppoePassword;
+                                            }
+                                            if ((string) $cb['pppoe_ip'] === $pppoe_ip) {
+                                                $cb->pppoe_ip = $oldPppoeIp;
+                                            }
                                             if ($passDiff && (string) $cb['password'] === $password) {
                                                 $cb->password = $oldPassPassword; // not a password changed since
                                             }
@@ -960,7 +976,7 @@ switch ($action) {
                                         RedisCache::forgetRadiusCustomer($pppoe_username);
                                     }
                                     _log('[' . $oldusername . '] edit not saved, rename refused: ' . $e->getMessage(), 'Router');
-                                    r2(getUrl('customers/edit/') . $id, 'e', Lang::T('The router did not accept the new username, nothing was changed') . ': ' . htmlspecialchars($e->getMessage(), ENT_QUOTES)
+                                    r2(getUrl('customers/edit/') . $id, 'e', Lang::T('The router did not accept the username change and it was reverted on the routers. Other profile changes in this form may have been saved') . ': ' . htmlspecialchars($e->getMessage(), ENT_QUOTES)
                                         . ($undoFailed ? '. ' . Lang::T('The rename could not be undone on') . ': ' . htmlspecialchars(implode(', ', $undoFailed), ENT_QUOTES) : ''));
                                 }
                                 try {

@@ -116,7 +116,7 @@ try {
             $macAddr = _req('macAddr', _req('macaddr'));
             $realm = _req('realm');
 
-            if (empty($acctSessionId)) {
+            if ((string) $acctSessionId === '') {
                 show_radius_result(['Reply-Message' => 'Session ID empty'], 401);
                 die();
             }
@@ -184,8 +184,15 @@ try {
 function radius_alert($text)
 {
     global $CACHE_PATH;
+    // the database write comes after the answer is out (radius_alert_deliver): a database that is slow or down is the very
+    // reason most of these alerts happen, and a write waiting on it would hold the router. The error log is immediate.
     try {
-        _log(mb_substr((string) $text, 0, 1000), 'RADIUS');
+        $GLOBALS['radius_alert_log'][] = mb_substr((string) $text, 0, 1000);
+        @error_log('[RADIUS] ' . mb_substr(str_replace("\n", ' | ', (string) $text), 0, 500));
+        if (empty($GLOBALS['radius_alert_registered'])) {
+            $GLOBALS['radius_alert_registered'] = true;
+            register_shutdown_function('radius_alert_deliver');
+        }
     } catch (Throwable $e) {
     }
     try {
@@ -208,40 +215,49 @@ function radius_alert($text)
         }
         fclose($fh);
         if ($send) {
-            // Not now: the answer goes out first. After the response is finished (fastcgi_finish_request) the Telegram call can
-            // take its few seconds without holding FreeRADIUS (its rest module gives up after 4 seconds). Without FastCGI the
-            // response cannot be released early, so only the time left of that window is spent (Message::sendTelegram
-            // honours $GLOBALS['radius_alert_budget_ms']).
+            // Not now: the answer goes out first (see radius_alert_deliver)
             $GLOBALS['radius_alert_text'] = mb_substr((string) $text, 0, 3000);
-            if (empty($GLOBALS['radius_alert_registered'])) {
-                $GLOBALS['radius_alert_registered'] = true;
-                register_shutdown_function('radius_alert_deliver');
-            }
         }
     } catch (Throwable $e) {
     }
 }
 
-/** Shutdown step of radius_alert(): sends the pending alert once the RADIUS answer is out. Never throws. */
+/**
+ * Shutdown step of radius_alert(): once the RADIUS answer is out, writes the log lines and sends the pending Telegram alert.
+ * Never throws.
+ */
 function radius_alert_deliver()
 {
     try {
+        $released = false;
+        if (function_exists('fastcgi_finish_request')) {
+            // false when the response could not be released: then the router is still waiting, as without FastCGI
+            $released = (bool) @fastcgi_finish_request();
+        } else {
+            @flush();
+        }
+        $lines = (array) ($GLOBALS['radius_alert_log'] ?? []);
+        $GLOBALS['radius_alert_log'] = [];
+        foreach ($lines as $line) {
+            try {
+                _log($line, 'RADIUS');
+            } catch (Throwable $e) {
+            }
+        }
         $text = (string) ($GLOBALS['radius_alert_text'] ?? '');
         if ($text === '') {
             return;
         }
         $GLOBALS['radius_alert_text'] = '';
-        if (function_exists('fastcgi_finish_request')) {
-            @fastcgi_finish_request();
+        // the time left of the window FreeRADIUS waits (it gives up after 4 s); a released response has the full budget
+        $elapsed = microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
+        $left = (int) floor((3.5 - $elapsed) * 1000);
+        if ($released) {
             $GLOBALS['radius_alert_budget_ms'] = 3000;
-        } else {
-            @flush();
-            $elapsed = microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
-            $left = (int) floor((3.5 - $elapsed) * 1000); // FreeRADIUS gives up after 4 s
-            if ($left < 500) {
-                return; // no time left to send without holding the answer: it is in the log
-            }
+        } elseif ($left >= 500) {
             $GLOBALS['radius_alert_budget_ms'] = $left;
+        } else {
+            return; // no time left to send without holding the answer: it is in the log
         }
         Message::sendTelegram($text);
     } catch (Throwable $e) {

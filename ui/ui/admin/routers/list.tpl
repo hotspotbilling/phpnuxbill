@@ -206,7 +206,8 @@
         t: {
             loading: '{Lang::T('Loading')|escape:'javascript'}', refresh: '{Lang::T('Refresh')|escape:'javascript'}', fail: '{Lang::T('Could not reach the router')|escape:'javascript'}',
             user: '{Lang::T('User')|escape:'javascript'}', address: '{Lang::T('Address')|escape:'javascript'}', mac: '{Lang::T('MAC / Caller ID')|escape:'javascript'}',
-            uptime: '{Lang::T('Uptime')|escape:'javascript'}', data: '{Lang::T('Data')|escape:'javascript'}', none: '{Lang::T('Nobody is connected')|escape:'javascript'}',
+            uptime: '{Lang::T('Uptime')|escape:'javascript'}', data: '{Lang::T('Data')|escape:'javascript'}', none: '{Lang::T('Nobody is connected')|escape:'javascript'}', noneRead: '{Lang::T('No sessions were found in the lists that could be read')|escape:'javascript'}',
+            waitReadings: '{Lang::T('Waiting for the first readings: the cron reads each router about every 5 minutes.')|escape:'javascript'}',
             notCustomer: '{Lang::T('not a customer')|escape:'javascript'}', drop: '{Lang::T('Disconnect')|escape:'javascript'}',
             dropAsk: '{Lang::T('Disconnect this user? They can sign in again at once.')|escape:'javascript'}', dropped: '{Lang::T('Disconnected')|escape:'javascript'}', dropRefresh: '{Lang::T('Refresh the list first: this session cannot be told apart from a new one.')|escape:'javascript'}',
             name: '{Lang::T('Name')|escape:'javascript'}', type: '{Lang::T('Type')|escape:'javascript'}', state: '{Lang::T('State')|escape:'javascript'}',
@@ -242,7 +243,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.24.3"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.24.4"></script>
 <script>
     // routers-tools.js did not load: its tabs cannot work. They are switched off and each details row says so; the Live tab is
     // left to routers-health.js, which works without it
@@ -297,7 +298,7 @@
         });
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.24.3" onerror="window.rtHealthFailed()"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.24.4" onerror="window.rtHealthFailed()"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">

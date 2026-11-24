@@ -27,7 +27,11 @@ class Message
         if (!empty($GLOBALS['radius_request'])) {
             // milliseconds; never more than the time radius.php left for it (and 3 s), 0 or less would mean no limit at all
             $budget = (int) ($GLOBALS['radius_alert_budget_ms'] ?? 3000);
-            $timeout = max(500, min(Http::timeoutMs($timeout), $budget, 3000));
+            // milliseconds. Under 500 ms left nothing usable can be sent: the alert is skipped, never sent with more time than is left
+            $timeout = min(Http::timeoutMs($timeout), $budget, 3000);
+            if ($timeout < 500) {
+                return false;
+            }
         }
         if (!empty($config['telegram_bot'])) {
             if (empty($chat_id)) {
@@ -73,7 +77,10 @@ class Message
         $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
         $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
         try {
-            $response = Http::getData($smsurl, [], $timeout, $timeout, $httpError);
+            $response = Http::getData($smsurl, [], $timeout, $timeout, $httpError, $httpStatus);
+            if ($httpError === '' && $httpStatus >= 500) {
+                $httpError = 'HTTP ' . $httpStatus; // the gateway refused the message (an empty body is no answer)
+            }
             if ($httpError !== '') {
                 // the gateway was not reached or did not answer in time: the text is cURL's error, not the gateway's answer
                 self::logMessage('SMS HTTP Request', $phone, $txt, 'Error', $httpError);
@@ -144,7 +151,10 @@ class Message
         $waurl = str_replace('[text]', urlencode($txt), $waurl);
 
         try {
-            $response = Http::getData($waurl, [], $timeout, $timeout, $httpError);
+            $response = Http::getData($waurl, [], $timeout, $timeout, $httpError, $httpStatus);
+            if ($httpError === '' && $httpStatus >= 500) {
+                $httpError = 'HTTP ' . $httpStatus; // the gateway refused the message (an empty body is no answer)
+            }
             if ($httpError !== '') {
                 // the gateway was not reached or did not answer in time: the text is cURL's error, not the gateway's answer
                 self::logMessage('WhatsApp HTTP Request', $phone, $txt, 'Error', $httpError);

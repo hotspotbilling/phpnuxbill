@@ -168,7 +168,7 @@
                 capped: rows.length < total ? t.capped.replace('%s', rows.length) : '',
                 // a menu the router refused (no permission) is said, so an empty list is not taken for nobody online
                 notice: [(d.read_errors || []).length ? t.readErr + ': ' + d.read_errors.join('; ') : ''].concat(orphans).filter(Boolean).join(' · '),
-                empty: t.none,
+                empty: (rd.hotspot && rd.pppoe) ? t.none : t.noneRead,
                 cols: [t.user, t.type, t.address, t.mac, t.uptime, t.data, ''],
                 filters: [{ key: 'all', label: t.all, test: function () { return true; } },
                     { key: 'hotspot', label: 'Hotspot ' + hs.length, test: function (r) { return r.kind === 'hotspot'; } },
@@ -496,7 +496,7 @@
             charts.forEach(function (c, i) {
                 // with readings but none for this graph (no uplink found, users not countable) it says so, rather than asking
                 // for history to be turned on
-                var ch = lineChart(c.series, c.fmt, c.max, d.from, d.to, long, pts.length ? t.noMetric : '', c.title);
+                var ch = lineChart(c.series, c.fmt, c.max, d.from, d.to, long, pts.length ? t.noMetric : (d.collecting ? t.waitReadings : t.noHistory), c.title);
                 wires.push(ch.wire);
                 html += '<figure class="rt-chart" data-rt-hchart="' + i + '"><figcaption class="rt-chart__head"><b>' + esc(c.title) + '</b><span class="rt-legend">'
                     + (c.series.length > 1 ? legend(c.series) : '') + '</span></figcaption><div class="rt-chart__box">' + ch.html + '</div></figure>';
@@ -646,7 +646,20 @@
             var dPrev = dPane._drops && dPane._drops[dKey];
             if (dPrev && dPrev.err) {
                 var dOrig = (dPane._dropStart || {})[dKey] || '';
-                if (dOrig === '') {
+                if (dOrig !== '' && dStarted !== '' && !sameStart(dOrig, dStarted)) {
+                    // the listed session began at another time: a replacement that got the same ID, not the one that failed.
+                    // Its own start is used and the old failure does not stand in its way
+                    delete dPane._drops[dKey];
+                    delete dPane._dropStart[dKey];
+                    dPrev = null;
+                } else if (dOrig === '' && dStarted !== '') {
+                    // the refreshed row has a known start: the old unknown-start failure is not inherited
+                    delete dPane._drops[dKey];
+                    if (dPane._dropStart) delete dPane._dropStart[dKey];
+                    dPrev = null;
+                    dOrig = dStarted;
+                }
+                if (dPrev && dOrig === '') {
                     // no start to tell this session from a replacement that got the same ID: not tried again from here
                     dPane._drops[dKey] = { err: t.dropRefresh, user: dUser };
                     var dRow0 = dModel && dModel.opts.rows.filter(function (r) {
@@ -655,7 +668,7 @@
                     if (dRow0) { dRow0.err = t.dropRefresh; listRender(dPane); }
                     return;
                 }
-                dStarted = dOrig;
+                if (dPrev) dStarted = dOrig;
             }
             var find = function (model) { // the row for this session (as listed: see dropKey()) in a list read with the same router settings
                 return model && (model.opts.cfg || '') === dCfg ? model.opts.rows.filter(function (r) {

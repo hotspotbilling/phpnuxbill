@@ -115,6 +115,7 @@ class RouterApi
         $req->setTag($tag);
         self::transmit($c, $req, $deadline);
         $recvErr = null;
+        $recvTimedOut = null;
         $got = [];
         $done = false;
         // whether these (newly collected) replies hold the closing one: only the new ones are looked at, not everything so far
@@ -160,6 +161,8 @@ class RouterApi
             } catch (\PEAR2\Net\Transmitter\Exception | \PEAR2\Net\RouterOS\SocketException $e) {
                 // the reply is incomplete: a read that ran out of time, or the connection closed mid-reply (told apart below)
                 $recvErr = $e;
+                // told now: putting an outer deadline back below starts the time-out record again
+                $recvTimedOut = method_exists($c, 'readTimedOut') ? $c->readTimedOut() : null;
             } finally {
                 if (method_exists($c, 'readDeadline')) {
                     $c->readDeadline($prior); // (null for a top-level request: the ordinary time limit)
@@ -185,7 +188,7 @@ class RouterApi
             throw new Exception(Lang::T('The router closed the connection') . ($fatal !== 'closed' ? ': ' . mb_substr($fatal, 0, 120) : ''), 503);
         }
         // the connection ended before the reply was complete, with time still left: not a router that went quiet
-        if ($recvErr !== null && method_exists($c, 'readTimedOut') && !$c->readTimedOut()) {
+        if ($recvErr !== null && $recvTimedOut === false) {
             $why = trim(preg_replace('/\s+/', ' ', strip_tags($recvErr->getMessage())));
             throw new Exception(Lang::T('The router closed the connection') . ($why !== '' ? ': ' . mb_substr($why, 0, 120) : ''), 503);
         }

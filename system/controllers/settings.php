@@ -266,7 +266,14 @@ switch ($action) {
                 $_POST['stale_session_timeout'] = (string) ($staleMinutes < 1 ? 10 : min(RadiusSessions::MAX_STALE_MINUTES, $staleMinutes));
             }
             // days of finished RADIUS REST sessions kept in rad_acct (0 = all), removed by cron.php
-            if (isset($_POST['frrest_keep_days'])) $_POST['frrest_keep_days'] = (string) min(3650, max(0, (int) $_POST['frrest_keep_days']));
+            if (isset($_POST['frrest_keep_days'])) {
+                // the whole value must be a whole number: anything else leaves the saved value as it is
+                if (is_string($_POST['frrest_keep_days']) && preg_match('/^\s*\d{1,6}\s*$/', $_POST['frrest_keep_days'])) {
+                    $_POST['frrest_keep_days'] = (string) min(3650, (int) $_POST['frrest_keep_days']);
+                } else {
+                    unset($_POST['frrest_keep_days']);
+                }
+            }
             // Captcha: which logins are protected, one check box each
             $_POST['captcha_on_admin'] = isset($_POST['captcha_on_admin']) ? 'yes' : 'no';
             $_POST['captcha_on_customer'] = isset($_POST['captcha_on_customer']) ? 'yes' : 'no';

@@ -312,9 +312,9 @@ class RouterMonitor
         $q = function () use ($id, $since) {
             return self::sinceMove(ORM::for_table('tbl_router_samples')->where('router_id', $id), $since);
         };
-        $prev = $q()->order_by_desc('at')->find_one();
+        $prev = $q()->order_by_desc('id')->find_one(); // by ID: the order they were saved in, whichever of local time or UTC a row has
         // the uplink chosen before: from the last reading that had one (a failed reading has none, and must not switch it)
-        $lastIf = $q()->where_not_null('iface')->order_by_desc('at')->find_one();
+        $lastIf = $q()->where_not_null('iface')->order_by_desc('id')->find_one();
         $s = ['online' => 0, 'cpu' => null, 'mem' => null, 'disk' => null, 'users' => null, 'uptime' => null, 'iface' => null, 'rx' => null, 'tx' => null, 'ifat' => null];
         $why = '';
         $readAt = null; // when the router answered /system/resource: the reading's time (see keep())
@@ -679,9 +679,10 @@ class RouterMonitor
             ->order_by_asc('id')->find_array();
         $bucket = max(300, (int) ceil($span / 300));
         // address changes in the period: no speed between a reading from before one and a reading from after it
+        // each as [time, ID of the last reading before it or null for a change saved before that was kept]
         $moves = array_map(function ($m) {
-            return self::ts('e', $m);
-        }, self::atWhere(ORM::for_table('tbl_router_events')->select_many('id', 'at')->where('router_id', (int) $id)
+            return ['t' => self::ts('e', $m), 'sample' => preg_match('/^sample:(\d+)$/', (string) $m['detail'], $x) ? (int) $x[1] : null];
+        }, self::atWhere(ORM::for_table('tbl_router_events')->select_many('id', 'at', 'detail')->where('router_id', (int) $id)
             ->where('type', 'moved'), 'e', '>=', $from)->find_array());
         $points = [];
         $online = 0;
@@ -702,8 +703,17 @@ class RouterMonitor
                 $restarted = true;
             }
             foreach ($moves as $m) {
-                // (a change in the same second as either reading cannot be placed before or after it: a break either way)
-                if ($prev && $m >= $prev['t'] && $m <= $t) {
+                if (!$prev) {
+                    break;
+                }
+                if ($m['sample'] !== null) {
+                    // the saved cut-off places it exactly, also within one second: only a pair that crosses it is a break
+                    $crosses = (int) $prev['id'] <= $m['sample'] && (int) $r['id'] > $m['sample'];
+                } else {
+                    // an older change has only its time (one in the same second as either reading cannot be placed: a break)
+                    $crosses = $m['t'] >= $prev['t'] && $m['t'] <= $t;
+                }
+                if ($crosses) {
                     $restarted = true; // (another device, or the same one reached another way: its counters do not follow on)
                 }
             }
@@ -716,7 +726,7 @@ class RouterMonitor
                     $up = $dTx * 8 / $sec;
                 }
             }
-            $prev = ['t' => $t, 'ti' => $ti, 'iface' => $r['iface'], 'rx' => $r['rx'], 'tx' => $r['tx'], 'uptime' => $r['uptime']];
+            $prev = ['id' => $r['id'], 't' => $t, 'ti' => $ti, 'iface' => $r['iface'], 'rx' => $r['rx'], 'tx' => $r['tx'], 'uptime' => $r['uptime']];
             $b = (int) floor($t / $bucket) * $bucket;
             if (!isset($points[$b])) {
                 $points[$b] = ['n' => 0, 'on' => 0, 'cpu' => [], 'mem' => [], 'users' => [], 'down' => [], 'up' => []];

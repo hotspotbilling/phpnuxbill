@@ -140,6 +140,10 @@ foreach ($d as $ds) {
                 if ($u['status'] !== 'on') {
                     continue;
                 }
+                // renewed while waiting for the lock: no longer expired, nothing is taken off
+                if (strtotime($u['expiration'] . ' ' . $u['time']) > time()) {
+                    continue;
+                }
 
                 // Fetch customer details
                 $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();

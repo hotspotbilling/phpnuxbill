@@ -154,9 +154,10 @@
             if (L.mem.length) push(L.mem, [d.at, null]);
             L.gap = false;
         }
-        if (d.cpu != null) push(L.cpu, [d.at, d.cpu]);
+        // a metric that is not available is a gap at this time (a null point), each one on its own
+        push(L.cpu, [d.at, d.cpu != null ? d.cpu : null]);
         var m = pct(d.mem_used, d.mem_total);
-        if (m != null) push(L.mem, [d.at, m]);
+        push(L.mem, [d.at, m != null ? m : null]);
         // the interfaces running now: one that has gone (unplugged, disabled) leaves the picker; its graph history stays in
         // L.rate, so it is there again if the interface comes back
         // L.ifs is the list shown in the picker: kept apart from L.prev, the counter baseline, which a pause, a failed reading or

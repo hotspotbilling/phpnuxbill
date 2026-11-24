@@ -392,7 +392,11 @@ switch ($action) {
         }
         // the lock first, and then the plan and its old snapshot: what is checked, saved and sent to the device is the plan as
         // it is now, a router rename or delete (which takes the same lock) coming wholly before or after it
-        $routerLock(true, getUrl('services/edit/') . (int) _post('id'));
+        // a RADIUS plan uses no router: it takes no router lock. Read first to tell, and read again under the lock
+        $pre = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
+        if (!$pre || (empty($pre['is_radius']) && strcasecmp((string) $pre['type'], 'Balance') !== 0)) {
+            $routerLock(true, getUrl('services/edit/') . (int) _post('id'));
+        }
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         $old = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         if ($d) {
@@ -784,7 +788,11 @@ switch ($action) {
 
         // the lock first, and then the plan and its old snapshot: what is checked, saved and sent to the device is the plan as
         // it is now, a router rename or delete (which takes the same lock) coming wholly before or after it
-        $routerLock(true, getUrl('services/pppoe-edit/') . (int) _post('id'));
+        // a RADIUS plan uses no router: it takes no router lock. Read first to tell, and read again under the lock
+        $pre = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
+        if (!$pre || (empty($pre['is_radius']) && strcasecmp((string) $pre['type'], 'Balance') !== 0)) {
+            $routerLock(true, getUrl('services/pppoe-edit/') . (int) _post('id'));
+        }
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         $old = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         // the router cannot be changed after the package is saved: it stays as the database has it (read under the lock, so a
@@ -1289,7 +1297,11 @@ switch ($action) {
 
         // the lock first, and then the plan and its old snapshot: what is checked, saved and sent to the device is the plan as
         // it is now, a router rename or delete (which takes the same lock) coming wholly before or after it
-        $routerLock(true, getUrl('services/vpn-edit/') . (int) _post('id'));
+        // a RADIUS plan uses no router: it takes no router lock. Read first to tell, and read again under the lock
+        $pre = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
+        if (!$pre || (empty($pre['is_radius']) && strcasecmp((string) $pre['type'], 'Balance') !== 0)) {
+            $routerLock(true, getUrl('services/vpn-edit/') . (int) _post('id'));
+        }
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         $old = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         // the router cannot be changed after the package is saved: it stays as the database has it (read under the lock, so a

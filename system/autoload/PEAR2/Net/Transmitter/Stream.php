@@ -762,6 +762,10 @@ class Stream
     public function isDataAwaiting($sTimeout = 0, $usTimeout = 0)
     {
         if (self::isStream($this->stream)) {
+            // a deadline that has passed ends the wait before the shortcut for a non-blocking stream is taken
+            if (null !== $this->deadline && $this->deadline - microtime(true) <= 0) {
+                return false;
+            }
             if (null === $sTimeout && !$this->isBlocking) {
                 $meta = stream_get_meta_data($this->stream);
                 return !$meta['eof'];

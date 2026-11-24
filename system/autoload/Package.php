@@ -183,12 +183,11 @@ class Package
             }
             return $query->find_one();
         };
-        $b = $findActive($router_name);
-        if (!$b && ($renamed = self::renamedTo($router_name, $router_id, $plan_id)) !== null) {
-            // the router was renamed after the caller read its name: the active recharge was moved to the new name with it, so
-            // it is found there and extended (followRename then moves this save to the new name too) rather than a second one
-            $b = $findActive($renamed);
-        }
+        // the router by its id when it is known: renamed since the caller read its name, its active recharge was moved to the new
+        // name with it, so it is found there and extended (followRename then moves this save to the new name too) rather than a
+        // second one; and a router that took the old name afterwards is not mistaken for it
+        $renamed = self::renamedTo($router_name, $router_id, $plan_id);
+        $b = $findActive($renamed !== null ? $renamed : $router_name);
 
         run_hook("recharge_user");
 
@@ -1152,7 +1151,7 @@ class Package
             $set();
             return;
         }
-        $hasGroup = $dev->getTableUserPackage()->where_equal('username', $customer['username'])->count() > 0;
+        $hasGroup = $dev->getTableUserPackage()->where_equal('username', $customer['username'])->where_not_equal('groupname', '')->count() > 0;
         $set();
         if (!$hasGroup) {
             throw new Exception(Lang::T('The new password was written to RADIUS, but the account has no plan group there. Use Sync customers to restore it.'));
@@ -1324,6 +1323,11 @@ class Package
             $plan->device = 'Radius';
             $plan->save();
             return $DEVICE_PATH . DIRECTORY_SEPARATOR . 'Radius' . '.php';
+        }
+        if ($plan['type'] == 'VPN') {
+            $plan->device = 'MikrotikVpn';
+            $plan->save();
+            return $DEVICE_PATH . DIRECTORY_SEPARATOR . 'MikrotikVpn' . '.php';
         }
         if ($plan['type'] == 'PPPOE') {
             $plan->device = 'MikrotikPppoe';

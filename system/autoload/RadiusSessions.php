@@ -174,7 +174,8 @@ class RadiusSessions
             }
             $before = (int) (fstat($fh)['size'] ?? 0);
             $written = @fwrite($fh, $line);
-            $ok = $written === strlen($line) && fflush($fh);
+            // flushed to the disk, not just to the system's cache: a Stop answered as queued must survive a crash or power loss
+            $ok = $written === strlen($line) && fflush($fh) && (!function_exists('fsync') || @fsync($fh));
             if (!$ok) {
                 // an incomplete line would corrupt the next one: back to what was there
                 @ftruncate($fh, $before);
@@ -248,7 +249,7 @@ class RadiusSessions
                     continue;
                 }
                 $p = json_decode($line, true);
-                if (!is_array($p) || empty($p['username']) || empty($p['acctsessionid'])) {
+                if (!is_array($p) || !isset($p['username'], $p['acctsessionid']) || (string) $p['username'] === '' || (string) $p['acctsessionid'] === '') {
                     continue;
                 }
                 $key = ($p['nasipaddress'] ?? '') . '|' . $p['username'] . '|' . $p['acctsessionid'];
@@ -278,8 +279,16 @@ class RadiusSessions
                     $keep($again !== false ? $again : $line); // kept, a Stop included
                 }
             }
+            $complete = feof($in); // false: fgets() stopped on a read error, not at the end of the file
             fclose($in);
             $in = null;
+            if (!$complete) {
+                // part of the snapshot was never read: it stays as it is (replaying it again is harmless), nothing is replaced
+                fclose($left);
+                $left = null;
+                @unlink($tmp);
+                return $out;
+            }
             $synced = $keepOk && @fflush($left) && (!function_exists('fsync') || @fsync($left));
             fclose($left);
             $left = null;
@@ -347,9 +356,15 @@ class RadiusSessions
             fclose($src);
             $src = null;
             $trunc = @fopen($file, 'r+b');
+            $emptied = $trunc && ftruncate($trunc, 0);
             if ($trunc) {
-                ftruncate($trunc, 0);
                 fclose($trunc);
+            }
+            if (!$emptied) {
+                // the queue could not be emptied: the copy is taken back (the lock is still held), or the same packets would be
+                // replayed twice from two files
+                @ftruncate($dst, $before);
+                return false;
             }
             return true;
         } finally {

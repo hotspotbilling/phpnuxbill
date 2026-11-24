@@ -170,9 +170,15 @@ if ($step == 1) {
     }
     AuthThrottle::clear('forgot-verify-user', $username);
     $ui->assign('username', $username);
+    if (!$user) {
+        // the account is gone: nothing was changed, so no success is said
+        $ui->assign('notify_t', 'e');
+        $ui->assign('notify', Lang::T('Invalid Username or Verification Code'));
+    } else {
     $ui->assign('notify_t', 's');
     $ui->assign('notify', Lang::T('Password changed successfully, Please login again')
         . ($routerFailed ? '. ' . Lang::T('Your portal password was changed, but it could not be applied to your internet connection. Your internet service may not accept the new password: please contact support about your network access.') : ''));
+    }
 } else if ($step == 7) {
     $find = trim((string) _post('find'));
     $step = 6;

@@ -159,12 +159,17 @@ class MikrotikVpn
         } else {
             $setRequest = new RouterOS\Request('/ppp/secret/set');
             $setRequest->setArgument('numbers', $cid);
-            if (!empty($customer['pppoe_password'])) {
+            // the expired plan changes the profile only: the secret's name and password stay as they are
+            if ($this->expiring) {
+                // (nothing else is written here)
+            } elseif (!empty($customer['pppoe_password'])) {
                 $setRequest->setArgument('password', $customer['pppoe_password']);
             } else {
                 $setRequest->setArgument('password', $customer['password']);
             }
-            if (!empty($customer['pppoe_username'])) {
+            if ($this->expiring) {
+                // (name left as it is)
+            } elseif (!empty($customer['pppoe_username'])) {
                 $setRequest->setArgument('name', $customer['pppoe_username']);
             } else {
                 $setRequest->setArgument('name', $customer['username']);
@@ -228,7 +233,9 @@ class MikrotikVpn
                 $setRequest->setArgument('remote-address', '0.0.0.0');
             }
             $setRequest->setArgument('profile', $plan['name_plan']);
-            $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
+            if (!$this->expiring) {
+                $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
+            }
             // (no answer is thrown by sendSync() and keeps a reserved address, like addVpnUser())
             $res = $client->sendSync($setRequest);
             if (($err = RouterApi::error($res)) !== null) {
@@ -1172,7 +1179,7 @@ class MikrotikVpn
             // only a rule with the same match conditions as the one in place (every NAT_MATCH field, src-address included) is
             // demonstrably the same forward; one that differs, or whose full match cannot be compared, is kept and reported
             $sameMatch = function ($r) use ($keep) {
-                if (!empty($r['@uncopied'])) {
+                if (!empty($r['@uncopied']) || !empty($keep['@uncopied'])) {
                     return false;
                 }
                 foreach (self::NAT_MATCH as $k) {

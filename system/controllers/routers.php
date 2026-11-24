@@ -242,6 +242,15 @@ $rosConnect = function ($ip, $user, $pass, $timeout = 5) {
     return [$c, $err];
 };
 
+// whether the router is still enabled and still has the endpoint and login it was chosen with (read now, for the actions that
+// change something on it: called with the endpoint lock held, so an edit cannot come between this and the command)
+$rosSame = function ($d) use ($endpointKey) {
+    $live = ORM::for_table('tbl_routers')->find_one($d['id']);
+    return $live && (int) $live['enabled'] === 1 && trim((string) $live['ip_address']) !== ''
+        && [(string) $live['name'], $endpointKey($live['ip_address']), (string) $live['username'], (string) $live['password']]
+        === [(string) $d['name'], $endpointKey($d['ip_address']), (string) $d['username'], (string) $d['password']];
+};
+
 $rosSend = Closure::fromCallable([RouterApi::class, 'send']);
 $rosError = Closure::fromCallable([RouterApi::class, 'error']);
 
@@ -700,6 +709,10 @@ switch ($action) {
                         continue;
                     }
                     $tur = $now;
+                    // past its expiry but still "on" (the cron is retrying an unfinished clean-up): access is not sent back
+                    if (strtotime($tur['expiration'] . ' ' . $tur['time']) <= time()) {
+                        continue;
+                    }
                     if (strcasecmp(rtrim((string) $tur['routers']), rtrim((string) $d['name'])) !== 0) {
                         continue; // moved to another router since the list was read: not this router's to sync
                     }
@@ -759,6 +772,15 @@ switch ($action) {
         [$c, $err] = $rosConnect($d['ip_address'], $d['username'], $d['password'], 8);
         if (!$c) {
             r2($back, 'e', htmlspecialchars($d['name'] . ': ' . $err));
+        }
+        // between the connection and the command: the endpoint lock is taken (held to the end of the request) and the router
+        // checked again, so an edit, a disable or a move saved meanwhile cancels the command before it is sent
+        if (!$endpointLock()) {
+            r2($back, 'e', $busyText());
+        }
+        if (!$rosSame($d)) {
+            $endpointLock(false);
+            r2($back, 'e', Lang::T('The router was changed just now, so nothing was done. Try again.'));
         }
         try {
             if ($op === 'reboot') {
@@ -913,6 +935,16 @@ switch ($action) {
         [$c, $err] = $rosConnect($d['ip_address'], $d['username'], $d['password'], 6);
         if (!$c) {
             $say(['ok' => false, 'error' => $err, 'hint' => $rosHint($err)]);
+        }
+        if ($action === 'drop' || ($action === 'updates' && $posting)) {
+            // a command that changes something: sent only while the router is the one chosen (lock held to the end of the request)
+            if (!$endpointLock()) {
+                $say(['ok' => false, 'error' => $busyText()]);
+            }
+            if (!$rosSame($d)) {
+                $endpointLock(false);
+                $say(['ok' => false, 'stale' => true, 'error' => Lang::T('The router was changed just now, so nothing was done. Try again.')]);
+            }
         }
         $until = microtime(true) + 15;
         try {
@@ -1246,6 +1278,31 @@ switch ($action) {
                         }
                         $ipRule = '';
                         $ipUnsure = false;
+                        if ($found === false) {
+                            // no web rule: an IP walled garden accept rule that surely covers the site (its host, and no other
+                            // condition this check cannot judge) is what lets customers open it; with none, the warning stays
+                            try {
+                                foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/ip/print', ['dst-host', 'dst-address', 'src-address', 'src-address-list', 'dst-address-list', 'protocol', 'dst-port', 'server', 'disabled', 'action'], $until) as $w) {
+                                    if ($w['disabled'] === 'true' || !in_array(strtolower((string) $w['action']), ['', 'accept'], true) || $hostIn($w['dst-host']) !== true) {
+                                        continue;
+                                    }
+                                    $proto = strtolower(trim((string) $w['protocol']));
+                                    $other = false;
+                                    foreach (['dst-address', 'src-address', 'src-address-list', 'dst-address-list', 'server'] as $k) {
+                                        $other = $other || trim((string) $w[$k]) !== '';
+                                    }
+                                    if (!$other && ($proto === '' || in_array($proto, ['tcp', '6'], true)) && $portIn($w['dst-port']) === true) {
+                                        $found = 'ipok';
+                                        $ipRule = (string) $w['dst-host'];
+                                        break;
+                                    }
+                                }
+                            } catch (Throwable $e) {
+                                if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
+                                    throw $e;
+                                }
+                            }
+                        }
                         if ($found === true) {
                             // the IP walled garden is asked before the web one: a rule there that drops or rejects the traffic blocks
                             // the site even though a web rule allows it. Its rules are tried in order and the first that matches
@@ -1305,7 +1362,9 @@ switch ($action) {
                                 $ipUnsure = true;
                             }
                         }
-                        if ($found === 'ipblock') {
+                        if ($found === 'ipok') {
+                            $add('ok', Lang::T('The billing site is in the walled garden'), $site . ' (' . Lang::T('IP walled garden rule for') . ' ' . $ipRule . ')');
+                        } elseif ($found === 'ipblock') {
                             $add('bad', Lang::T('An IP walled garden rule blocks the billing site'), Lang::T('The IP walled garden rule for') . ' ' . $ipRule . ' ' . Lang::T('drops or rejects the traffic, so customers cannot open') . ' ' . $site
                                 . ' ' . Lang::T('before they sign in. Change it in Winbox, IP > Hotspot > Walled Garden.'));
                         } elseif ($ipUnsure) {
@@ -1510,7 +1569,11 @@ switch ($action) {
             exit;
         }
         $range = in_array(_get('range'), ['24h', '7d', '30d'], true) ? _get('range') : '24h';
-        echo json_encode(['ok' => true, 'range' => $range, 'collecting' => RouterMonitor::enabled()] + RouterMonitor::history((int) $d['id'], $range), JSON_INVALID_UTF8_SUBSTITUTE);
+        try {
+            echo json_encode(['ok' => true, 'range' => $range, 'collecting' => RouterMonitor::enabled()] + RouterMonitor::history((int) $d['id'], $range), JSON_INVALID_UTF8_SUBSTITUTE);
+        } catch (Throwable $e) {
+            echo json_encode(['ok' => false, 'error' => Lang::T('The history could not be read') . ': ' . mb_substr($e->getMessage(), 0, 160)]);
+        }
         exit;
 
     case 'backup-download':
@@ -1633,6 +1696,12 @@ switch ($action) {
             exit;
         }
         if (hash('sha256', $now['ip_address'] . "\n" . $now['username'] . "\n" . $now['password']) !== $key) {
+            echo json_encode(['ok' => false, 'error' => Lang::T('The router settings changed since this check began. Check it again.')]);
+            exit;
+        }
+        // a reset (the router's enabled state or details changed) after this reading began: it is for the old details, whether or
+        // not the store above could be written
+        if ((float) @file_get_contents($dir . DIRECTORY_SEPARATOR . $id . '.reset') > $observed) {
             echo json_encode(['ok' => false, 'error' => Lang::T('The router settings changed since this check began. Check it again.')]);
             exit;
         }

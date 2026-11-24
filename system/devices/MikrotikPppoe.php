@@ -65,7 +65,12 @@ class MikrotikPppoe
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
             $setRes = $this->checked($client->sendSync($setRequest));
-            $setTaken = RouterApi::error($setRes) === null;
+            $setErr = RouterApi::error($setRes);
+            $setTaken = $setErr === null;
+            if (!$setTaken) {
+                // a refused change (the expired profile included) stops here: no address is cleared, no session ended
+                throw new Exception(Lang::T('The router refused the command') . ': ' . $setErr);
+            }
 
             // the fixed IP is cleared only on a secret the router has just taken: after a refused change, nothing was saved
             $unsetErr = null;
@@ -98,26 +103,22 @@ class MikrotikPppoe
             }
 
 
-            //disconnect then
+            //disconnect then: the secret is saved already, so a session that cannot be ended is not a failed update
             if(isset($isChangePlan) && $isChangePlan){
-                if ($unsetErr === null) {
-                    $this->removePpoeActive($client, $customer['username']);
-                    if (!empty($customer['pppoe_username'])) {
-                        $this->removePpoeActive($client, $customer['pppoe_username']);
-                    }
-                } else {
-                    // the secret is saved, so the session is still ended on the new plan; a failure here is added to the partial
-                    // result below rather than replacing it
+                if ($connLost) {
                     try {
-                        if ($connLost) {
-                            $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        }
-                        $this->removePpoeActive($client, $customer['username']);
-                        if (!empty($customer['pppoe_username'])) {
-                            $this->removePpoeActive($client, $customer['pppoe_username']);
-                        }
+                        $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     } catch (Exception $e) {
                         $unsetErr .= '; ' . Lang::T('the active session could not be disconnected') . ': ' . $e->getMessage();
+                        $client = null;
+                    }
+                }
+                $discErr = $client ? $this->dropSessions($client, $customer) : null;
+                if ($discErr !== null) {
+                    if ($unsetErr === null) {
+                        _log('PPPoE ' . $customer['username'] . ': ' . Lang::T('the active session could not be disconnected') . ': ' . $discErr->getMessage(), 'Router');
+                    } else {
+                        $unsetErr .= '; ' . Lang::T('the active session could not be disconnected') . ': ' . $discErr->getMessage();
                     }
                 }
             }
@@ -169,12 +170,8 @@ class MikrotikPppoe
                     $pending = $e->getMessage();
                     _log('PPPoE ' . $customer['username'] . ': ' . $pending, 'Router');
                 }
-                try {
-                    $this->removePpoeActive($client, $customer['username']);
-                    if (!empty($customer['pppoe_username'])) {
-                        $this->removePpoeActive($client, $customer['pppoe_username']);
-                    }
-                } catch (Exception $e) {
+                $e = $this->dropSessions($client, $customer);
+                if ($e !== null) {
                     if ($pending === null) {
                         throw $e;
                     }
@@ -215,6 +212,23 @@ class MikrotikPppoe
                 _log('PPPoE ' . $from . ': ' . $e->getMessage(), 'Router');
             }
         }
+    }
+
+    /**
+     * Ends the sessions of the customer's distinct names, each one tried whatever the other did; the first failure comes back
+     * (null when none), after every attempt
+     */
+    private function dropSessions($client, $customer)
+    {
+        $first = null;
+        foreach (array_unique(array_filter([(string) $customer['username'], (string) ($customer['pppoe_username'] ?? '')])) as $name) {
+            try {
+                $this->removePpoeActive($client, $name);
+            } catch (Exception $e) {
+                $first = $first ?? $e;
+            }
+        }
+        return $first;
     }
 
     function add_plan($plan)

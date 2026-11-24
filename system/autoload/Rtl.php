@@ -728,8 +728,11 @@ class Rtl
         if (preg_match('/^-?0+(\.0+)?([a-z%]*)$/i', $v)) {
             return $v;
         }
+        if (preg_match('/^(var|env)\(.*\)$/is', $v)) {
+            return 'calc(-1 * ' . $v . ')'; // a length held in a variable: negated, the name kept
+        }
         if (!preg_match('/^-?(\d*\.)?\d+[a-z%]*$/i', $v)) {
-            return $v; // var(), keywords: left as they are
+            return $v; // keywords: left as they are
         }
         return $v[0] === '-' ? substr($v, 1) : '-' . $v;
     }

@@ -65,19 +65,28 @@ class MikrotikHotspot
 		return $res;
 	}
 
-	/** The plan's limit-uptime and limit-bytes-total as addHotspotUser() gives them, "0" (no limit) for one the plan has not */
+	/** The plan's limit-uptime as RouterOS writes it ("2:00:00", "00:30:00"), or null when the plan has no time limit */
+	private function uptimeLimit($plan)
+	{
+		if ($plan['typebp'] != "Limited" || !in_array($plan['limit_type'], ['Time_Limit', 'Both_Limit'], true)) {
+			return null;
+		}
+		return ($plan['time_unit'] == 'Hrs') ? $plan['time_limit'] . ":00:00" : "00:" . $plan['time_limit'] . ":00";
+	}
+
+	/** The plan's limit-bytes-total in bytes, or null when the plan has no data limit */
+	private function bytesLimit($plan)
+	{
+		if ($plan['typebp'] != "Limited" || !in_array($plan['limit_type'], ['Data_Limit', 'Both_Limit'], true)) {
+			return null;
+		}
+		return ($plan['data_unit'] == 'GB') ? $plan['data_limit'] . "000000000" : $plan['data_limit'] . "000000";
+	}
+
+	/** What a sync writes: both limits, "0" (no limit) for one the plan has not, so an obsolete limit is cleared */
 	private function planLimits($plan)
 	{
-		$limits = ['limit-uptime' => '0', 'limit-bytes-total' => '0'];
-		if ($plan['typebp'] == "Limited") {
-			if (in_array($plan['limit_type'], ['Time_Limit', 'Both_Limit'])) {
-				$limits['limit-uptime'] = ($plan['time_unit'] == 'Hrs') ? $plan['time_limit'] . ":00:00" : "00:" . $plan['time_limit'] . ":00";
-			}
-			if (in_array($plan['limit_type'], ['Data_Limit', 'Both_Limit'])) {
-				$limits['limit-bytes-total'] = ($plan['data_unit'] == 'GB') ? $plan['data_limit'] . "000000000" : $plan['data_limit'] . "000000";
-			}
-		}
-		return $limits;
+		return ['limit-uptime' => $this->uptimeLimit($plan) ?? '0', 'limit-bytes-total' => $this->bytesLimit($plan) ?? '0'];
 	}
 
 	private function syncCustomer($customer, $plan)
@@ -156,8 +165,12 @@ class MikrotikHotspot
             if (($err = RouterApi::error($client->sendSync($setRequest))) !== null) {
                 throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
             }
-            //disconnect then
-            $this->removeHotspotActiveUser($client, $from);
+            // disconnect then: the rename stands if this fails (the session ends by itself on its next login)
+            try {
+                $this->removeHotspotActiveUser($client, $from);
+            } catch (Exception $e) {
+                _log('Hotspot ' . $from . ': ' . $e->getMessage(), 'Router');
+            }
         }
     }
 
@@ -337,65 +350,20 @@ class MikrotikHotspot
             return null;
         }
         $addRequest = new RouterOS\Request('/ip/hotspot/user/add');
-        if ($plan['typebp'] == "Limited") {
-            if ($plan['limit_type'] == "Time_Limit") {
-                if ($plan['time_unit'] == 'Hrs')
-                    $timelimit = $plan['time_limit'] . ":00:00";
-                else
-                    $timelimit = "00:" . $plan['time_limit'] . ":00";
-                $this->checked($client->sendSync(
-                    $addRequest
-                        ->setArgument('name', $customer['username'])
-                        ->setArgument('profile', $plan['name_plan'])
-                        ->setArgument('password', $customer['password'])
-                        ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
-                        ->setArgument('email', $customer['email'])
-                        ->setArgument('limit-uptime', $timelimit)
-                ));
-            } else if ($plan['limit_type'] == "Data_Limit") {
-                if ($plan['data_unit'] == 'GB')
-                    $datalimit = $plan['data_limit'] . "000000000";
-                else
-                    $datalimit = $plan['data_limit'] . "000000";
-                $this->checked($client->sendSync(
-                    $addRequest
-                        ->setArgument('name', $customer['username'])
-                        ->setArgument('profile', $plan['name_plan'])
-                        ->setArgument('password', $customer['password'])
-                        ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
-                        ->setArgument('email', $customer['email'])
-                        ->setArgument('limit-bytes-total', $datalimit)
-                ));
-            } else if ($plan['limit_type'] == "Both_Limit") {
-                if ($plan['time_unit'] == 'Hrs')
-                    $timelimit = $plan['time_limit'] . ":00:00";
-                else
-                    $timelimit = "00:" . $plan['time_limit'] . ":00";
-                if ($plan['data_unit'] == 'GB')
-                    $datalimit = $plan['data_limit'] . "000000000";
-                else
-                    $datalimit = $plan['data_limit'] . "000000";
-                $this->checked($client->sendSync(
-                    $addRequest
-                        ->setArgument('name', $customer['username'])
-                        ->setArgument('profile', $plan['name_plan'])
-                        ->setArgument('password', $customer['password'])
-                        ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
-                        ->setArgument('email', $customer['email'])
-                        ->setArgument('limit-uptime', $timelimit)
-                        ->setArgument('limit-bytes-total', $datalimit)
-                ));
-            }
-        } else {
-            $this->checked($client->sendSync(
-                $addRequest
-                    ->setArgument('name', $customer['username'])
-                    ->setArgument('profile', $plan['name_plan'])
-                    ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
-                    ->setArgument('email', $customer['email'])
-                    ->setArgument('password', $customer['password'])
-            ));
+        $addRequest
+            ->setArgument('name', $customer['username'])
+            ->setArgument('profile', $plan['name_plan'])
+            ->setArgument('password', $customer['password'])
+            ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
+            ->setArgument('email', $customer['email']);
+        // a new user only gets the limits the plan has (a plan with none, or a Limited one with an unknown type, adds no limit)
+        if (($timelimit = $this->uptimeLimit($plan)) !== null) {
+            $addRequest->setArgument('limit-uptime', $timelimit);
         }
+        if (($datalimit = $this->bytesLimit($plan)) !== null) {
+            $addRequest->setArgument('limit-bytes-total', $datalimit);
+        }
+        $this->checked($client->sendSync($addRequest));
     }
 
     /**

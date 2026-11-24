@@ -45,14 +45,19 @@ class Http
         if ($v <= 0) {
             return 3000;
         }
-        return (int) ($v >= 100 ? $v : $v * 1000);
+        // at least 1 ms: a positive limit that rounds down to 0 would mean "no limit" to cURL
+        return max(1, (int) ceil($v >= 100 ? $v : $v * 1000));
     }
 
-    /** $error: set to cURL's error text when the request did not reach the server or timed out, '' otherwise */
-    public static function getData($url, $headers = [], $connect_timeout = 3000, $wait_timeout = 15000, &$error = null)
+    /**
+     * $error: set to cURL's error text when the request did not reach the server or timed out, '' otherwise.
+     * $status: the HTTP status code of the answer (0 when there was none).
+     */
+    public static function getData($url, $headers = [], $connect_timeout = 3000, $wait_timeout = 15000, &$error = null, &$status = null)
     {
         global $http_proxy, $http_proxyauth, $admin;
         $error = '';
+        $status = 0;
         $error_msg = '';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -70,6 +75,7 @@ class Http
             }
         }
         $server_output = curl_exec($ch);
+        $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         if (curl_errno($ch)) {
             $error_msg = curl_error($ch);
             $error = $error_msg !== '' ? $error_msg : 'cURL error ' . curl_errno($ch);

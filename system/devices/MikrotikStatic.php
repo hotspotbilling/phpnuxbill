@@ -4,30 +4,11 @@ use PEAR2\Net\RouterOS;
 
 class MikrotikStatic
 {
-    // set while sync_customer() runs: a change the router refuses is thrown, so the sync counts that customer as not sent
-    private $strict = false;
-
     public function sync_customer($customer, $plan)
     {
-        $this->strict = true;
-        try {
-            $this->add_customer($customer, $plan);
-        } finally {
-            $this->strict = false;
-        }
+        $this->add_customer($customer, $plan); // every refusal is thrown by add_customer() itself
     }
 
-    /** A command's replies; during a sync, the router's refusal (a !trap) is thrown instead of passing unnoticed */
-    private function checked($res)
-    {
-        if ($this->strict && ($err = RouterApi::error($res)) !== null) {
-            throw new Exception($err);
-        }
-        if ($res instanceof RouterOS\ResponseCollection) {
-            $res->rewind(); // error() iterated the replies: back to the first, for getProperty()
-        }
-        return $res;
-    }
     // show Description
     public function description()
     {
@@ -137,9 +118,15 @@ class MikrotikStatic
             }
         }
         $listErr = $this->expiredListAdd($client, $customer);
-        $this->removeStaticUser($client, $customer['username']);
+        // the queue lookups and removals are read: an absent queue is a removal done, a refused one is not
+        $queueErr = $this->removeStaticUser($client, $customer['username']);
         if (!empty($customer['pppoe_username'])) {
-            $this->removeStaticUser($client, $customer['pppoe_username']);
+            $queueErr = $queueErr ?? $this->removeStaticUser($client, $customer['pppoe_username']);
+        }
+        if ($queueErr !== null) {
+            // not a partial result (207): the queue is still there. Both results are said when the list add failed too
+            throw new Exception(Lang::T('The customer\'s queue could not be removed') . ': ' . $queueErr
+                . ($listErr !== null ? '; ' . Lang::T('the address could not be put on the Expired list') . ': ' . $listErr : ''));
         }
         $this->throwListPartial($listErr); // the queues are gone, only the address is not blocked: a partial result
     }
@@ -315,10 +302,17 @@ class MikrotikStatic
         $printRequest = new RouterOS\Request('/queue/simple/print');
         //$printRequest->setArgument('.proplist', '.id');
         $printRequest->setQuery(RouterOS\Query::where('name', $username));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
+        $res = $client->sendSync($printRequest);
+        if (($err = RouterApi::error($res)) !== null) {
+            return $err;
+        }
+        $id = $res->getProperty('.id');
+        if (empty($id)) {
+            return null; // no such queue: nothing to remove
+        }
         $removeRequest = new RouterOS\Request('/queue/simple/remove');
         $removeRequest->setArgument('numbers', $id);
-        $client->sendSync($removeRequest);
+        return RouterApi::error($client->sendSync($removeRequest));
     }
 
     public function addStaticUser($client, $plan, $customer, $isExp = false)
