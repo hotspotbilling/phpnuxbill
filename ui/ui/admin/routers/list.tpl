@@ -74,7 +74,7 @@
                     {$rt_detail = $rt_tools || $history_ready}
                     <tr{if $rt_can} data-rt-id="{$ds['id']}"{/if}>
                         <td class="ls-check"><input type="checkbox" name="ids[]" value="{$ds['id']}" form="rtBulkForm" aria-label="{$ds['name']|escape}"></td>
-                        <td data-label="{Lang::T('Router Name')}">{if $ds['coordinates']}<a href="https://www.google.com/maps/dir//{$ds['coordinates']|escape:'url'}/" target="_blank" rel="noopener" title="{$ds['coordinates']|escape}"><i class="fa fa-map-marker" aria-hidden="true"></i></a> {/if}<b class="ls-strong">{$ds['name']|escape}</b>{if $has_site && $ds['site']} <span class="ls-pill rt-site">{$ds['site']|escape}</span>{/if}</td>
+                        <td data-label="{Lang::T('Router Name')}" class="rt-name">{if $ds['coordinates']}<a href="https://www.google.com/maps/dir//{$ds['coordinates']|escape:'url'}/" target="_blank" rel="noopener" title="{$ds['coordinates']|escape}"><i class="fa fa-map-marker" aria-hidden="true"></i></a> {/if}<b class="ls-strong">{$ds['name']|escape}</b>{if $has_site && $ds['site']} <span class="ls-pill rt-site">{$ds['site']|escape}</span>{/if}</td>
                         <td data-label="{Lang::T('IP Address')}"><span class="ls-secret" tabindex="0">{$ds['ip_address']|escape}</span>{if isset($routely_vpn['addresses'][$ds['ip_address']])}{$rv = $routely_vpn['addresses'][$ds['ip_address']]} <a class="ls-pill ls-pill--routely{if $rv['state'] != 'up'} is-down{/if}" href="{Text::url('plugin/routely/vpn')}" title="{Lang::T('Reached through Routely VPN')}: {$rv['device']|escape} ({if $rv['state'] == 'up'}{Lang::T('connected')}{else}{Lang::T('not connected')}{/if})"><i class="fa fa-shield" aria-hidden="true"></i> Routely</a>{/if}</td>
                         <td data-label="{Lang::T('Username')}"><span class="ls-secret" tabindex="0">{$ds['username']|escape}</span></td>
                         <td data-label="{Lang::T('Description')}" class="ls-dim rt-desc">{$ds['description']|escape}</td>
@@ -90,7 +90,7 @@
                     <tr class="rt-detail" id="rt-detail-{$ds['id']}" hidden><td colspan="{$rt_cols}">
                         <div class="rt-tabs" role="tablist" aria-label="{$ds['name']|escape}" data-rt-tabs="{$ds['id']}">
                             {if $rt_can}<button type="button" role="tab" class="rt-tab" data-rt-tab="live" id="rt-tab-{$ds['id']}-live" aria-controls="rt-pane-{$ds['id']}-live" aria-selected="false" tabindex="-1" disabled><i class="fa fa-line-chart" aria-hidden="true"></i> {Lang::T('Live')}</button>{/if}
-                            <button type="button" role="tab" class="rt-tab" data-rt-tab="history" id="rt-tab-{$ds['id']}-history" aria-controls="rt-pane-{$ds['id']}-history" aria-selected="false" tabindex="-1"><i class="fa fa-history" aria-hidden="true"></i> {Lang::T('History')}</button>
+                            {if $history_ready}<button type="button" role="tab" class="rt-tab" data-rt-tab="history" id="rt-tab-{$ds['id']}-history" aria-controls="rt-pane-{$ds['id']}-history" aria-selected="false" tabindex="-1"><i class="fa fa-history" aria-hidden="true"></i> {Lang::T('History')}</button>{/if}
                             {if $rt_tools}
                             <button type="button" role="tab" class="rt-tab" data-rt-tab="users" id="rt-tab-{$ds['id']}-users" aria-controls="rt-pane-{$ds['id']}-users" aria-selected="false" tabindex="-1"><i class="fa fa-users" aria-hidden="true"></i> {Lang::T('Users online')}</button>
                             <button type="button" role="tab" class="rt-tab" data-rt-tab="ifaces" id="rt-tab-{$ds['id']}-ifaces" aria-controls="rt-pane-{$ds['id']}-ifaces" aria-selected="false" tabindex="-1"><i class="fa fa-plug" aria-hidden="true"></i> {Lang::T('Interfaces')}</button>
@@ -99,7 +99,7 @@
                             {/if}
                         </div>
                         {if $rt_can}<div class="rt-pane" role="tabpanel" data-rt-pane="live" id="rt-pane-{$ds['id']}-live" aria-labelledby="rt-tab-{$ds['id']}-live" tabindex="0"><div class="rt-panel" data-rt-panel="{$ds['id']}"></div></div>{/if}
-                        <div class="rt-pane" role="tabpanel" data-rt-pane="history" id="rt-pane-{$ds['id']}-history" aria-labelledby="rt-tab-{$ds['id']}-history" tabindex="0" hidden></div>
+                        {if $history_ready}<div class="rt-pane" role="tabpanel" data-rt-pane="history" id="rt-pane-{$ds['id']}-history" aria-labelledby="rt-tab-{$ds['id']}-history" tabindex="0" hidden></div>{/if}
                         {if $rt_tools}
                         <div class="rt-pane" role="tabpanel" data-rt-pane="users" id="rt-pane-{$ds['id']}-users" aria-labelledby="rt-tab-{$ds['id']}-users" tabindex="0" hidden></div>
                         <div class="rt-pane" role="tabpanel" data-rt-pane="ifaces" id="rt-pane-{$ds['id']}-ifaces" aria-labelledby="rt-tab-{$ds['id']}-ifaces" tabindex="0" hidden></div>
@@ -242,7 +242,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.24.1"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.24.2"></script>
 <script>
     // routers-tools.js did not load: its tabs cannot work. They are switched off and each details row says so; the Live tab is
     // left to routers-health.js, which works without it
@@ -297,7 +297,7 @@
         });
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.24.1" onerror="window.rtHealthFailed()"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.24.2" onerror="window.rtHealthFailed()"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">

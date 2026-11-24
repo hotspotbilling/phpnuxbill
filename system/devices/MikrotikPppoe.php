@@ -69,6 +69,8 @@ class MikrotikPppoe
 
             // the fixed IP is cleared only on a secret the router has just taken: after a refused change, nothing was saved
             $unsetErr = null;
+            $unsetCause = null;
+            $connLost = false;
             if ($unsetIP && $setTaken) {
                 $unsetRequest = new RouterOS\Request('/ppp/secret/unset');
                 $unsetRequest->setArgument('numbers', $cid);
@@ -77,22 +79,41 @@ class MikrotikPppoe
                     // checked in every mode: a refusal is said below as a partial update, never as a failed (rolled back) one
                     $unsetErr = RouterApi::error($client->sendSync($unsetRequest));
                 } catch (Exception $e) {
-                    // no answer (the connection is dropped): the secret was saved, whether the address was cleared is not known
-                    throw new Exception(Lang::T('Saved, but the fixed IP address could not be cleared') . ': ' . $e->getMessage(), self::PARTIAL, $e);
+                    // no answer (the connection is dropped): the secret was saved, whether the address was cleared is not known;
+                    // the disconnect below is still tried (on a new connection) before this is reported
+                    $unsetErr = $e->getMessage();
+                    $unsetCause = $e;
+                    $connLost = true;
                 }
             }
 
 
             //disconnect then
             if(isset($isChangePlan) && $isChangePlan){
-                $this->removePpoeActive($client, $customer['username']);
-                if (!empty($customer['pppoe_username'])) {
-                    $this->removePpoeActive($client, $customer['pppoe_username']);
+                if ($unsetErr === null) {
+                    $this->removePpoeActive($client, $customer['username']);
+                    if (!empty($customer['pppoe_username'])) {
+                        $this->removePpoeActive($client, $customer['pppoe_username']);
+                    }
+                } else {
+                    // the secret is saved, so the session is still ended on the new plan; a failure here is added to the partial
+                    // result below rather than replacing it
+                    try {
+                        if ($connLost) {
+                            $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        }
+                        $this->removePpoeActive($client, $customer['username']);
+                        if (!empty($customer['pppoe_username'])) {
+                            $this->removePpoeActive($client, $customer['pppoe_username']);
+                        }
+                    } catch (Exception $e) {
+                        $unsetErr .= '; ' . Lang::T('the active session could not be disconnected') . ': ' . $e->getMessage();
+                    }
                 }
             }
             if ($unsetErr !== null) {
-                // the router took the secret change and refused only the clear: the address is still to be cleared
-                throw new Exception(Lang::T('Saved, but the fixed IP address could not be cleared') . ': ' . $unsetErr, self::PARTIAL);
+                // the router took the secret change and refused (or did not answer) only the clear: the address is still to be cleared
+                throw new Exception(Lang::T('Saved, but the fixed IP address could not be cleared') . ': ' . $unsetErr, self::PARTIAL, $unsetCause);
             }
         }
     }
@@ -428,6 +449,22 @@ class MikrotikPppoe
             $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
         }
         $this->checked($client->sendSync($setRequest));
+    }
+
+    /**
+     * Only adds the customer's secret (never changes one already there), the router's refusal thrown: a password change uses it
+     * for a secret its lookup found missing, and on a refusal looks it up again rather than change its profile or address
+     */
+    function addPpoeUserChecked($client, $plan, $customer)
+    {
+        $isExp = ORM::for_table('tbl_plans')->select("id")->where('plan_expired', $plan['id'])->find_one();
+        $was = $this->strict;
+        $this->strict = true;
+        try {
+            $this->addPpoeUser($client, $plan, $customer, $isExp);
+        } finally {
+            $this->strict = $was;
+        }
     }
 
     function removePpoeActive($client, $username)

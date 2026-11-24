@@ -197,6 +197,9 @@ foreach ($d as $ds) {
 
 // RADIUS sessions: those that stopped sending accounting updates, then old finished REST sessions (rad_acct)
 try {
+    // accounting packets radius.php could not save (database busy or down) and kept in a file: written now, oldest first,
+    // before stale sessions are judged (a queued update may be what shows a session is still alive)
+    RadiusSessions::replayAccounting();
     // Clear Stale Sessions (Settings > General): sessions that stopped sending accounting updates are closed, REST and MySQL
     // alike, on every run (system/cron/cleanup_stale_sessions.php does the same, for a site that runs it more often)
     $staleMinutes = RadiusSessions::staleMinutes($config);
@@ -262,6 +265,9 @@ if ($config['router_check']) {
     foreach ($routers as $router) {
         $ip = (string) $router->ip_address;
         $isOnline = false;
+        // kept for this router until the check below confirms the address checked is still the saved one and the router is
+        // still enabled: an error for an address changed (or a router disabled) meanwhile must not reach the alert
+        $probeError = null;
 
         try {
             // "host", "host:port", "[IPv6]" or "[IPv6]:port", read as the router pages and devices read it; a malformed saved
@@ -294,8 +300,7 @@ if ($config['router_check']) {
                 throw new Exception("Neither fsockopen nor stream_socket_client are enabled on the server.");
             }
         } catch (Throwable $e) {
-            _log($e->getMessage());
-            $errors[] = "Error with router $ip: " . $e->getMessage();
+            $probeError = $e->getMessage();
         }
 
         // the result is kept only for the address that was checked: under the lock routers.php holds while it saves an edit, the
@@ -311,6 +316,10 @@ if ($config['router_check']) {
             if (!$cur || (string) $cur['ip_address'] !== (string) $router->ip_address || (int) $cur['enabled'] !== 1) {
                 continue;
             }
+            if ($probeError !== null) {
+                _log($probeError);
+                $errors[] = "Error with router $ip: " . $probeError;
+            }
             if ($isOnline) {
                 $router->last_seen = date('Y-m-d H:i:s');
                 $router->status = 'Online';
@@ -319,6 +328,11 @@ if ($config['router_check']) {
                 $offlineRouters[] = $router;
             }
             $router->save();
+        } catch (Throwable $e) {
+            // a failed re-read or save is reported for this router only: the next router, the history and the nightly
+            // backups below still run
+            _log($e->getMessage());
+            $errors[] = "Error with router {$router->name}: " . $e->getMessage();
         } finally {
             if ($locked) {
                 try {

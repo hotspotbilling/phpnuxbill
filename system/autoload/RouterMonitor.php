@@ -25,7 +25,15 @@ class RouterMonitor
     // minutes (Routers > Settings says so); this allows a 15-minute cron and 5 minutes of lateness (a cron started late, or slow
     // routers read before this one in a run and not in the last). A longer gap is a break.
     const GAP = 1200;
-    const BOOT_SLACK = 120;     // seconds a router's start time can seem to move between readings without it having restarted
+    // seconds a router's start time (reading time less uptime) can seem to move between readings without it having restarted. A
+    // reading's time is taken as the /system/resource reply arrives, so the start time is off by the rounding of the two whole
+    // seconds and the reply's trip only: a few seconds. 45 covers that several times over, yet a restart moves the start time by
+    // at least the uptime the router had at the earlier reading plus its own boot (20 seconds or more), so it is missed only when
+    // that reading came within about 25 seconds of the previous start. Readings far apart get BOOT_DRIFT more (see restarted()).
+    const BOOT_SLACK = 45;
+    // the router's uptime and the server's clock run at slightly different rates (a crystal is good to about 50 parts per million,
+    // NTP corrects the server): 0.0002 per second elapsed covers readings days apart (a week adds about 2 minutes)
+    const BOOT_DRIFT = 0.0002;
 
     /** Two readings follow on from each other (no gap in the collection between them, a late cron allowed for) */
     private static function follows($prev, $at)
@@ -42,18 +50,22 @@ class RouterMonitor
         if ($prevUptime === null || $uptime === null) {
             return false;
         }
-        return ($at - (int) $uptime) - ($prevAt - (int) $prevUptime) > self::BOOT_SLACK;
+        return ($at - (int) $uptime) - ($prevAt - (int) $prevUptime) > self::BOOT_SLACK + abs($at - $prevAt) * self::BOOT_DRIFT;
     }
 
-    public static function ready()
+    /** The history tables are installed. $strict: a failed probe throws (and is looked at again) instead of reading as "not installed" */
+    public static function ready($strict = false)
     {
         static $ok = null;
-        if ($ok === null) {
+        if ($ok === null || ($strict && $ok === false)) {
             try {
                 $db = ORM::getDb();
                 $ok = (bool) $db->query("SHOW TABLES LIKE 'tbl_router_samples'")->fetch() && (bool) $db->query("SHOW TABLES LIKE 'tbl_router_events'")->fetch();
             } catch (Throwable $e) {
                 $ok = false;
+                if ($strict) {
+                    throw $e;
+                }
             }
         }
         return $ok;
@@ -74,7 +86,8 @@ class RouterMonitor
      */
     public static function moved($id, $strict = false)
     {
-        if (!self::ready()) {
+        // (strict: only tables known not to be there skip the event; a probe that failed throws, so the edit is rolled back)
+        if (!self::ready($strict)) {
             return;
         }
         try {
@@ -217,6 +230,7 @@ class RouterMonitor
         $lastIf = $q()->where_not_null('iface')->order_by_desc('at')->find_one();
         $s = ['online' => 0, 'cpu' => null, 'mem' => null, 'disk' => null, 'users' => null, 'uptime' => null, 'iface' => null, 'rx' => null, 'tx' => null];
         $why = '';
+        $readAt = null; // when the router answered /system/resource: the reading's time (see keep())
         [$c, $err] = RouterApi::connect($r['ip_address'], $r['username'], $r['password'], 5);
         if ($c) {
             // done with the router either way: the connection is dropped (no goodbye, which can wait for ever) before the reading is kept
@@ -224,6 +238,7 @@ class RouterMonitor
                 $until = microtime(true) + 10;
                 try {
                     $res = RouterApi::rows($c, '/system/resource/print', ['cpu-load', 'free-memory', 'total-memory', 'free-hdd-space', 'total-hdd-space', 'uptime'], $until);
+                    $readAt = time();
                     $x = $res[0] ?? [];
                     $pct = function ($free, $total) {
                         return is_numeric($free) && is_numeric($total) && (float) $total > 0 ? (int) round((1 - (float) $free / (float) $total) * 100) : null;
@@ -323,7 +338,7 @@ class RouterMonitor
             if ((int) $now['enabled'] !== 1) {
                 return Lang::T('router disabled during the reading, not kept');
             }
-            return self::keep($r, $s, $prev, $why, $since);
+            return self::keep($r, $s, $prev, $why, $since, $readAt);
         } finally {
             try {
                 $db->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
@@ -346,11 +361,12 @@ class RouterMonitor
     private static $queue = [];
 
     /** Save a reading and turn it into events (called with the router edit lock held) */
-    private static function keep($r, array $s, $prev, $why, $since)
+    private static function keep($r, array $s, $prev, $why, $since, $readAt = null)
     {
         $id = (int) $r['id'];
-        // one time for the reading: kept with the row and used for the restart test against it
-        $at = time();
+        // one time for the reading: kept with the row and used for the restart test against it. The time the router answered when
+        // it did (not now: the other reads and the wait for the lock come between), so its uptime and this time go together
+        $at = $readAt ?: time();
         $row = ORM::for_table('tbl_router_samples')->create();
         $row->router_id = $id;
         $row->at = date('Y-m-d H:i:s', $at);
@@ -571,8 +587,9 @@ class RouterMonitor
             $down = $up = null;
             // a restart between the two readings resets the counters: no speed across it (the same test as the restart event)
             $restarted = $prev && self::restarted($prev['t'], $prev['uptime'], $t, $r['uptime']);
-            // an uptime that went down is a restart even when the start time moved less than BOOT_SLACK (the earlier reading was
-            // made within that long of the router's start, and it restarted again soon after): its counters started again too
+            // an uptime that went down is a restart even when the start time moved less than BOOT_SLACK (and BOOT_DRIFT, the same
+            // allowance through restarted()): the earlier reading was made within that long of the router's start, and it restarted
+            // again soon after. Its counters started again too
             if ($prev && $prev['uptime'] !== null && $r['uptime'] !== null && (int) $r['uptime'] < (int) $prev['uptime']) {
                 $restarted = true;
             }

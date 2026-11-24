@@ -667,7 +667,17 @@
                 dPane._dropReq[dKey] = dReq;
                 dRow.pending = true;
                 dRow.err = null;
-                if (dPane._lv === dModel) listRender(dPane);
+                // the Disconnect button is drawn again (waiting) and the one that had the keyboard is gone: the focus is parked
+                // on the sessions pane (a stable target), and goes to the retry button if this fails and it has not moved since
+                var fe = document.activeElement;
+                var parked = false;
+                if (dPane._lv === dModel) {
+                    listRender(dPane);
+                    if (!fe || fe === drop || fe === document.body || !document.contains(fe)) {
+                        dPane.focus({ preventScroll: true });
+                        parked = document.activeElement === dPane;
+                    }
+                }
                 request('drop', rid, { kind: dKind, sid: dSid, user: dUser, address: dAddr, mac: dMac, started: dStarted, cfg: dCfg }).then(function (d) {
                     // kept on the pane, not only on the row: a Refresh meanwhile replaces the rows, and the result must survive it
                     // (a disconnect of a newer session with the same key has been sent since: the state, the rows and any notice
@@ -684,6 +694,14 @@
                     });
                     if (cur) {
                         listRender(dPane);
+                        if (!d.ok && parked && document.activeElement === dPane) {
+                            var retry = Array.prototype.filter.call(dPane.querySelectorAll('[data-rt-drop]'), function (b) {
+                                return b.getAttribute('data-rt-drop') === dKind && b.getAttribute('data-sid') === dSid && b.getAttribute('data-user') === dUser
+                                    && (b.getAttribute('data-address') || '') === dAddr && (b.getAttribute('data-mac') || '') === dMac
+                                    && sameStart(b.getAttribute('data-started') || '', dStarted);
+                            })[0];
+                            if (retry) retry.focus();
+                        }
                     } else if (!d.ok && dPane._lv && (dPane._lv.opts.cfg || '') === dCfg && dPane.querySelector('[data-rt-list]')) {
                         // the session is not in the list shown now (read with the same router settings): the failure is said above
                         // it. A list from other settings is about another router, and is left alone

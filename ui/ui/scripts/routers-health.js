@@ -193,10 +193,13 @@
             L.iface = saved(id) && L.ifs[saved(id)] ? saved(id) : best;
         }
     }
+    // the interface picked is kept for the router at its present address (its revision): after the address changes, the new
+    // router's busiest interface is shown instead of a name the old one had
     function saved(id, v) {
+        var key = 'rt-iface-' + id + (live[id] && live[id].rev ? '-' + live[id].rev : '');
         try {
-            if (v === undefined) return localStorage.getItem('rt-iface-' + id);
-            localStorage.setItem('rt-iface-' + id, v);
+            if (v === undefined) return localStorage.getItem(key);
+            localStorage.setItem(key, v);
         } catch (e) {
             return null;
         }
@@ -490,6 +493,8 @@
         // a deadline for the whole request, reading the answer included: a stuck one fails, so its queue place is freed and the
         // live readings carry on. It is raced against the request, so it holds where requests cannot be cancelled as well.
         var ctl = window.AbortController ? new AbortController() : null;
+        // a Live reading can be cancelled when its chain is started again (start())
+        if (opts.gen !== undefined && live[id]) live[id].ctl = ctl;
         var timer;
         var deadline = new Promise(function (resolve) {
             timer = setTimeout(function () { if (ctl) ctl.abort(); resolve({ ok: false, error: t.fail }); }, LIMIT);
@@ -565,7 +570,11 @@
             L.timer = setTimeout(function () { tick(id, gen); }, EVERY);
             return;
         }
-        ask(id, { live: true, gen: gen }).then(function (d) {
+        // one reading at a time for each router: start() waits for this one before a new chain asks again
+        var req = L.inflight = ask(id, { live: true, gen: gen });
+        var settled = function () { if (L.inflight === req) L.inflight = null; };
+        req.then(settled, settled);
+        req.then(function (d) {
             // a router that does not answer is asked every 30 seconds only: each try can wait for the connection time limit
             var cur = live[id];
             // (an answer dropped because the page was hidden or shown meanwhile is no failure: asked again at the usual pace)
@@ -585,7 +594,17 @@
         L.paused = false;
         L.started = Date.now();
         if (data[id]) panel(id, data[id]);
-        tick(id, L.gen);
+        var gen = L.gen;
+        if (L.inflight) {
+            // a reading of the chain before (paused, or the panel closed, while it was on its way) is still out: cancelled where the
+            // browser can, and the new chain asks only once it has settled (at the latest at its deadline), so a router never has
+            // two readings on their way at once. Its answer is still dropped (its generation is over).
+            if (L.ctl) L.ctl.abort();
+            var go = function () { tick(id, gen); };
+            L.inflight.then(go, go);
+        } else {
+            tick(id, gen);
+        }
     }
     // suspended: paused by leaving the Live tab or closing the row, so showing it again carries on; any other pause (the Pause
     // button, the 10-minute limit) stays until Resume is pressed
@@ -657,7 +676,14 @@
     document.querySelectorAll('[data-rt-tab="live"]').forEach(function (b) { b.disabled = false; });
     (function () {
         var check = document.getElementById('rtCheckNow');
-        if (check) check.disabled = !document.querySelector('input[name="ids[]"][form="rtBulkForm"]:checked');
+        // as the list's own check (admin/routers/list.tpl): on only when a ticked router can be checked, i.e. has a row this
+        // script reads (tr[data-rt-id]: enabled, with an address); a selection of disabled routers alone keeps it off
+        if (!check) return;
+        var can = false;
+        document.querySelectorAll('input[name="ids[]"][form="rtBulkForm"]:checked').forEach(function (b) {
+            if (document.querySelector('tr[data-rt-id="' + b.value + '"]')) can = true;
+        });
+        check.disabled = !can;
     })();
 
     document.addEventListener('click', function (e) {

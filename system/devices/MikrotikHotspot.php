@@ -65,6 +65,21 @@ class MikrotikHotspot
 		return $res;
 	}
 
+	/** The plan's limit-uptime and limit-bytes-total as addHotspotUser() gives them, "0" (no limit) for one the plan has not */
+	private function planLimits($plan)
+	{
+		$limits = ['limit-uptime' => '0', 'limit-bytes-total' => '0'];
+		if ($plan['typebp'] == "Limited") {
+			if (in_array($plan['limit_type'], ['Time_Limit', 'Both_Limit'])) {
+				$limits['limit-uptime'] = ($plan['time_unit'] == 'Hrs') ? $plan['time_limit'] . ":00:00" : "00:" . $plan['time_limit'] . ":00";
+			}
+			if (in_array($plan['limit_type'], ['Data_Limit', 'Both_Limit'])) {
+				$limits['limit-bytes-total'] = ($plan['data_unit'] == 'GB') ? $plan['data_limit'] . "000000000" : $plan['data_limit'] . "000000";
+			}
+		}
+		return $limits;
+	}
+
 	private function syncCustomer($customer, $plan)
 	{
 		$mikrotik = $this->info($plan['routers']);
@@ -73,22 +88,29 @@ class MikrotikHotspot
 		$t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('plan_id', $plan['id'])->where('status', 'on')->find_one();
 		if ($t) {
 			$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
-			$printRequest->setArgument('.proplist', '.id,limit-uptime,limit-bytes-total');
+			$printRequest->setArgument('.proplist', '.id');
 			$printRequest->setQuery(RouterOS\Query::where('name', $customer['username']));
 			// a refused lookup (!trap) is thrown here, before anything is removed or added; an empty answer means no such user
 			$userInfo = $this->checked($client->sendSync($printRequest));
 			$id = $userInfo->getProperty('.id');
-			$uptime = $userInfo->getProperty('limit-uptime');
-			$data = $userInfo->getProperty('limit-bytes-total');
-			if (!empty($id) && (!empty($uptime) || !empty($data))) {
-				// changed in place, so the user's usage counters are kept
+			if (!empty($id)) {
+				// an existing user is changed in place (never removed first), so its usage counters are kept; the plan's limits
+				// are set too ("0" is no limit), so a plan whose limits changed is followed
 				$setRequest = new RouterOS\Request('/ip/hotspot/user/set');
 				$setRequest->setArgument('numbers', $id);
 				$setRequest->setArgument('profile', $plan['name_plan']);
 				$setRequest->setArgument('password', $customer['password']);
+				foreach ($this->planLimits($plan) as $k => $v) {
+					$setRequest->setArgument($k, $v);
+				}
 				$this->checked($client->sendSync($setRequest));
 			} else {
-				$this->add_customer($customer, $plan);
+				// a missing user only is made, and nothing is removed (the add is refused if one appeared meanwhile)
+				$isExp = ORM::for_table('tbl_plans')->select("id")->where('plan_expired', $plan['id'])->find_one();
+				if ($isExp) {
+					$this->removeHotspotActiveUser($client, $customer['username']);
+				}
+				$this->addHotspotUserChecked($client, $plan, $customer);
 			}
 		}
 	}
@@ -119,13 +141,21 @@ class MikrotikHotspot
         $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
         $printRequest->setArgument('.proplist', '.id');
         $printRequest->setQuery(RouterOS\Query::where('name', $from));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
+        $res = $client->sendSync($printRequest);
+        // a refused lookup is thrown: carrying on would let the caller's add_customer() replace whatever user has the new name
+        if (($err = RouterApi::error($res)) !== null) {
+            throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+        }
+        $id = $res->getProperty('.id');
 
         if (!empty($id)) {
             $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
             $setRequest->setArgument('numbers', $id);
             $setRequest->setArgument('name', $to);
-            $client->sendSync($setRequest);
+            // a refused rename (a user of the new name already there, say) stops the edit, and the old session stays connected
+            if (($err = RouterApi::error($client->sendSync($setRequest))) !== null) {
+                throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+            }
             //disconnect then
             $this->removeHotspotActiveUser($client, $from);
         }

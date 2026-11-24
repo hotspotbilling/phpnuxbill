@@ -727,6 +727,27 @@ switch ($action) {
                     r2(getUrl('settings/app'), 'e', 'PHP GD is not installed');
                 }
             }
+            // a changed address is checked and saved under the locks VPN provisioning takes (MikrotikVpn::lockAddressEdit()):
+            // the old one stays reserved until a provisioning that uses it has finished, and one another customer holds is refused
+            $vpnLocks = [];
+            if ($pppoeIpDiff) {
+                if (class_exists('MikrotikVpn') || DeviceLoader::load('MikrotikVpn')) {
+                    $vpnRouters = [];
+                    foreach (ORM::for_table('tbl_user_recharges')->select('routers')->where('customer_id', $c['id'])->find_array() as $row) {
+                        $vpnRouters[] = (string) $row['routers'];
+                    }
+                    $vpnLocks = MikrotikVpn::lockAddressEdit($c['id'], $vpnRouters);
+                    if ($vpnLocks === false) {
+                        r2(getUrl('customers/edit/') . $id, 'e', Lang::T('Another customer is being given an address from this pool. Try again in a moment.'));
+                    }
+                }
+                if ($pppoe_ip !== '' && ORM::for_table('tbl_customers')->where('pppoe_ip', $pppoe_ip)->where_not_equal('id', $c['id'])->find_one()) {
+                    if ($vpnLocks) {
+                        MikrotikVpn::unlockAddressEdit($vpnLocks);
+                    }
+                    r2(getUrl('customers/edit/') . $id, 'e', Lang::T('This IP address is already saved for another customer') . ': ' . $pppoe_ip);
+                }
+            }
             if ($userDiff) {
                 $c->username = $username;
             }
@@ -751,7 +772,13 @@ switch ($action) {
             $c->district = $district;
             $c->state = $state;
             $c->zip = $zip;
-            $c->save();
+            try {
+                $c->save();
+            } finally {
+                if ($vpnLocks) {
+                    MikrotikVpn::unlockAddressEdit($vpnLocks);
+                }
+            }
             if (class_exists('RedisCache')) {
                 RedisCache::forgetRadiusCustomer($oldusername);
                 RedisCache::forgetRadiusCustomer($username);
@@ -805,6 +832,7 @@ switch ($action) {
                 }
             }
 
+            $partialPlans = []; // plans whose router update was only partly done (code 207)
             if ($userDiff || $pppoeDiff || $pppoeIpDiff || $passDiff) {
                 $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->findMany();
                 foreach ($turs as $tur) {
@@ -833,12 +861,16 @@ switch ($action) {
                                 try {
                                     (new $p['device'])->add_customer($c, $p);
                                 } catch (Exception $e) {
-                                    // code 207: saved on the router, one later step refused (a fixed IP not cleared): the change stands, so it is
-                                    // saved here too, and logged for the admins; any other error stops as before
+                                    // code 207: saved on the router, one later step refused (a fixed IP not cleared, a port forward not
+                                    // made): the change stands, so it is saved here too, logged for the admins and named in a warning;
+                                    // any other error stops as before
                                     if ($e->getCode() !== 207) {
                                         throw $e;
                                     }
-                                    _log('[' . $c['username'] . '] edit: ' . $e->getMessage(), 'Router');
+                                    $cause = $e->getPrevious();
+                                    _log('[' . $c['username'] . '] edit: ' . $e->getMessage()
+                                        . ($cause && strpos($e->getMessage(), $cause->getMessage()) === false ? ' (' . $cause->getMessage() . ')' : ''), 'Router');
+                                    $partialPlans[] = $p['name_plan'];
                                 }
                             } else {
                                 new Exception(Lang::T("Devices Not Found"));
@@ -848,6 +880,10 @@ switch ($action) {
                     $tur->username = $username;
                     $tur->save();
                 }
+            }
+            if ($partialPlans) {
+                r2(getUrl('customers/view/') . $id, 'w', Lang::T('User Updated, but the router update is incomplete for') . ': '
+                    . implode(', ', array_unique($partialPlans)) . '. ' . Lang::T('See the Router logs.'));
             }
             r2(getUrl('customers/view/') . $id, 's', 'User Updated Successfully');
         } else {

@@ -25,7 +25,7 @@ class Message
         // while answering FreeRADIUS (radius.php) the router is waiting: 3 seconds at most, whatever the caller asked for
         // (a voucher login's purchase alert comes from Package::rechargeUser, in the middle of the login)
         if (!empty($GLOBALS['radius_request'])) {
-            $timeout = min((int) $timeout, 3);
+            $timeout = max(1, min((int) $timeout, 3)); // 0 or less would mean no limit at all
         }
         if (!empty($config['telegram_bot'])) {
             if (empty($chat_id)) {

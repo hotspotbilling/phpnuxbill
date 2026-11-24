@@ -400,6 +400,10 @@ switch ($action) {
                 }
                 $values['router_backup_password'] = $backupPass;
             }
+            // no backup is made without a password: nightly backups are not turned on until one is saved or typed here
+            if ($values['router_backup'] === '1' && $backupPass === '' && (string) ($config['router_backup_password'] ?? '') === '') {
+                r2(getUrl('routers/settings'), 'e', Lang::T('Nightly backups need a backup password. Type one to turn them on.'));
+            }
             // all or nothing: a write that fails leaves the settings as they were
             $db = ORM::get_db();
             try {
@@ -552,7 +556,8 @@ switch ($action) {
         $skipped = [];
         $taken = [];
         $badAddr = [];
-        if ($op === 'enable' && !$endpointLock()) {
+        // both operations wait for the lock: a router sync checks each customer against the router's enabled state under it
+        if (!$endpointLock()) {
             r2(getUrl('routers/list'), 'e', $busyText());
         }
         foreach (ORM::for_table('tbl_routers')->where_in('id', $ids)->find_many() as $r) {
@@ -1515,6 +1520,7 @@ switch ($action) {
         }
         // text from an old router can be in a legacy encoding: replaced rather than failing the whole answer
         $json = json_encode($out + ['key' => $key], JSON_INVALID_UTF8_SUBSTITUTE);
+        $now = false; // the router as it is now: read under the file lock below, or after it when the file cannot be opened
         $fh = $json !== false ? @fopen($file, 'c+') : false;
         if ($fh) {
             // read and write under one lock: when two readings of the same router finish together, the newer one stays
@@ -1535,6 +1541,20 @@ switch ($action) {
                 flock($fh, LOCK_UN);
             }
             fclose($fh);
+        }
+        // the answer too is only for the router's details as they are now: a router disabled (or left without an address)
+        // meanwhile gets the disabled answer, one whose address or login changed meanwhile is asked to try again, not handed a
+        // reading of the old details
+        if ($now === false) {
+            $now = ORM::for_table('tbl_routers')->find_one($id);
+        }
+        if (!$now || (int) $now['enabled'] !== 1 || trim((string) $now['ip_address']) === '') {
+            echo json_encode(['ok' => false, 'skip' => true, 'error' => Lang::T('Disabled')]);
+            exit;
+        }
+        if (hash('sha256', $now['ip_address'] . "\n" . $now['username'] . "\n" . $now['password']) !== $key) {
+            echo json_encode(['ok' => false, 'error' => Lang::T('The router settings changed since this check began. Check it again.')]);
+            exit;
         }
         $out['age'] = 0;
         echo json_encode($out, JSON_INVALID_UTF8_SUBSTITUTE);

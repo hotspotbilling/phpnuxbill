@@ -72,7 +72,157 @@ class RadiusSessions
         return $out;
     }
 
-    private static function close(array &$out, string $label, string $table, ?string $connection, string $setSql, array $setParams, string $where, array $params): void
+    /**
+     * Write one REST accounting packet to rad_acct (radius.php, and the replay of queued ones). One statement keyed on the
+     * unique (username, acctsessionid): a new session is added, a known one updated, atomically. $p holds the columns of
+     * the INSERT below; acctstatustype is null for an unknown type (the stored one is kept). A replayed packet only
+     * changes a row it is newer than (its dateUpdated is the time it was received), so it never rolls back a later update.
+     * Throws on any failure.
+     */
+    public static function saveAccounting(array $p, bool $replay = false): void
+    {
+        $cols = ['acctsessionid', 'username', 'realm', 'nasid', 'nasipaddress', 'nasportid', 'nasporttype', 'framedipaddress',
+            'acctsessiontime', 'acctinputoctets', 'acctoutputoctets', 'acctstatustype', 'macaddr', 'dateAdded', 'dateUpdated'];
+        $set = [
+            'acctinputoctets' => 'VALUES(acctinputoctets)',
+            'acctoutputoctets' => 'VALUES(acctoutputoctets)',
+            'acctsessiontime' => 'VALUES(acctsessiontime)',
+            'framedipaddress' => 'VALUES(framedipaddress)',
+            'acctstatustype' => 'COALESCE(VALUES(acctstatustype), acctstatustype)',
+            'dateUpdated' => 'VALUES(dateUpdated)', // last: MySQL applies the assignments in order, the test below reads the old value
+        ];
+        if ($replay) {
+            // a session already closed (by its Stop or the stale cleanup) is not made live again by an older queued update
+            $set['acctstatustype'] = "IF(acctstatustype = 'Stop', acctstatustype, {$set['acctstatustype']})";
+        }
+        $parts = [];
+        foreach ($set as $col => $expr) {
+            $parts[] = $replay
+                ? "{$col} = IF(VALUES(dateUpdated) >= COALESCE(dateUpdated, dateAdded), {$expr}, {$col})"
+                : "{$col} = {$expr}";
+        }
+        $values = [];
+        foreach ($cols as $col) {
+            $values[] = $p[$col] ?? null;
+        }
+        $stmt = ORM::get_db()->prepare('INSERT INTO rad_acct (' . implode(', ', $cols) . ') VALUES ('
+            . implode(', ', array_fill(0, count($cols), '?')) . ') ON DUPLICATE KEY UPDATE ' . implode(', ', $parts));
+        // the connection throws on errors (PDO::ERRMODE_EXCEPTION); a false result is treated the same, never as saved
+        if (!$stmt || !$stmt->execute($values)) {
+            throw new RuntimeException('rad_acct write failed: ' . implode(' ', $stmt ? $stmt->errorInfo() : ORM::get_db()->errorInfo()));
+        }
+    }
+
+    /** The accounting packets that could not be written, waiting for replayAccounting() (one JSON object per line) */
+    public static function queueFile(): string
+    {
+        global $CACHE_PATH;
+        return rtrim((string) $CACHE_PATH, '/\\') . DIRECTORY_SEPARATOR . 'radius_acct_retry.jsonl';
+    }
+
+    /**
+     * Keep a packet that could not be written, so the router can still be answered and nothing is lost. True when it is
+     * on disk. Above 50 MB (a long database outage) only Stop packets are kept: they carry a session's final usage, while
+     * a Start or Interim-Update is superseded by the next one. Never throws.
+     */
+    public static function queueAccounting(array $p): bool
+    {
+        try {
+            $file = self::queueFile();
+            if (($p['acctstatustype'] ?? null) !== 'Stop' && @filesize($file) > 50 * 1024 * 1024) {
+                return false;
+            }
+            $line = json_encode($p, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+            if ($line === false) {
+                return false;
+            }
+            $line .= "\n";
+            return @file_put_contents($file, $line, FILE_APPEND | LOCK_EX) === strlen($line);
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Write the queued accounting packets, oldest first. Meant for the cron. A packet that still fails goes back in the
+     * queue (with any written meanwhile); a line that is not a packet is dropped. Returns ['replayed' => n, 'failed' => n].
+     * Never throws.
+     */
+    public static function replayAccounting(int $max = 20000): array
+    {
+        $out = ['replayed' => 0, 'failed' => 0];
+        $file = self::queueFile();
+        if (!is_file($file) || (int) @filesize($file) === 0) {
+            return $out;
+        }
+        $work = $file . '.replay';
+        try {
+            // take the queue as a whole under its lock, so radius.php appends to a new one meanwhile
+            $fh = @fopen($file, 'c+');
+            if (!$fh) {
+                return $out;
+            }
+            if (!flock($fh, LOCK_EX)) {
+                fclose($fh);
+                return $out;
+            }
+            // a replay that stopped halfway left its file: its packets come first
+            $data = (is_file($work) ? (string) @file_get_contents($work) : '') . stream_get_contents($fh);
+            if (@file_put_contents($work, $data, LOCK_EX) !== strlen($data)) {
+                flock($fh, LOCK_UN);
+                fclose($fh);
+                return $out;
+            }
+            ftruncate($fh, 0);
+            flock($fh, LOCK_UN);
+            fclose($fh);
+
+            $retry = '';
+            foreach (preg_split('/\r?\n/', $data, -1, PREG_SPLIT_NO_EMPTY) as $i => $line) {
+                $p = json_decode($line, true);
+                if (!is_array($p) || empty($p['username']) || empty($p['acctsessionid'])) {
+                    continue;
+                }
+                if ($i >= $max) {
+                    $retry .= $line . "\n";
+                    continue;
+                }
+                try {
+                    self::saveAccounting($p, true);
+                    $out['replayed']++;
+                } catch (Throwable $e) {
+                    $out['failed']++;
+                    $retry .= $line . "\n";
+                }
+            }
+            if ($retry !== '') {
+                // ahead of anything queued while this ran, to keep the order
+                $fh = @fopen($file, 'c+');
+                if ($fh && flock($fh, LOCK_EX)) {
+                    $newer = stream_get_contents($fh);
+                    ftruncate($fh, 0);
+                    rewind($fh);
+                    fwrite($fh, $retry . $newer);
+                    fflush($fh);
+                    flock($fh, LOCK_UN);
+                    fclose($fh);
+                } else {
+                    return $out; // the work file stays, and is picked up first next time
+                }
+            }
+            @unlink($work);
+            if ($out['replayed'] > 0 || $out['failed'] > 0) {
+                try {
+                    _log("RADIUS accounting queue: {$out['replayed']} packet(s) written, {$out['failed']} still waiting", 'CRON');
+                } catch (Throwable $ignored) {
+                }
+            }
+        } catch (Throwable $e) {
+        }
+        return $out;
+    }
+
+    private static function close(array &$out,string $label, string $table, ?string $connection, string $setSql, array $setParams, string $where, array $params): void
     {
         try {
             $sample = self::sample($table, $connection, $where, $params);

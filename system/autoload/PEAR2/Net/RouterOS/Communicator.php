@@ -471,13 +471,17 @@ class Communicator
         }
 
         flock($stream, LOCK_SH);
-        $totalLength = strlen($prefix) + self::seekableStreamLength($stream);
-        static::verifyLengthSupport($totalLength);
+        // PHPNuxBill: the lock is let go however the send ends (also when it fails or runs out of time); the stream's position
+        // is put back by send() itself
+        try {
+            $totalLength = strlen($prefix) + self::seekableStreamLength($stream);
+            static::verifyLengthSupport($totalLength);
 
-        $bytes = $this->trans->send(self::encodeLength($totalLength) . $prefix);
-        $bytes += $this->trans->send($stream);
-
-        flock($stream, LOCK_UN);
+            $bytes = $this->trans->send(self::encodeLength($totalLength) . $prefix);
+            $bytes += $this->trans->send($stream);
+        } finally {
+            flock($stream, LOCK_UN);
+        }
         return $bytes;
     }
 

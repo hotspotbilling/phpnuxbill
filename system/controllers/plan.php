@@ -938,6 +938,13 @@ switch ($action) {
             }
         }
         if (!empty($made)) {
+            // a router renamed while that batch was written: following the rename is done again here (it is idempotent, and
+            // touches only codes still under a name no router has), in case the first request's follow failed
+            $rec = $rec ?? ORM::for_table('tbl_appconfig')->where('setting', $formKey)->find_one();
+            $saved = $rec ? json_decode((string) $rec['value'], true) : null;
+            if (is_array($saved) && !empty($saved['ids']) && !empty($saved['rid'])) {
+                Package::followRename('tbl_voucher', $saved['ids'], (string) ($saved['server'] ?? ''), (int) ($saved['plan'] ?? 0), (int) $saved['rid']);
+            }
             r2(getUrl('plan/voucher') . '&made=' . $formHash, 'w',
                 Lang::T('These vouchers were created already, the form was sent twice. They are in this list.'));
         }
@@ -972,8 +979,21 @@ switch ($action) {
         if ($prefix !== '' && !preg_match('/^[A-Za-z0-9_-]{1,20}$/', $prefix)) {
             $msg .= Lang::T('The prefix can only have letters, numbers, - and _ (20 at most)') . '<br>';
         }
+        // the router's own id, read in one statement with the check that the plan is still on the router chosen: the form names the
+        // router only, and a rename since the form was opened (or another router given that name) would otherwise put the codes
+        // on a router other than the one picked. A rename after this is followed to that same router only (see Package).
+        $serverId = null;
         if ($msg == '' && !ORM::for_table('tbl_plans')->find_one($plan)) {
             $msg .= Lang::T('Plan Not Found') . '<br>';
+        } elseif ($msg == '' && $server !== 'radius') {
+            $st = ORM::getDb()->prepare('SELECT r.id FROM tbl_plans p JOIN tbl_routers r ON r.name = p.routers WHERE p.id = ? AND p.routers = ?');
+            $st->execute([(int) $plan, $server]);
+            $rids = $st->fetchAll(PDO::FETCH_COLUMN);
+            if (!$rids) {
+                $msg .= Lang::T('The router or the plan was changed since this form was opened. Open it again to create the vouchers.') . '<br>';
+            } elseif (count($rids) === 1) {
+                $serverId = (int) $rids[0]; // (routers sharing one name: none is followed, as Package does)
+            }
         }
 
         if ($msg == '') {
@@ -1041,8 +1061,6 @@ switch ($action) {
             }
             $inBatch = array_flip(array_map($key, $vouchers));
 
-            // the router's own id, read before the codes are written: a rename is followed only to that same router (see Package)
-            $serverId = Package::routerId($server);
             ORM::raw_execute('START TRANSACTION');
             try {
                 foreach ($vouchers as $code) {
@@ -1079,7 +1097,8 @@ switch ($action) {
                     // committed together with the vouchers: both are saved, or neither. The ids let the list show exactly these.
                     $rec = ORM::for_table('tbl_appconfig')->create();
                     $rec->setting = $formKey;
-                    $rec->value = json_encode($done + ['ids' => array_map('intval', $newVoucherIds)]);
+                    $rec->value = json_encode($done + ['ids' => array_map('intval', $newVoucherIds), 'server' => $server,
+                        'plan' => (int) $plan, 'rid' => $serverId]);
                     $rec->save();
                 }
                 ORM::raw_execute('COMMIT');
@@ -1392,10 +1411,12 @@ switch ($action) {
                             $isChangePlan = true;
                             try {
                                 (new $p['device'])->add_customer($c, $p);
-                            } catch (Exception $e) {
+                            } catch (Throwable $e) {
                                 // code 207: saved on the router, one later step refused (a fixed IP not cleared): the change stands, so it is
-                                // saved here too, and logged for the admins; any other error stops as before
+                                // saved here too, and logged for the admins; any other error stops as before, and the link's marker is
+                                // taken back so the admin can try the extend again (nothing was extended)
                                 if ($e->getCode() !== 207) {
+                                    App::clearVoucher($svoucher);
                                     throw $e;
                                 }
                                 _log('[' . $c['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');

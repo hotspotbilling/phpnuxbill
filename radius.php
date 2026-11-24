@@ -122,34 +122,39 @@ try {
             }
 
             // One statement for every accounting request, keyed on the unique (username, acctsessionid): a new session is
-            // added, a known one updated. Atomic, so a Start and the NAS's resend of it (or an Interim arriving with it)
-            // can never both insert and fail on the key, which used to answer FreeRADIUS with an error and no
-            // Accounting-Response for the router. The status changes only for a known type; the start fields stay as
-            // first written. Dates in PHP's timezone, as the cron and the dashboard compare them.
+            // added, a known one updated (RadiusSessions::saveAccounting). Atomic, so a Start and the NAS's resend of it (or an
+            // Interim arriving with it) can never both insert. Dates in PHP's timezone, as the cron and the dashboard compare them.
             $now = date('Y-m-d H:i:s');
-            $status = in_array($acctStatusType, ['Start', 'Stop', 'Interim-Update'], true) ? $acctStatusType : null;
+            $packet = [
+                'acctsessionid' => (string) $acctSessionId, 'username' => (string) $username, 'realm' => (string) $realm,
+                'nasid' => (string) _req('nasid'), 'nasipaddress' => (string) $nasIpAddress, 'nasportid' => $nasPortId,
+                'nasporttype' => $nasPortType, 'framedipaddress' => (string) $framedIPAddress, 'acctsessiontime' => $acctSessionTime,
+                'acctinputoctets' => $acctInputOctets, 'acctoutputoctets' => $acctOutputOctets,
+                // the status changes only for a known type; the start fields stay as first written
+                'acctstatustype' => in_array($acctStatusType, ['Start', 'Stop', 'Interim-Update'], true) ? $acctStatusType : null,
+                'macaddr' => (string) $macAddr, 'dateAdded' => $now, 'dateUpdated' => $now,
+            ];
             try {
-                ORM::raw_execute(
-                    "INSERT INTO rad_acct (acctsessionid, username, realm, nasid, nasipaddress, nasportid, nasporttype, framedipaddress,
-                        acctsessiontime, acctinputoctets, acctoutputoctets, acctstatustype, macaddr, dateAdded, dateUpdated)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                     ON DUPLICATE KEY UPDATE acctinputoctets = VALUES(acctinputoctets), acctoutputoctets = VALUES(acctoutputoctets),
-                        acctsessiontime = VALUES(acctsessiontime), framedipaddress = VALUES(framedipaddress),
-                        dateUpdated = VALUES(dateUpdated), acctstatustype = COALESCE(VALUES(acctstatustype), acctstatustype)",
-                    [
-                        (string) $acctSessionId, (string) $username, (string) $realm, (string) _req('nasid'), (string) $nasIpAddress,
-                        $nasPortId, $nasPortType, (string) $framedIPAddress, $acctSessionTime, $acctInputOctets, $acctOutputOctets,
-                        $status, (string) $macAddr, $now, $now,
-                    ]
-                );
+                RadiusSessions::saveAccounting($packet);
                 show_radius_result(['Reply-Message' => 'Saved'], 200);
             } catch (Throwable $e) {
-                // the router is still answered (200): without an Accounting-Response it logs "no response" and sends the
-                // request again, which only adds load; this one update is lost, the next interim update brings the session up to date
-                radius_alert("Database save error on RADIUS accounting.\nUsername: {$username}\nSession ID: {$acctSessionId}\nError: " . $e->getMessage());
-                show_radius_result(['Reply-Message' => 'Not saved'], 200);
+                // Not written: the packet is queued on disk (the cron writes it later, RadiusSessions::replayAccounting) and
+                // the router is answered 200, since without an Accounting-Response it logs "no response" and resends, which
+                // only adds load. Only a Stop that could not be queued either is refused, so the NAS sends it again: it
+                // carries the session's final usage. A lost Start or Interim-Update is made up by the next update.
+                $queued = RadiusSessions::queueAccounting($packet);
+                radius_alert("Database save error on RADIUS accounting (" . ($queued ? 'queued for retry' : 'NOT queued') . ").\nUsername: {$username}\nSession ID: {$acctSessionId}\nError: " . $e->getMessage());
+                if (!$queued && $packet['acctstatustype'] === 'Stop') {
+                    show_radius_result(['Reply-Message' => 'Not saved'], 500);
+                }
+                show_radius_result(['Reply-Message' => $queued ? 'Queued' : 'Not saved'], 200);
             }
             break;
+        case 'post-auth':
+            // FreeRADIUS's rest module calls this after every login when post-auth is in its config: nothing to record here.
+            // Answered "no content" (ok), never 401: a reject in post-auth can turn an accepted login into a rejected one.
+            header("HTTP/1.1 204 No Content");
+            die();
         default:
             show_radius_result(['Reply-Message' => 'Invalid Command : ' . $action], 401);
             break;

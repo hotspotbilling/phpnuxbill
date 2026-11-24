@@ -64,6 +64,13 @@ class App{
         $_SESSION[$token] = $value;
     }
 
+    /** Takes back a setVoucher() mark (the action it guarded failed), so the same link can be used again */
+    public static function clearVoucher($token){
+        if (!empty($token)) {
+            unset($_SESSION[$token]);
+        }
+    }
+
     public static function getVoucherValue($key){
         if(empty($key)){
             return "";

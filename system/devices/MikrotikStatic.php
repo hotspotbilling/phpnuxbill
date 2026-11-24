@@ -73,15 +73,29 @@ class MikrotikStatic
             $setRequest->setArgument('max-limit', $rate);
             $setRequest->setArgument('comment', $plan['name_plan'] . ' | ' . $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
             // the expired entry is cleared only once the router has taken the queue change: a refused change keeps it blocked
-            if (RouterApi::error($this->checked($client->sendSync($setRequest))) === null && !$isExp) {
+            $this->queueWritten($client->sendSync($setRequest));
+            if (!$isExp) {
                 $this->clearExpired($client, $customer['pppoe_ip']);
             }
         }
     }
 
     /**
-     * Take the customer's address off the Expired list, after the queue for it is in place. During a sync, a cleanup the router
-     * refuses is thrown as a partial update (MikrotikPppoe::PARTIAL): the queue was saved, the address may still be blocked.
+     * A queue add or set the router refused (a !trap) is thrown as a failed provisioning, in every mode (not only during a sync):
+     * nothing was saved, so the customer stays on the Expired list and no cleanup follows.
+     */
+    private function queueWritten($res)
+    {
+        if (($err = RouterApi::error($res)) !== null) {
+            throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+        }
+        return $res;
+    }
+
+    /**
+     * Take the customer's address off the Expired list, after the queue for it is in place. A cleanup the router refuses or does
+     * not answer is thrown as a partial update (MikrotikPppoe::PARTIAL), in every mode: the queue was saved, the address may
+     * still be blocked.
      */
     private function clearExpired($client, $ip)
     {
@@ -91,7 +105,7 @@ class MikrotikStatic
             // no answer (the connection is dropped): the queue was saved, whether the address left the list is not known
             throw new Exception(Lang::T('Saved, but the address could not be taken off the Expired list') . ': ' . $e->getMessage(), 207, $e);
         }
-        if ($err !== null && $this->strict) {
+        if ($err !== null) {
             throw new Exception(Lang::T('Saved, but the address could not be taken off the Expired list') . ': ' . $err, 207);
         }
     }
@@ -103,8 +117,12 @@ class MikrotikStatic
         if (!empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
             if ($p) {
-                $this->add_customer($customer, $p);
-                $this->addIpToAddressList($client, $customer['pppoe_ip'], $listName = 'Expired', $customer['username']);
+                try {
+                    $this->add_customer($customer, $p);
+                } finally {
+                    // the address goes on the Expired list even when the expired plan's queue was refused (now thrown)
+                    $this->addIpToAddressList($client, $customer['pppoe_ip'], $listName = 'Expired', $customer['username']);
+                }
                 return;
             }
         }
@@ -285,7 +303,8 @@ class MikrotikStatic
         $setRequest->setArgument('max-limit', $rate);
         $setRequest->setArgument('comment', $plan['name_plan'] . ' | ' . $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
         // the queue first: the customer leaves the Expired list only once the router has confirmed the queue that limits them
-        if (RouterApi::error($this->checked($client->sendSync($setRequest))) === null && !$isExp) {
+        $this->queueWritten($client->sendSync($setRequest));
+        if (!$isExp) {
             $this->clearExpired($client, $customer['pppoe_ip']);
         }
     }

@@ -105,16 +105,45 @@ class RouterApi
         $tag = 'nb' . (++$n);
         $req->setTag($tag);
         self::transmit($c, $req, $deadline);
-        $left = $deadline - microtime(true);
         $recvErr = null;
-        if ($left > 0) {
+        $got = [];
+        $finished = function () use (&$got) {
+            foreach ($got as $r) {
+                if (in_array($r->getType(), [Response::TYPE_FINAL, Response::TYPE_FATAL], true)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        if ($deadline - microtime(true) > 0) {
             // every read inside the reply (not only the wait for it to start) ends by the deadline
             if (method_exists($c, 'readDeadline')) {
                 $c->readDeadline($deadline);
             }
             try {
-                // (each wait inside is capped by the deadline set above, not only the total)
-                $c->loop((int) floor($left), (int) (($left - floor($left)) * 1000000));
+                // one reply at a time, and this request's replies collected after each: the library's loop() runs until every
+                // pending request is done (a /listen on the same client never is), so this wait ends as soon as this request is
+                // done (or the deadline passes), and replies to other requests stay buffered (or go to their callbacks)
+                $next = \Closure::bind(function ($s, $us) {
+                    try {
+                        $this->dispatchNextResponse($s, $us);
+                    } catch (\PEAR2\Net\RouterOS\SocketException $e) {
+                        if ($e->getCode() !== \PEAR2\Net\RouterOS\SocketException::CODE_NO_DATA) {
+                            throw $e; // (no reply within the time is not an error here: the deadline is checked below)
+                        }
+                    }
+                }, $c, \PEAR2\Net\RouterOS\Client::class);
+                while (($left = $deadline - microtime(true)) > 0) {
+                    $next((int) floor($left), (int) (($left - floor($left)) * 1000000));
+                    // (isRequestActive() is no test of being finished: it stays true while a finished answer waits to be
+                    // collected; once the closing reply is collected the request is gone, so nothing is asked for after it)
+                    if ($c->isRequestActive($tag)) {
+                        $got = array_merge($got, $c->extractNewResponses($tag)->toArray());
+                    }
+                    if ($finished() || $c->getPendingRequestsCount() === 0) {
+                        break; // done, or nothing is pending any more (the connection ended): no reply can still come
+                    }
+                }
             } catch (\PEAR2\Net\Transmitter\Exception | \PEAR2\Net\RouterOS\SocketException $e) {
                 // the reply is incomplete: a read that ran out of time, or the connection closed mid-reply (told apart below)
                 $recvErr = $e;
@@ -124,12 +153,14 @@ class RouterApi
                 }
             }
         }
-        // (isRequestActive() is no test of being finished: it stays true while a finished answer waits to be collected)
-        $res = $c->extractNewResponses($tag);
-        foreach ($res as $r) {
-            if (in_array($r->getType(), [Response::TYPE_FINAL, Response::TYPE_FATAL], true)) {
-                return $res;
-            }
+        if (!$finished() && $c->isRequestActive($tag)) {
+            $got = array_merge($got, $c->extractNewResponses($tag)->toArray());
+        }
+        if ($finished()) {
+            $res = new \PEAR2\Net\RouterOS\ResponseCollection($got);
+            // at the first reply, so a caller's $res->getProperty() (which reads the current reply) sees it
+            $res->rewind();
+            return $res;
         }
         // the router ended the connection itself (a !fatal reply, which belongs to no request): a broken connection, not a
         // router that went quiet
@@ -359,14 +390,17 @@ class RouterApi
     /**
      * Nightly backups, from the cron: once a day, each enabled router saves "phpnuxbill-auto-<date>.backup" on itself, and only
      * the newest few of those are kept (older ones are removed from the router). Only files this code confirmed it saved (kept
-     * per router in the state's "made" list) are ever removed: backups made by hand, and nightly-named files saved before that
-     * list existed, are left alone (they are counted in the output so they can be removed by hand).
+     * per router in the state's "made" list, with the times and size the router listed for each) are ever removed, and only
+     * while the file is still that one: backups made by hand, nightly-named files saved before that list existed and files
+     * replaced since are left alone (they are counted in the output so they can be removed by hand). Today's confirmed backup
+     * always keeps one of the kept places.
      * A router that fails, or whose connection is not protected, is tried again on the next runs that day (up to 3 times); one
      * that is done is not touched again. Progress is kept per router row and address, so a router moved to another address
      * starts again. A save counts as made only once the router confirmed it and the file has something in it; that is recorded
      * before older backups are removed, so a retry after a failed clean-up only cleans up, as long as today's file is still
-     * listed with something in it (otherwise it is saved again). A file left by a save that never answered is saved again (the
-     * same name, so it is replaced). The password is sent only over a protected connection (see backupTransportError()).
+     * listed as saved with something in it (otherwise it is saved again). A save never writes over a file (RouterOS replaces a
+     * file of the same name): when today's name is taken (by hand, or by a save that never answered) it goes to today's name
+     * with -2 to -9, and when all are taken none is made that day. The password is sent only over a protected connection (see backupTransportError()).
      * Never throws; returns lines for the cron's output.
      */
     public static function nightlyBackups()
@@ -426,16 +460,17 @@ class RouterApi
             $keep = max(1, min(30, (int) ($config['router_backup_keep'] ?? 7)));
             $name = 'phpnuxbill-auto-' . str_replace('-', '', $today); // the same day as the progress kept above, across midnight too
             $autoFiles = function ($c, &$folder = null) {
-                $files = self::rows($c, '/file/print', ['.id', 'name', 'type', 'size'], microtime(true) + 15);
+                // the times and size are what tells a file the nightly backup made from another later given the same name
+                $files = self::rows($c, '/file/print', ['.id', 'name', 'type', 'size', 'creation-time', 'last-modified'], microtime(true) + 15);
                 $folder = self::backupFolder($files);
                 // only in the folder nightly backups are saved to on this router (flash/ or the root folder): a file of the same
                 // name anywhere else (a USB disk, a folder of copies) was not made here and is never removed
-                $own = '/^' . preg_quote($folder, '/') . 'phpnuxbill-auto-\d{8}\.backup$/';
+                $own = '/^' . preg_quote($folder, '/') . 'phpnuxbill-auto-\d{8}(?:-\d{1,2})?\.backup$/';
                 $auto = array_values(array_filter($files, function ($f) use ($own) {
                     return preg_match($own, (string) $f['name']);
                 }));
                 usort($auto, function ($a, $b) {
-                    return strcmp(self::backupDate($b['name']), self::backupDate($a['name'])); // newest first, by the date in the name
+                    return strcmp(self::backupDate($b['name']), self::backupDate($a['name'])); // newest first, by the name
                 });
                 return $auto;
             };
@@ -463,11 +498,59 @@ class RouterApi
                 try {
                     $folder = '';
                     $auto = $autoFiles($c, $folder);
-                    // confirmed by an earlier run today, whose clean-up then failed: trusted only while today's file is still
-                    // listed with something in it (removed or emptied since, it is saved again)
-                    $made = (bool) $s['saved'] && self::hasData(self::todaysSize($auto, $name));
+                    // what nightly backups made on this router: each file with what identified it when it was saved (a name
+                    // recorded before identities were kept has none, so it never matches and is never removed)
+                    $records = [];
+                    foreach ((is_array($state['made'][$key] ?? null) ? $state['made'][$key] : []) as $m) {
+                        $m = is_array($m) ? $m : ['name' => (string) $m];
+                        if (isset($m['name'])) {
+                            $records[(string) $m['name']] = $m;
+                        }
+                    }
+                    // a listed file is ours only while it is still the very file recorded (same name, times and size): one
+                    // removed and replaced by another of the same name is not
+                    $isOurs = function ($f) use (&$records) {
+                        $m = $records[(string) $f['name']] ?? null;
+                        return is_array($m) && array_key_exists('id', $m) && $m['id'] === self::fileIdentity($f);
+                    };
+                    $find = function ($path) use (&$auto) {
+                        foreach ($auto as $f) {
+                            if ((string) $f['name'] === $path) {
+                                return $f;
+                            }
+                        }
+                        return null;
+                    };
+                    // confirmed by an earlier run today, whose clean-up then failed: trusted only while that very file is still
+                    // listed with something in it (removed, emptied or replaced since, it is saved again). ('saved' was true
+                    // before it held the file's name: then today's plain name)
+                    $savedPath = $s['saved'] === true ? $folder . $name . '.backup' : (is_string($s['saved']) ? $s['saved'] : '');
+                    $f = $savedPath !== '' ? $find($savedPath) : null;
+                    $made = $f !== null && $isOurs($f) && self::hasData($f['size'] ?? null);
                     if (!$made) {
                         $s['saved'] = false;
+                        $savedPath = '';
+                        // a save replaces a file of the same name, so it goes to a name that is free: today's name, or today's
+                        // name with -2 to -9 (still a nightly name, so it is kept and removed like the others). A file already
+                        // there is never written over, whoever made it (one left by a save that never answered included)
+                        $base = null;
+                        foreach (array_merge([''], array_map(function ($i) {
+                            return '-' . $i;
+                        }, range(2, 9))) as $suffix) {
+                            if ($find($folder . $name . $suffix . '.backup') === null) {
+                                $base = $name . $suffix;
+                                break;
+                            }
+                        }
+                        if ($base === null) {
+                            // every name for today is taken: nothing is overwritten, and the router is done for today (trying
+                            // again would find the same)
+                            $s['ok'] = true;
+                            $state['routers'][$key] = $s;
+                            $log[] = $r['name'] . ': ' . Lang::T('The backup was not made: every nightly backup name for today is already taken by a file on the router.');
+                            self::saveBackupState($state);
+                            continue; // (the connection is dropped in finally)
+                        }
                         // checked on this very connection, right before the password would go out on it
                         if (($why = self::backupTransportError($c)) !== null) {
                             // counts as a try: a later run (up to the limit) looks again, in case the connection or the
@@ -480,47 +563,50 @@ class RouterApi
                             continue; // (the connection is dropped in finally)
                         }
                         $s['blocked'] = false;
-                        // encrypted with the backup password (never written to the log or the output). A file of today's name
-                        // left by a save that never answered is not trusted (its size says nothing about it being complete): this
-                        // save replaces it
-                        self::run($c, '/system/backup/save', ['name' => $folder . $name, 'password' => $password], microtime(true) + 60);
+                        // encrypted with the backup password (never written to the log or the output)
+                        self::run($c, '/system/backup/save', ['name' => $folder . $base, 'password' => $password], microtime(true) + 60);
                         $auto = $autoFiles($c);
+                        $savedPath = $folder . $base . '.backup';
+                        $f = $find($savedPath);
                         // the router said the save is done: the file must be there, with something in it, before older ones go
-                        if (!self::hasData(self::todaysSize($auto, $name))) {
+                        if ($f === null || !self::hasData($f['size'] ?? null)) {
                             throw new Exception(Lang::T('The backup file was not saved on the router'));
                         }
                         // recorded before the clean-up, so a retry after a failed clean-up does not save again; and the file
-                        // goes on this router's list of files nightly backups made, the only ones ever removed
-                        $s['saved'] = true;
+                        // goes on this router's list of files nightly backups made (with what identifies it), the only ones
+                        // ever removed
+                        $s['saved'] = $savedPath;
                         $state['routers'][$key] = $s;
-                        $list = is_array($state['made'][$key] ?? null) ? $state['made'][$key] : [];
-                        if (!in_array($folder . $name . '.backup', $list, true)) {
-                            $list[] = $folder . $name . '.backup';
-                        }
-                        $state['made'][$key] = $list;
+                        $records[$savedPath] = ['name' => $savedPath, 'id' => self::fileIdentity($f)];
+                        $state['made'][$key] = array_values($records);
                         self::saveBackupState($state);
                     }
-                    // removal candidates: only files on the list (newest first, by the date in the name); a file of a
-                    // nightly-looking name that is not on it (made by hand, or before the list existed) is left alone
-                    $list = is_array($state['made'][$key] ?? null) ? $state['made'][$key] : [];
-                    $ours = array_values(array_filter($auto, function ($f) use ($list) {
-                        return in_array((string) $f['name'], $list, true);
+                    // removal candidates: only files still identified as the ones recorded (newest first, by the name); a file of
+                    // a nightly-looking name that is not (made by hand, before the list existed, or replaced since) is left
+                    // alone. The file confirmed today always keeps its place, and the other places go to the newest of the rest
+                    $ours = array_values(array_filter($auto, $isOurs));
+                    $older = array_values(array_filter($ours, function ($f) use ($savedPath) {
+                        return (string) $f['name'] !== $savedPath;
                     }));
                     $foreign = count($auto) - count($ours);
-                    foreach (array_slice($ours, $keep) as $old) {
+                    foreach (array_slice($older, $keep - 1) as $old) {
                         self::run($c, '/file/remove', ['numbers' => $old['.id']], microtime(true) + 15);
-                        $list = array_values(array_diff($list, [(string) $old['name']]));
-                        $state['made'][$key] = $list;
+                        unset($records[(string) $old['name']]);
+                        $state['made'][$key] = array_values($records);
                         self::saveBackupState($state);
                     }
-                    // names no longer on the router (removed by hand) leave the list, so it stays as short as what is kept
-                    $listed = array_map(function ($f) {
-                        return (string) $f['name'];
-                    }, $ours);
-                    $state['made'][$key] = array_values(array_intersect($list, $listed));
+                    // records of files no longer on the router as they were saved (removed or replaced by hand) leave the list,
+                    // so it stays as short as what is kept
+                    $kept = [];
+                    foreach ($ours as $f) {
+                        if (isset($records[(string) $f['name']])) {
+                            $kept[] = $records[(string) $f['name']];
+                        }
+                    }
+                    $state['made'][$key] = $kept;
                     $s['ok'] = true;
                     $state['routers'][$key] = $s;
-                    $log[] = $r['name'] . ': ' . $folder . $name . '.backup' . ($made ? ' (' . Lang::T('already saved') . ')' : '')
+                    $log[] = $r['name'] . ': ' . $savedPath . ($made ? ' (' . Lang::T('already saved') . ')' : '')
                         . ($foreign > 0 ? ' (' . $foreign . ' ' . Lang::T('nightly-named backup files not recorded as made by the nightly backup are kept; remove them by hand if not needed') . ')' : '');
                 } catch (Throwable $e) {
                     $s['tries']++; // 'saved' is kept: the next try resumes with the clean-up
@@ -543,21 +629,17 @@ class RouterApi
         return $log;
     }
 
-    /** The size the router lists for today's nightly backup (as it gives it), or null when there is no such file */
-    private static function todaysSize(array $auto, $name)
+    /** What identifies a file the router lists (its times and size): another file later saved under the same name differs */
+    private static function fileIdentity(array $f)
     {
-        foreach ($auto as $f) {
-            if (basename((string) $f['name']) === $name . '.backup') {
-                return (string) ($f['size'] ?? '');
-            }
-        }
-        return null;
+        return (string) ($f['creation-time'] ?? '') . '|' . (string) ($f['last-modified'] ?? '') . '|' . (string) ($f['size'] ?? '');
     }
 
-    /** The date (yyyymmdd) in a nightly backup's file name, or "" */
+    /** A nightly backup file name as a key that sorts by its date, then by its -2 to -9 suffix (yyyymmddnn), or "" */
     private static function backupDate($name)
     {
-        return preg_match('/phpnuxbill-auto-(\d{8})\.backup$/', (string) $name, $m) ? $m[1] : '';
+        return preg_match('/phpnuxbill-auto-(\d{8})(?:-(\d{1,2}))?\.backup$/', (string) $name, $m)
+            ? $m[1] . sprintf('%02d', isset($m[2]) && $m[2] !== '' ? (int) $m[2] : 1) : '';
     }
 
     /** Whether a listed size is more than nothing ("0", "0 B" and a missing size are not) */

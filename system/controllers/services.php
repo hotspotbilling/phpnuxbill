@@ -15,23 +15,16 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
-// A plan saved with a router: the router is checked to still be there under the same lock the router page takes to delete one
-// (routers.php $endpointLock), so a plan cannot be saved pointing at a router that a delete running at the same time removes.
-// $planRouterLock(plan, back) takes the lock and checks; $planRouterLock(null) releases it after the save.
-$planRouterLock = function ($plan, $back = null) {
+// A plan saved with a router: the router is checked to still be there under the same lock the router page takes to delete or
+// rename one (routers.php $endpointLock), so a plan cannot be saved pointing at a router that a delete running at the same time
+// removes. The lock is held until the plan has also been sent to its device, so the router's name still means the router that
+// was checked while the device looks it up (a rename, or a name taken over by another router, waits until then).
+// $routerLock(true, back) takes the lock (back with an error when the routers are busy), $routerLock(false) lets it go.
+$routerLock = function ($on, $back = null) {
     $db = ORM::getDb();
-    if ($plan === null) {
+    if (!$on) {
         try { $db->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')"); } catch (Throwable $e) { /* released when the request ends */ }
         return;
-    }
-    // A RADIUS or balance plan uses no router, whatever its routers column holds; any other plan is checked by name,
-    // even a router that happens to be called "radius" or "balance".
-    if (!empty($plan['is_radius']) || strcasecmp((string) $plan['type'], 'Balance') === 0) {
-        return;
-    }
-    $name = (string) $plan['routers'];
-    if ($name === '') {
-        return; // no router chosen: nothing to check
     }
     try {
         $got = (int) $db->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 15)")->fetchColumn() === 1;
@@ -41,10 +34,35 @@ $planRouterLock = function ($plan, $back = null) {
     if (!$got) {
         r2($back, 'e', Lang::T('The routers are being changed right now. Try again in a moment.'));
     }
+};
+// With the lock held: the plan's router is still there (the lock is let go and the admin sent back when it is not).
+$planRouterCheck = function ($plan, $back) use ($routerLock) {
+    // A RADIUS or balance plan uses no router, whatever its routers column holds; any other plan is checked by name,
+    // even a router that happens to be called "radius" or "balance".
+    if (!empty($plan['is_radius']) || strcasecmp((string) $plan['type'], 'Balance') === 0) {
+        return;
+    }
+    $name = (string) $plan['routers'];
+    if ($name === '') {
+        return; // no router chosen: nothing to check
+    }
     if (!ORM::for_table('tbl_routers')->where('name', $name)->find_one()) {
-        $db->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
+        $routerLock(false);
         r2($back, 'e', Lang::T('Router not found'));
     }
+};
+// $planRouterLock(plan, back) takes the lock and checks (a plan that uses no router takes none); $planRouterLock(null) lets
+// it go, after the save and the device's update.
+$planRouterLock = function ($plan, $back = null) use ($routerLock, $planRouterCheck) {
+    if ($plan === null) {
+        $routerLock(false);
+        return;
+    }
+    if (!empty($plan['is_radius']) || strcasecmp((string) $plan['type'], 'Balance') === 0 || (string) $plan['routers'] === '') {
+        return;
+    }
+    $routerLock(true, $back);
+    $planRouterCheck($plan, $back);
 };
 
 switch ($action) {
@@ -317,7 +335,6 @@ switch ($action) {
             }
             $planRouterLock($d, getUrl('services/add'));
             $d->save();
-            $planRouterLock(null);
 
             $dvc = Package::getDevice($d);
             if ($_app_stage != 'demo') {
@@ -328,6 +345,7 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
+            $planRouterLock(null); // held until the device has the plan
             r2(getUrl('services/edit/') . $d->id(), 's', Lang::T('Data Created Successfully'));
         } else {
             r2(getUrl('services/add'), 'e', $msg);
@@ -372,6 +390,9 @@ switch ($action) {
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '') {
             $msg .= Lang::T('All field is required') . '<br>';
         }
+        // the lock first, and then the plan and its old snapshot: what is checked, saved and sent to the device is the plan as
+        // it is now, a router rename or delete (which takes the same lock) coming wholly before or after it
+        $routerLock(true, getUrl('services/edit/') . (int) _post('id'));
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         $old = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         if ($d) {
@@ -433,9 +454,9 @@ switch ($action) {
             } else {
                 $d->expired_date = 20;
             }
-            $planRouterLock($d, getUrl('services/edit/') . (int) _post('id'));
+            // the router the plan names now (the lock is held) must still be there
+            $planRouterCheck($d, getUrl('services/edit/') . (int) _post('id'));
             $d->save();
-            $planRouterLock(null);
             if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             $dvc = Package::getDevice($d);
@@ -447,8 +468,10 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
+            $routerLock(false); // held until the device has the change
             r2(getUrl('services/hotspot'), 's', Lang::T('Data Updated Successfully'));
         } else {
+            $routerLock(false);
             r2(getUrl('services/edit/') . $id, 'e', $msg);
         }
         break;
@@ -705,7 +728,6 @@ switch ($action) {
             $d->device = $device;
             $planRouterLock($d, getUrl('services/pppoe-add'));
             $d->save();
-            $planRouterLock(null);
 
             $dvc = Package::getDevice($d);
             if ($_app_stage != 'demo') {
@@ -716,6 +738,7 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
+            $planRouterLock(null); // held until the device has the plan
             r2(getUrl('services/pppoe'), 's', Lang::T('Data Created Successfully'));
         } else {
             r2(getUrl('services/pppoe-add'), 'e', $msg);
@@ -759,8 +782,16 @@ switch ($action) {
             $price_old = '';
         }
 
+        // the lock first, and then the plan and its old snapshot: what is checked, saved and sent to the device is the plan as
+        // it is now, a router rename or delete (which takes the same lock) coming wholly before or after it
+        $routerLock(true, getUrl('services/pppoe-edit/') . (int) _post('id'));
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         $old = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
+        // the router cannot be changed after the package is saved: it stays as the database has it (read under the lock, so a
+        // rename is followed). The form sends it back as shown; a value left out keeps it, and a different one is refused
+        if ($d && $routers !== '' && (string) $routers !== (string) $d['routers']) {
+            $msg .= Lang::T('The router cannot be changed after the package is saved.') . '<br>';
+        }
         if ($d) {
         } else {
             $msg .= Lang::T('Data Not Found') . '<br>';
@@ -793,7 +824,6 @@ switch ($action) {
             $d->plan_type = $plan_type;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
-            $d->routers = $routers;
             $d->pool = $pool;
             $d->plan_expired = $plan_expired;
             $d->enabled = $enabled;
@@ -809,9 +839,9 @@ switch ($action) {
             } else {
                 $d->expired_date = 0;
             }
-            $planRouterLock($d, getUrl('services/pppoe-edit/') . (int) _post('id'));
+            // the router the plan names now (the lock is held) must still be there
+            $planRouterCheck($d, getUrl('services/pppoe-edit/') . (int) _post('id'));
             $d->save();
-            $planRouterLock(null);
             if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             $dvc = Package::getDevice($d);
@@ -823,8 +853,10 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
+            $routerLock(false); // held until the device has the change
             r2(getUrl('services/pppoe'), 's', Lang::T('Data Updated Successfully'));
         } else {
+            $routerLock(false);
             r2(getUrl('services/pppoe-edit/') . $id, 'e', $msg);
         }
         break;
@@ -1201,7 +1233,6 @@ switch ($action) {
             $d->device = $device;
             $planRouterLock($d, getUrl('services/vpn-add'));
             $d->save();
-            $planRouterLock(null);
 
             $dvc = Package::getDevice($d);
             if ($_app_stage != 'demo') {
@@ -1212,6 +1243,7 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
+            $planRouterLock(null); // held until the device has the plan
             r2(getUrl('services/vpn'), 's', Lang::T('Data Created Successfully'));
         } else {
             r2(getUrl('services/vpn-add'), 'e', $msg);
@@ -1255,8 +1287,16 @@ switch ($action) {
             $price_old = '';
         }
 
+        // the lock first, and then the plan and its old snapshot: what is checked, saved and sent to the device is the plan as
+        // it is now, a router rename or delete (which takes the same lock) coming wholly before or after it
+        $routerLock(true, getUrl('services/vpn-edit/') . (int) _post('id'));
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         $old = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
+        // the router cannot be changed after the package is saved: it stays as the database has it (read under the lock, so a
+        // rename is followed). The form sends it back as shown; a value left out keeps it, and a different one is refused
+        if ($d && $routers !== '' && (string) $routers !== (string) $d['routers']) {
+            $msg .= Lang::T('The router cannot be changed after the package is saved.') . '<br>';
+        }
         if ($d) {
         } else {
             $msg .= Lang::T('Data Not Found') . '<br>';
@@ -1289,7 +1329,6 @@ switch ($action) {
             $d->plan_type = $plan_type;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
-            $d->routers = $routers;
             $d->pool = $pool;
             $d->plan_expired = $plan_expired;
             $d->enabled = $enabled;
@@ -1305,9 +1344,9 @@ switch ($action) {
             } else {
                 $d->expired_date = 0;
             }
-            $planRouterLock($d, getUrl('services/vpn-edit/') . (int) _post('id'));
+            // the router the plan names now (the lock is held) must still be there
+            $planRouterCheck($d, getUrl('services/vpn-edit/') . (int) _post('id'));
             $d->save();
-            $planRouterLock(null);
             if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             $dvc = Package::getDevice($d);
@@ -1319,8 +1358,10 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
+            $routerLock(false); // held until the device has the change
             r2(getUrl('services/vpn'), 's', Lang::T('Data Updated Successfully'));
         } else {
+            $routerLock(false);
             r2(getUrl('services/vpn-edit/') . $id, 'e', $msg);
         }
         break;

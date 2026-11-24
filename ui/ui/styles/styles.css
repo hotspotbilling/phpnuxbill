@@ -10537,6 +10537,15 @@ body.dark-mode .rt-err {
   background: var(--ls-accent-soft);
   color: var(--ls-accent);
   font-size: 11px;
+  white-space: normal; /* a site label can be long (unlike the status pills): it wraps rather than widening the column */
+  overflow-wrap: anywhere;
+}
+@media (max-width: 767px) {
+  /* the router's name and site on a phone: both wrap inside the card rather than running past its edge */
+  .ls-table td.rt-name {
+    flex-wrap: wrap;
+    overflow-wrap: anywhere;
+  }
 }
 /* tabs under a router's details: Live, Users online, Interfaces, Setup check, Updates & backups */
 .rt-tabs {

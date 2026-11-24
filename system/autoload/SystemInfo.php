@@ -839,6 +839,12 @@ class SystemInfo
                             $reqH->setArgument('.proplist', '.id');
                             $out['hotspot'] += self::countSessions($client->sendSync($reqH));
                         } catch (Throwable $eH) {
+                            // a refusal comes back as a reply, not an exception: one thrown means the query timed out or the
+                            // connection broke, and the client was dropped with it, so the PPPoE count gets a connection of its own
+                            $client = Mikrotik::getClient($r['ip_address'], $r['username'], $r['password'], $r['port'] ?? null, 1);
+                            if (!$client) {
+                                continue;
+                            }
                         }
                         try {
                             // PPPoE only: L2TP, SSTP and the other tunnels are not customers

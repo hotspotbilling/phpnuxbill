@@ -24,7 +24,9 @@ class Mikrotik
         [$host, $saved] = RouterAddress::split($ip);
         $p = ($port) ? $port : (($saved ?? null) ? $saved : null);
         // through RouterApi: API-SSL on port 8729, a time limit on every read, and a connection that can be dropped
-        return RouterApi::deviceClient($host, $user, $pass, $p, $timeout, 30);
+        // each read waits a few times the connect limit (3 to 30 seconds): a caller that asks for a quick answer (the dashboard
+        // passes 1) gets one, and the default 8 still leaves room for a long print
+        return RouterApi::deviceClient($host, $user, $pass, $p, $timeout, min(30, max(3, (int) ceil($timeout * 3))));
     }
 
     public static function isUserLogin($client, $username)

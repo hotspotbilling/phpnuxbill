@@ -54,11 +54,16 @@ switch ($action) {
                 }
                 Package::keepDialPassword($user); // a PPPoE / VPN connection keeps the password its router dials with
                 $user->password = $npass;
-                // every active plan's device gets the new password (see Package::sendPassword for how each kind is told)
-                foreach (Package::sendPassword($user) as $err) {
-                    _log('[' . $user['username'] . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
-                }
                 $user->save();
+                // every active plan's device gets the new password (see Package::sendPassword for how each kind is told). The new
+                // password is saved already: a device that fails is logged, and the change goes on (as Forgot password does)
+                try {
+                    foreach (Package::sendPassword($user) as $err) {
+                        _log('[' . $user['username'] . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
+                    }
+                } catch (Throwable $e) {
+                    _log('[' . $user['username'] . ']: new password not sent to the router: ' . $e->getMessage(), 'User', $user['id']);
+                }
                 Package::passwordLock($user['id'], false);
                 if (class_exists('RedisCache')) {
                     RedisCache::forgetRadiusCustomer($user['username']);

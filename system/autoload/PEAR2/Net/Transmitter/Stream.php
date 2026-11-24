@@ -314,13 +314,15 @@ class Stream
     /**
      * PHPNuxBill: writes one chunk. Without a deadline as the library always did (one blocking fwrite). Under one, a blocking
      * write would wait inside the system call however long the other end takes to read (the socket's time limit does not
-     * apply to writes), so the chunk is written without blocking, waiting between tries only for the time left. When the time
-     * runs out the connection is closed and the send stops.
+     * apply to writes), so the chunk is written without blocking, waiting between tries only for the time left. The whole
+     * chunk is written or an exception is thrown: a wait that ended early (interrupted) tries the unwritten rest again while
+     * time is left; when the time runs out, or the other end closed the connection, the connection is closed and the
+     * exception carries what was sent (half a request cannot be finished later, so nothing more may go out on it).
      *
      * @param string $data  The chunk.
      * @param double $bytes What was sent before it.
      *
-     * @return int|false What was written (all of it, unless the other end closed the connection), or FALSE.
+     * @return int|false What was written (without a deadline as fwrite() gives it; under one, always all of it).
      */
     protected function writeChunk($data, $bytes)
     {
@@ -335,15 +337,22 @@ class Stream
                 $this->close();
                 throw $this->createException('Ran out of time while sending.', 6, null, $bytes + $done);
             }
+            if (!$this->isAvailable()) {
+                $this->close();
+                throw $this->createException('The connection closed while sending.', 7, null, $bytes + $done);
+            }
             stream_set_blocking($this->stream, false);
             $n = @fwrite($this->stream, substr($data, $done));
             stream_set_blocking($this->stream, $this->isBlocking);
             if (false === $n) {
-                return $done > 0 ? $done : false;
+                $this->close();
+                throw $this->createException('Failed while sending.', 7, null, $bytes + $done);
             }
             $done += $n;
             if ($done < $len && !$this->waitToSend($bytes + $done)) {
-                return $done > 0 ? $done : false; // the other end closed the connection
+                // the wait ended with time left: the other end closed (found at the top of the loop), or the wait was
+                // interrupted, and then the same unwritten rest is tried again (after a moment, so this never spins)
+                usleep(1000);
             }
         }
         return $done;

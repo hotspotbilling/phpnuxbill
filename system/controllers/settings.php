@@ -260,7 +260,11 @@ switch ($action) {
             // the former REST-only stale minutes are now Clear Stale Sessions (the form shows them there, so they are carried
             // over): once that is saved, the old setting is retired so the two can never disagree
             if (isset($_POST['clear_stale_sessions'])) $_POST['frrest_interim_update'] = '0';
-            if (isset($_POST['stale_session_timeout'])) $_POST['stale_session_timeout'] = (string) max(1, (int) $_POST['stale_session_timeout']);
+            // an empty, zero or negative timeout falls back to 10 minutes, as RadiusSessions::staleMinutes() reads it
+            if (isset($_POST['stale_session_timeout'])) {
+                $staleMinutes = is_string($_POST['stale_session_timeout']) ? (int) trim($_POST['stale_session_timeout']) : 0;
+                $_POST['stale_session_timeout'] = (string) ($staleMinutes < 1 ? 10 : $staleMinutes);
+            }
             // days of finished RADIUS REST sessions kept in rad_acct (0 = all), removed by cron.php
             if (isset($_POST['frrest_keep_days'])) $_POST['frrest_keep_days'] = (string) min(3650, max(0, (int) $_POST['frrest_keep_days']));
             // Captcha: which logins are protected, one check box each

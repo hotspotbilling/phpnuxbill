@@ -15,8 +15,14 @@ class MikrotikVpn
     /** The code of an exception for a partial update: the secret was saved, a later step was refused (like MikrotikPppoe) */
     const PARTIAL = 207;
 
-    // match fields an operator may add to a forward to restrict who reaches it: kept when a forward is replaced
-    const NAT_MATCH = ['src-address', 'src-address-list', 'in-interface', 'in-interface-list', 'dst-address-list'];
+    // match fields an operator may add to a forward to restrict who reaches it: copied when a forward is replaced. A forward
+    // with any other field set (one not in NAT_KNOWN either) is never replaced: its full match cannot be copied
+    const NAT_MATCH = ['src-address', 'src-address-list', 'src-port', 'src-mac-address', 'src-address-type', 'in-interface',
+        'in-interface-list', 'dst-address-list', 'dst-address-type', 'connection-state', 'connection-type', 'connection-mark',
+        'packet-mark', 'routing-mark', 'ipsec-policy', 'hotspot', 'time', 'tls-host', 'layer7-protocol', 'content'];
+    // the fields a forward is made of (set here), and those that only describe it (counters, flags, logging)
+    const NAT_KNOWN = ['.id', '.nextid', 'comment', 'chain', 'action', 'protocol', 'dst-port', 'dst-address', 'to-addresses',
+        'to-ports', 'disabled', 'dynamic', 'invalid', 'bytes', 'packets', 'log', 'log-prefix'];
 
     function description()
     {
@@ -35,6 +41,9 @@ class MikrotikVpn
 
     function add_customer($customer, $plan)
     {
+        if (self::isDemo()) {
+            return null; // no client in the demo stage: nothing is sent
+        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         // one request at a time for this customer on this router (a database lock, so on every PHP worker), whether or not an
@@ -43,7 +52,7 @@ class MikrotikVpn
         // On a database that releases the lock it holds when it takes another (MySQL before 5.7.5, MariaDB before 10.0.2) the
         // address and port locks taken below would free this one: there, one lock covers every VPN request instead.
         $nested = self::nestedLocks();
-        $lock = $nested ? 'phpnuxbill_vpn_c_' . substr(sha1($plan['routers'] . '|' . $customer['id']), 0, 32) : 'phpnuxbill_vpn_all';
+        $lock = $nested ? self::customerLock($plan['routers'], $customer['id']) : 'phpnuxbill_vpn_all';
         if (!$this->dbLock($lock)) {
             throw new Exception(Lang::T('This customer is being set up on the router by another request. Try again in a moment.'));
         }
@@ -53,6 +62,51 @@ class MikrotikVpn
         } finally {
             $this->allLock = false;
             $this->dbUnlock($lock);
+        }
+    }
+
+    /** The name of the lock add_customer() holds for this customer on this router */
+    private static function customerLock($router, $customerId)
+    {
+        return 'phpnuxbill_vpn_c_' . substr(sha1($router . '|' . $customerId), 0, 32);
+    }
+
+    /**
+     * For an edit of a customer's saved address: the locks provisioning takes, in the same order (the customer's lock on each of
+     * these routers, then the address lock; where locks cannot be nested, the one lock for every VPN request). Held while the
+     * new address is checked and saved, so the old one is never freed while a provisioning still uses it, and no reservation
+     * hands out the new one at the same time. Returns the names taken, or false when one was not got in time (none held then).
+     */
+    public static function lockAddressEdit($customerId, array $routers)
+    {
+        if (self::nestedLocks()) {
+            $names = [];
+            foreach (array_unique(array_map('strval', $routers)) as $r) {
+                $names[] = self::customerLock($r, $customerId);
+            }
+            sort($names);
+            $names[] = 'phpnuxbill_vpn_ip';
+        } else {
+            $names = ['phpnuxbill_vpn_all'];
+        }
+        $dev = new self();
+        $held = [];
+        foreach ($names as $n) {
+            if (!$dev->dbLock($n)) {
+                self::unlockAddressEdit($held);
+                return false;
+            }
+            $held[] = $n;
+        }
+        return $held;
+    }
+
+    /** Release what lockAddressEdit() took */
+    public static function unlockAddressEdit($held)
+    {
+        $dev = new self();
+        foreach (array_reverse((array) $held) as $n) {
+            $dev->dbUnlock($n);
         }
     }
 
@@ -91,6 +145,8 @@ class MikrotikVpn
             $resume = '';
             // the expired plan changes only the profile: the address on the router is left as it is
             $keepAddr = $this->expiring;
+            // the secret could not be read and no address is saved: its forwards cannot be checked
+            $addrUnknown = false;
             if (empty($customer['pppoe_ip']) && !$this->expiring) {
                 $readRequest = new RouterOS\Request('/ppp/secret/print');
                 $readRequest->setQuery(RouterOS\Query::where('.id', $cid));
@@ -102,6 +158,7 @@ class MikrotikVpn
                         throw new Exception($readErr);
                     }
                     $keepAddr = true;
+                    $addrUnknown = true;
                 } else {
                     $given = (string) self::prop($readRes, 'remote-address');
                     if (filter_var($given, FILTER_VALIDATE_IP) && $given !== '0.0.0.0') {
@@ -111,7 +168,21 @@ class MikrotikVpn
             }
             $reserved = '';
             $oldType = $customer['service_type'];
-            if (!empty($customer['pppoe_ip'])) {
+            if (!$this->expiring) {
+                // who holds the address is settled before the secret is changed: an address saved for another customer as
+                // well (an edit, say) is not written, nor are forwards made to it; one the router gave this secret is saved
+                // for this customer first (under the address lock), unless another customer holds it
+                if (!empty($customer['pppoe_ip']) && $this->heldByOther($customer, (string) $customer['pppoe_ip'])) {
+                    throw new Exception(Lang::T('This IP address is already saved for another customer') . ': ' . $customer['pppoe_ip']);
+                }
+                if ($resume !== '' && !$this->claimIp($customer, $resume)) {
+                    // nothing is sent: it is reported to be sorted out by hand
+                    throw new Exception(Lang::T('The address of this VPN secret on the router is saved for another customer') . ': ' . $resume);
+                }
+            }
+            if ($this->expiring) {
+                // the expired plan changes only the profile: no address is written, not even the saved one
+            } elseif (!empty($customer['pppoe_ip'])) {
                 $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
             } elseif ($resume !== '') {
                 $setRequest->setArgument('remote-address', $resume);
@@ -140,20 +211,15 @@ class MikrotikVpn
             $this->checked($res);
             $taken = RouterApi::error($res) === null;
             $addr = !empty($customer['pppoe_ip']) ? (string) $customer['pppoe_ip'] : $resume;
-            if ($resume !== '' && !$this->claimIp($customer, $resume)) {
-                // the address the router gave this secret is saved for another customer: nothing more is done (no forwards are
-                // made to it), and it is reported to be sorted out by hand
-                throw new Exception(Lang::T('The address of this VPN secret on the router is saved for another customer') . ': ' . $resume, $taken ? self::PARTIAL : 0);
-            }
             // the forwards are checked against the router each time, not inferred from the saved address: one refused before is
             // added now, and one already there (by its comment) is not added again. Only once the router took the change above:
             // a refused secret gets no forwards. The expired plan touches no forwards.
-            $natOk = true;
+            $natErr = null;
             if ($addr !== '' && $taken && !$this->expiring) {
-                $natOk = $this->addNat($client, $plan, $customer, $addr);
-                if (!$natOk && $this->strict) {
-                    throw new Exception(Lang::T('The router refused a port forward for this customer'));
-                }
+                $natErr = $this->natAfterSave($client, $plan, $customer, $addr);
+            } elseif ($addrUnknown && $taken && ORM::for_table('tbl_port_pool')->where('routers', $plan['routers'])->find_one()) {
+                // the profile was changed, but the secret's address is unknown, so its forwards could not be checked
+                $natErr = new Exception(Lang::T('Saved, but the address of this VPN secret could not be read, so its port forwards were not checked'), self::PARTIAL);
             }
             if (isset($isChangePlan) && $isChangePlan) {
                 $this->removeVpnActive($client, $customer['username']);
@@ -161,9 +227,8 @@ class MikrotikVpn
                     $this->removeVpnActive($client, $customer['pppoe_username']);
                 }
             }
-            if (!$natOk) {
-                // the secret was saved: said as a partial update, so it is reported instead of passing as done
-                throw new Exception(Lang::T('Saved, but a port forward for this customer could not be made'), self::PARTIAL);
+            if ($natErr !== null) {
+                throw $natErr;
             }
         }
     }
@@ -189,6 +254,9 @@ class MikrotikVpn
 
     function remove_customer($customer, $plan)
     {
+        if (self::isDemo()) {
+            return null; // no client in the demo stage: nothing is sent
+        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         if (!empty($plan['plan_expired'])) {
@@ -219,6 +287,9 @@ class MikrotikVpn
 
     public function change_username($plan, $from, $to)
     {
+        if (self::isDemo()) {
+            return null; // no client in the demo stage: nothing is sent
+        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $printRequest = new RouterOS\Request('/ppp/secret/print');
@@ -235,6 +306,9 @@ class MikrotikVpn
 
     function add_plan($plan)
     {
+        if (self::isDemo()) {
+            return null; // no client in the demo stage: nothing is sent
+        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
 
@@ -272,6 +346,9 @@ class MikrotikVpn
      */
     function getIdByCustomer($customer, $client, $checked = null)
     {
+        if (self::isDemo()) {
+            return null; // no client in the demo stage: nothing is sent
+        }
         $checked = $checked ?? $this->strict;
         $id = $this->secretId($client, $customer['username'], $checked);
         if (empty($id)) {
@@ -310,6 +387,9 @@ class MikrotikVpn
 
     function update_plan($old_name, $new_plan)
     {
+        if (self::isDemo()) {
+            return null; // no client in the demo stage: nothing is sent
+        }
         $mikrotik = $this->info($new_plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
 
@@ -352,6 +432,9 @@ class MikrotikVpn
 
     function remove_plan($plan)
     {
+        if (self::isDemo()) {
+            return null; // no client in the demo stage: nothing is sent
+        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $printRequest = new RouterOS\Request(
@@ -369,8 +452,7 @@ class MikrotikVpn
 
     function add_pool($pool)
     {
-        global $_app_stage;
-        if (strtolower((string) $_app_stage) === 'demo') {
+        if (self::isDemo()) {
             return null;
         }
         $mikrotik = $this->info($pool['routers']);
@@ -385,8 +467,7 @@ class MikrotikVpn
 
     function update_pool($old_pool, $new_pool)
     {
-        global $_app_stage;
-        if (strtolower((string) $_app_stage) === 'demo') {
+        if (self::isDemo()) {
             return null;
         }
         $mikrotik = $this->info($new_pool['routers']);
@@ -411,8 +492,7 @@ class MikrotikVpn
 
     function remove_pool($pool)
     {
-        global $_app_stage;
-        if (strtolower((string) $_app_stage) === 'demo') {
+        if (self::isDemo()) {
             return null;
         }
         $mikrotik = $this->info($pool['routers']);
@@ -432,6 +512,9 @@ class MikrotikVpn
 
     function online_customer($customer, $router_name)
     {
+        if (self::isDemo()) {
+            return null; // no client in the demo stage: nothing is sent
+        }
         $mikrotik = $this->info($router_name);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $printRequest = new RouterOS\Request(
@@ -446,11 +529,16 @@ class MikrotikVpn
         return ORM::for_table('tbl_routers')->where('name', $name)->find_one();
     }
 
-    function getClient($ip, $user, $pass)
+    /** The demo stage ("Demo", "demo", with spaces around it or not): no router is ever asked anything */
+    private static function isDemo()
     {
         global $_app_stage;
-        // the stage is written "Demo" in some places and "demo" in others: either one keeps real routers untouched
-        if (strcasecmp(trim((string) $_app_stage), 'demo') === 0) {
+        return strcasecmp(trim((string) $_app_stage), 'demo') === 0;
+    }
+
+    function getClient($ip, $user, $pass)
+    {
+        if (self::isDemo()) {
             return null;
         }
         [$host, $port] = RouterAddress::split($ip); // "host:port", or "[IPv6]:port"
@@ -459,8 +547,7 @@ class MikrotikVpn
 
     function removeVpnUser($client, $username, $cstid)
     {
-        global $_app_stage;
-        if (strtolower((string) $_app_stage) === 'demo') {
+        if (self::isDemo()) {
             return null;
         }
         $printRequest = new RouterOS\Request('/ppp/secret/print');
@@ -475,6 +562,9 @@ class MikrotikVpn
 
     function addVpnUser($client, $plan, $customer)
     {
+        if (self::isDemo()) {
+            return null; // no client in the demo stage: nothing is sent
+        }
         $setRequest = new RouterOS\Request('/ppp/secret/add');
         $setRequest->setArgument('service', 'any');
         $setRequest->setArgument('profile', $plan['name_plan']);
@@ -501,6 +591,13 @@ class MikrotikVpn
             // (it would have no fixed address, and no forwards could point at it).
             $ips = $this->reserveIp($plan, $customer);
             $reserved = true;
+        }
+        if ($this->expiring) {
+            // the expired plan writes no address, not even the saved one
+            $ips = '';
+        } elseif (!$reserved && $this->heldByOther($customer, $ips)) {
+            // an address saved for another customer as well: no secret is made with it, nor forwards to it
+            throw new Exception(Lang::T('This IP address is already saved for another customer') . ': ' . $ips);
         }
         if (!is_string($ips) || !filter_var($ips, FILTER_VALIDATE_IP)) {
             if (!$this->expiring) {
@@ -531,13 +628,38 @@ class MikrotikVpn
         if ($this->expiring || $ips === '') {
             return; // the expired plan touches no forwards
         }
-        if (!$this->addNat($client, $plan, $customer, $ips)) {
-            if ($this->strict) {
-                throw new Exception(Lang::T('The router refused a port forward for this customer'));
-            }
-            // the secret was saved: said as a partial update, so it is reported instead of passing as done
-            throw new Exception(Lang::T('Saved, but a port forward for this customer could not be made'), self::PARTIAL);
+        $natErr = $this->natAfterSave($client, $plan, $customer, $ips);
+        if ($natErr !== null) {
+            throw $natErr;
         }
+    }
+
+    /**
+     * addNat() once the secret is saved: null when every forward is in place; otherwise a partial update (PARTIAL), during a
+     * sync too, as the secret stands. The cause (a refusal, or an exception) is kept as the previous exception.
+     */
+    private function natAfterSave($client, $plan, $customer, $addr)
+    {
+        $msg = Lang::T('Saved, but a port forward for this customer could not be made');
+        try {
+            if ($this->addNat($client, $plan, $customer, $addr)) {
+                return null;
+            }
+            $cause = new Exception(Lang::T('The router refused a port forward for this customer'));
+        } catch (Throwable $e) {
+            $cause = $e;
+        }
+        return new Exception($msg . ': ' . $cause->getMessage(), self::PARTIAL, $cause);
+    }
+
+    /** Whether another customer has this address saved */
+    private function heldByOther($customer, $ip)
+    {
+        $ip = trim((string) $ip);
+        return $ip !== '' && (bool) ORM::for_table('tbl_customers')
+            ->where('pppoe_ip', $ip)
+            ->where_not_equal('id', $customer['id'])
+            ->find_one();
     }
 
     /**
@@ -674,6 +796,16 @@ class MikrotikVpn
                 foreach (array_merge(['.id', 'comment', 'chain', 'action', 'protocol', 'dst-port', 'dst-address', 'to-addresses', 'to-ports', 'disabled'], self::NAT_MATCH) as $k) {
                     $row[$k] = (string) RouterApi::text($nat->getProperty($k));
                 }
+                // a field set on it that is neither copied nor known (another match, a newer RouterOS one): it cannot be
+                // replaced by a copy
+                $row['@uncopied'] = [];
+                foreach ($nat->getIterator() as $k => $v) {
+                    $k = (string) $k;
+                    if (!in_array($k, self::NAT_KNOWN, true) && !in_array($k, self::NAT_MATCH, true)
+                        && trim((string) RouterApi::text($v)) !== '') {
+                        $row['@uncopied'][] = $k;
+                    }
+                }
                 if ($row['to-addresses'] === (string) $addr || preg_match($owned, $row['comment'])) {
                     $rules[] = $row;
                 }
@@ -684,8 +816,7 @@ class MikrotikVpn
 
     function removeVpnActive($client, $username)
     {
-        global $_app_stage;
-        if (strtolower((string) $_app_stage) === 'demo') {
+        if (self::isDemo()) {
             return null;
         }
         $onlineRequest = new RouterOS\Request('/ppp/active/print');
@@ -701,8 +832,7 @@ class MikrotikVpn
 
     function addIpToAddressList($client, $ip, $listName, $comment = '')
     {
-        global $_app_stage;
-        if (strtolower((string) $_app_stage) === 'demo') {
+        if (self::isDemo()) {
             return null;
         }
         $addRequest = new RouterOS\Request('/ip/firewall/address-list/add');
@@ -716,8 +846,7 @@ class MikrotikVpn
 
     function removeIpFromAddressList($client, $ip)
     {
-        global $_app_stage;
-        if (strtolower((string) $_app_stage) === 'demo') {
+        if (self::isDemo()) {
             return null;
         }
         $printRequest = new RouterOS\Request(
@@ -744,8 +873,7 @@ class MikrotikVpn
      */
     function addNat($client, $plan, $cust, $ips, $rules = false)
     {
-        global $_app_stage;
-        if (strtolower((string) $_app_stage) === 'demo') {
+        if (self::isDemo()) {
             return true;
         }
         $ip = ORM::for_table('tbl_port_pool')
@@ -780,20 +908,31 @@ class MikrotikVpn
         $toPorts = ['Winbox' => '8291', 'Web' => '80', 'Api' => '8728'];
         // all three forwards are needed: one whose port could not be reserved (the range is full) is missing, and is tried
         // again next time (the ports already reserved are kept)
-        $named = [];
+        // one reservation per service, settled before any rule is changed: each service is handled once, with that one port.
+        // Two rows for a service with different ports (or a value that is not a port) are a conflict: that service's rules
+        // are left as they are and it is reported, never changed by one row and then undone by the other
+        $wanted = [];
         foreach ($tcf as $cf) {
-            $named[$cf['field_name']] = true;
+            $name = (string) $cf['field_name'];
+            if (isset($toPorts[$name])) {
+                $wanted[$name][trim((string) $cf['field_value'])] = true;
+            }
         }
-        if (count(array_intersect_key($toPorts, $named)) < count($toPorts)) {
-            $ok = false;
-        }
-        foreach ($tcf as $cf) {
-            $dst = (string) $cf['field_value'];
-            $cmnt = $cf['field_name'];
-            if (!isset($toPorts[$cmnt])) {
+        foreach ($toPorts as $cmnt => $tp) {
+            if (empty($wanted[$cmnt])) {
+                $ok = false; // missing: tried again next time
                 continue;
             }
-            $tp = $toPorts[$cmnt];
+            if (count($wanted[$cmnt]) !== 1) {
+                $ok = false;
+                continue;
+            }
+            $dst = (string) array_key_first($wanted[$cmnt]);
+            if (!preg_match('/^\d{1,5}$/', $dst) || (int) $dst < 1 || (int) $dst > 65535) {
+                $ok = false;
+                continue;
+            }
+            $dst = (string) (int) $dst;
             // a forward is this customer's by the id at the end of its comment, which stays when the username changes
             $want = $cmnt . ' || ' . $cust['username'] . ' || ' . $cust['id'];
             $mine = '/^' . preg_quote($cmnt . ' || ', '/') . '.* \|\| ' . preg_quote((string) $cust['id'], '/') . '$/';
@@ -858,6 +997,12 @@ class MikrotikVpn
                     $keep = array_shift($stale);
                 }
             }
+            if ($keep === null && $stale && !empty($stale[0]['@uncopied'])) {
+                // it could not be changed in place, and a copy would lose a match it has (it could then be reached by more
+                // than it is now): the old one stays as it is, and the repair is reported as not done
+                $ok = false;
+                continue;
+            }
             if ($keep === null) {
                 $addRequest = new RouterOS\Request('/ip/firewall/nat/add');
                 $addRequest
@@ -899,8 +1044,7 @@ class MikrotikVpn
 
     function rmNat($client, $cstid)
     {
-        global $_app_stage;
-        if (strtolower((string) $_app_stage) === 'demo') {
+        if (self::isDemo()) {
             return null;
         }
 
@@ -951,7 +1095,7 @@ class MikrotikVpn
      * Whether the database keeps the locks a connection holds when it takes another (MySQL 5.7.5+, MariaDB 10.0.2+). Before
      * that, GET_LOCK() released the lock already held, so locks must never be nested there. Unknown: taken as no.
      */
-    private static function nestedLocks()
+    public static function nestedLocks()
     {
         static $ok = null;
         if ($ok === null) {
