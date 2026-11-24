@@ -76,6 +76,17 @@
   PRIMARY KEY (`id`),
   KEY `nasname` (`nasname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;</pre>
+                        {elseif $why == 'tables'}
+                        <small>{Lang::T('The database exists, but its radpostauth table (the log of sign-ins) is missing. If FreeRADIUS already uses this database, do not import install/radius.sql: run only this in phpMyAdmin (SQL tab), which adds that table and changes nothing else:')}</small>
+<pre class="nf__code">CREATE TABLE IF NOT EXISTS `radpostauth` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(64) NOT NULL DEFAULT '',
+  `pass` varchar(64) NOT NULL DEFAULT '',
+  `reply` varchar(32) NOT NULL DEFAULT '',
+  `authdate` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  `class` varchar(64) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;</pre>
                         {/if}
                     </div>
                 </li>
