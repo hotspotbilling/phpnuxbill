@@ -243,16 +243,23 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.24.4"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-chart.js?2026.11.25"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.25"></script>
 <script>
     // routers-tools.js did not load: its tabs cannot work. They are switched off and each details row says so; the Live tab is
     // left to routers-health.js, which works without it
-    if (!window.rtToolsReady) {
+    // (once every script has run: the Live readings work when routers-health.js loaded, and then only the other tabs are said to be out)
+    window.addEventListener('load', function () {
+        if (window.rtToolsReady) return;
         document.querySelectorAll('.rt-tab:not([data-rt-tab="live"])').forEach(function (b) { b.disabled = true; });
+        var msg = window.rtHealthReady
+            ? '{Lang::T('The other detail tabs could not be loaded. The Live readings still work. Reload the page to try again.')|escape:'javascript'}'
+            : '{Lang::T('The details could not be loaded. Reload the page and try again.')|escape:'javascript'}';
         document.querySelectorAll('.rt-detail > td').forEach(function (td) {
-            td.insertAdjacentHTML('afterbegin', '<p class="rt-err rt-err--block rt-unavail"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {Lang::T('The details could not be loaded. Reload the page and try again.')|escape:'javascript'}</p>');
+            if (td.querySelector('.rt-unavail')) return;
+            td.insertAdjacentHTML('afterbegin', '<p class="rt-err rt-err--block rt-unavail"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> ' + msg + '</p>');
         });
-    }
+    });
 </script>
 
 {if $health_on}
@@ -298,7 +305,7 @@
         });
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.24.4" onerror="window.rtHealthFailed()"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.25" onerror="window.rtHealthFailed()"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">

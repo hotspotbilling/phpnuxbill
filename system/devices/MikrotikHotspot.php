@@ -101,15 +101,16 @@ class MikrotikHotspot
 	private function syncCustomer($customer, $plan)
 	{
 		$this->assertLimitType($plan);
-		$mikrotik = $this->info($plan['routers']);
-		$client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-		// the active recharge of this plan (not any recharge of the username, which may be a PPPoE one)
+		// the active recharge of this plan (not any recharge of the username, which may be a PPPoE one), looked for before the router
+		// is contacted: a customer without one gets the 409 even when the router is offline
 		// the recharge of this plan on the router the plan names now: another plan or router is not this sync's (no update of it)
 		$t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('plan_id', $plan['id'])->where('routers', $plan['routers'])->where('status', 'on')->find_one();
 		if (!$t) {
 			// a deliberate skip, said to the caller (409), so the sync is not counted as done
 			throw new Exception(Lang::T('The customer has no active recharge of this plan: nothing was sent.'), 409);
 		}
+		$mikrotik = $this->info($plan['routers']);
+		$client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
 		if ($t) {
 			$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
 			$printRequest->setArgument('.proplist', '.id');
@@ -279,7 +280,12 @@ class MikrotikHotspot
         if (empty($profileID) && $old_plan['name_plan'] !== $new_plan['name_plan']) {
             // a retry after the profile was renamed already (or created under the new name): the existing one is updated
             $printNew = new RouterOS\Request('/ip hotspot user profile print .proplist=.id', RouterOS\Query::where('name', $new_plan['name_plan']));
-            $profileID = $client->sendSync($printNew)->getProperty('.id');
+            $resNew = $client->sendSync($printNew);
+            if (($err = RouterApi::error($resNew)) !== null) {
+                throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+            }
+            $resNew->rewind();
+            $profileID = $resNew->getProperty('.id');
             // a profile already under the new name is ours only when an earlier save of this plan failed after the rename (the note that
             // services.php keeps, plan_rename_pending_<id>): otherwise it is someone else's, and is reported, never overwritten
             if (!empty($profileID) && !ORM::for_table('tbl_appconfig')->where('setting', 'plan_rename_pending_' . (int) $new_plan['id'])->find_one()) {
@@ -308,7 +314,7 @@ class MikrotikHotspot
 				$rate = '';
 			}
             $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
-            $client->sendSync(
+            $setRes = $client->sendSync(
                 $setRequest
                     ->setArgument('numbers', $profileID)
                     ->setArgument('name', $new_plan['name_plan'])
@@ -317,6 +323,10 @@ class MikrotikHotspot
                     ->setArgument('on-login', $new_plan['on_login'])
                     ->setArgument('on-logout', $new_plan['on_logout'])
             );
+            // a refusal is thrown, so the caller keeps its recovery note instead of treating the update as done
+            if (($err = RouterApi::error($setRes)) !== null) {
+                throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+            }
         }
     }
 
@@ -466,18 +476,31 @@ class MikrotikHotspot
         if ($throw && ($err = RouterApi::error($res)) !== null) {
             throw new Exception($err);
         }
-        $id = $this->checked($res)->getProperty('.id');
-        if (empty($id)) {
-            return; // no active session: nothing to remove
-        }
-
-        $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
-        $removeRequest->setArgument('numbers', $id);
-        $res = $client->sendSync($removeRequest);
-        if ($throw && ($err = RouterApi::error($res)) !== null) {
-            throw new Exception($err);
-        }
         $this->checked($res);
+        // every matching session (a customer can be connected on more than one device), not only the reply the collection points at
+        $ids = [];
+        foreach ($res as $r) {
+            if ($r->getType() === RouterOS\Response::TYPE_DATA) {
+                $one = RouterApi::text($r->getProperty('.id'));
+                if ($one !== null && $one !== '') {
+                    $ids[] = $one;
+                }
+            }
+        }
+        $first = null;
+        foreach ($ids as $one) { // none: no active session, nothing to remove
+            $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
+            $removeRequest->setArgument('numbers', $one);
+            $res = $client->sendSync($removeRequest);
+            if ($throw && ($err = RouterApi::error($res)) !== null) {
+                $first = $first ?? $err; // the others are still tried
+                continue;
+            }
+            $this->checked($res);
+        }
+        if ($first !== null) {
+            throw new Exception($first);
+        }
     }
 
     function getIpHotspotUser($client, $username)

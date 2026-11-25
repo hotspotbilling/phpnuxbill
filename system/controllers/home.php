@@ -272,6 +272,12 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                             _log('[' . $user['username'] . '] deactivate incomplete: ' . $r, 'Router');
                         } catch (Throwable $ignored) {
                         }
+                        // kept on and expiring now: the cron (which takes every recharge on and past its expiry) repeats the removal
+                        $bill->status = 'on';
+                        $bill->expiration = date('Y-m-d');
+                        $bill->time = date('H:i:s');
+                        $bill->save();
+                        App::setToken(_get('stoken'), 1); // consume token, prevent replay
                         r2(getUrl('home'), 'w', Lang::T('The router did not finish taking the access off, so the plan was not marked as expired. Contact support if this stays.'));
                     }
                 } catch (Exception $e) {

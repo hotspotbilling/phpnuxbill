@@ -359,26 +359,29 @@ try {
         if (!$pruneOk) {
             echo "RADIUS REST: finished sessions are not removed this run (accounting updates are queued, or the queue is busy)\n";
         }
-        for ($i = 0; $pruneOk && $i < 20; $i++) {
-            ORM::raw_execute(
-                "DELETE FROM rad_acct
-                  WHERE acctstatustype IN ('Stop', 'Stale') AND COALESCE(dateUpdated, dateAdded) < ?
-                    AND NOT EXISTS (SELECT 1 FROM tbl_user_recharges r
-                         WHERE r.username = rad_acct.username AND r.status = 'on'
-                           AND rad_acct.dateAdded >= TIMESTAMP(r.recharged_on, r.recharged_time)
-                           AND rad_acct.dateAdded <= TIMESTAMP(r.expiration, r.time))
-                  LIMIT 5000",
-                [$before]
-            );
-            $n = ORM::get_last_statement()->rowCount();
-            $removed += $n;
-            if ($n < 5000) {
-                break;
+        try {
+            for ($i = 0; $pruneOk && $i < 20; $i++) {
+                ORM::raw_execute(
+                    "DELETE FROM rad_acct
+                      WHERE acctstatustype IN ('Stop', 'Stale') AND COALESCE(dateUpdated, dateAdded) < ?
+                        AND NOT EXISTS (SELECT 1 FROM tbl_user_recharges r
+                             WHERE r.username = rad_acct.username AND r.status = 'on'
+                               AND rad_acct.dateAdded >= TIMESTAMP(r.recharged_on, r.recharged_time)
+                               AND rad_acct.dateAdded <= TIMESTAMP(r.expiration, r.time))
+                      LIMIT 5000",
+                    [$before]
+                );
+                $n = ORM::get_last_statement()->rowCount();
+                $removed += $n;
+                if ($n < 5000) {
+                    break;
+                }
             }
-        }
-        if ($pruneLock) {
-            flock($pruneLock, LOCK_UN);
-            fclose($pruneLock);
+        } finally {
+            if ($pruneLock) {
+                flock($pruneLock, LOCK_UN);
+                fclose($pruneLock);
+            }
         }
         if ($removed > 0) {
             echo "RADIUS REST: removed $removed finished session(s) older than $keepDays day(s)\n";
@@ -414,7 +417,7 @@ if ($config['router_check']) {
     // back while it ran (the same address again) is not mistaken for no change at all.
     $moveGeneration = function ($rid) {
         try {
-            return RouterMonitor::ready() ? (int) ORM::for_table('tbl_router_events')->where('router_id', (int) $rid)->where('type', 'moved')->max('id') : 0;
+            return RouterMonitor::ready(true) ? (int) ORM::for_table('tbl_router_events')->where('router_id', (int) $rid)->where('type', 'moved')->max('id') : 0;
         } catch (Throwable $e) {
             return -1;
         }

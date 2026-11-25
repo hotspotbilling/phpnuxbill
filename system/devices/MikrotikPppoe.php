@@ -38,7 +38,7 @@ class MikrotikPppoe
         global $isChangePlan;
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        $cid = self::getIdByCustomer($customer, $client);
+        $cid = self::getIdByCustomer($customer, $client, true); // a refused lookup is thrown, never taken for a missing secret
         $isExp = ORM::for_table('tbl_plans')->select("id")->where('plan_expired', $plan['id'])->find_one();
         if (empty($cid)) {
             //customer not exists, add it
@@ -409,7 +409,12 @@ class MikrotikPppoe
         if (empty($profileID) && $old_name['name_plan'] !== $new_plan['name_plan']) {
             // a retry after the profile was renamed already (or created under the new name): the existing one is updated
             $printNew = new RouterOS\Request('/ppp profile print .proplist=.id', RouterOS\Query::where('name', $new_plan['name_plan']));
-            $profileID = $client->sendSync($printNew)->getProperty('.id');
+            $resNew = $client->sendSync($printNew);
+            if (($err = RouterApi::error($resNew)) !== null) {
+                throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+            }
+            $resNew->rewind();
+            $profileID = $resNew->getProperty('.id');
             // a profile already under the new name is ours only when an earlier save of this plan failed after the rename (the note that
             // services.php keeps, plan_rename_pending_<id>): otherwise it is someone else's, and is reported, never overwritten
             if (!empty($profileID) && !ORM::for_table('tbl_appconfig')->where('setting', 'plan_rename_pending_' . (int) $new_plan['id'])->find_one()) {
@@ -439,7 +444,7 @@ class MikrotikPppoe
 			}
             $pool = ORM::for_table("tbl_pool")->where("pool_name", $new_plan['pool'])->find_one();
             $setRequest = new RouterOS\Request('/ppp/profile/set');
-            $client->sendSync(
+            $setRes = $client->sendSync(
                 $setRequest
                     ->setArgument('numbers', $profileID)
                     ->setArgument('local-address', (!empty($pool['local_ip'])) ? $pool['local_ip']: $pool['pool_name'])
@@ -448,6 +453,9 @@ class MikrotikPppoe
                     ->setArgument('on-up', $new_plan['on_login'])
                     ->setArgument('on-down', $new_plan['on_logout'])
             );
+            if (($err = RouterApi::error($setRes)) !== null) {
+                throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+            }
         }
     }
 
@@ -581,7 +589,10 @@ class MikrotikPppoe
         }
         $removeRequest = new RouterOS\Request('/ppp/secret/remove');
         $removeRequest->setArgument('numbers', $id);
-        $client->sendSync($removeRequest);
+        // a refused removal is thrown, so the retry workflow sees it
+        if (($err = RouterApi::error($client->sendSync($removeRequest))) !== null) {
+            throw new Exception($err);
+        }
     }
 
     function addPpoeUser($client, $plan, $customer, $isExp = false)

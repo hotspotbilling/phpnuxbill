@@ -98,6 +98,8 @@ try {
             // resends or logs "no response" because of a problem on this side. The one exception is a Stop that could be neither
             // written nor queued (HTTP 503 below). Anything that goes wrong is written to the logs
             // (Logs > Radius > Rest).
+            // the order of packets is the order they arrived in: taken before any database work or lookup can delay this one
+            $receivedAt = (int) round(microtime(true) * 1000000);
             $username = _req('username');
             if (empty($username)) {
                 radius_log('Accounting packet without a username was not stored. NAS: ' . (string) _req('nasIpAddress', _req('nasipaddress', _req('nasid'))) . ', session: ' . (string) _req('acctSessionId', _req('acctsessionid')));
@@ -160,12 +162,17 @@ try {
                 'acctstatustype' => in_array($acctStatusType, ['Start', 'Stop', 'Interim-Update'], true) ? $acctStatusType : null,
                 'macaddr' => (string) $macAddr, 'dateAdded' => $now, 'dateUpdated' => $now,
                 // when it was received, to the microsecond: the order of packets that arrive within one second
-                'receivedAt' => (int) round(microtime(true) * 1000000),
+                'receivedAt' => $receivedAt,
             ];
             if ($nasUnresolved) {
                 $packet['_nasid_unresolved'] = true;
             }
             try {
+                if ($nasUnresolved) {
+                    // the legacy-NAS lookup failed (the database is most likely unreachable): the packet is queued as it is and
+                    // resolved when it is replayed, never written now under an address that may be wrong
+                    throw new RuntimeException('NAS address not resolved');
+                }
                 RadiusSessions::saveAccounting($packet);
                 if (($config['radius_rest_log_all'] ?? '0') === '1') {
                     // Settings > FreeRadius > Log every accounting packet: for finding out what a NAS really sends
@@ -223,6 +230,26 @@ function radius_alert($text)
         @error_log('[RADIUS] ' . mb_substr(str_replace("\n", ' | ', (string) $text), 0, 500));
         if (empty($GLOBALS['radius_alert_text'])) {
             $GLOBALS['radius_alert_text'] = mb_substr((string) $text, 0, 3000);
+        }
+        if (empty($GLOBALS['radius_alert_registered'])) {
+            $GLOBALS['radius_alert_registered'] = true;
+            register_shutdown_function('radius_alert_deliver');
+        }
+    } catch (Throwable $e) {
+    }
+}
+
+/**
+ * A Telegram notification raised while answering FreeRADIUS (a voucher's purchase note from Package::rechargeUser, say): queued and
+ * sent once the answer is out (radius_alert_deliver), like an alert, but it is not an error, so it is not written to the RADIUS REST
+ * log or the error log, and it is not held to the one alert in five minutes. Never throws.
+ */
+function radius_notify($text)
+{
+    try {
+        $GLOBALS['radius_notify_queue'] = $GLOBALS['radius_notify_queue'] ?? [];
+        if (count($GLOBALS['radius_notify_queue']) < 10) {
+            $GLOBALS['radius_notify_queue'][] = mb_substr((string) $text, 0, 3000);
         }
         if (empty($GLOBALS['radius_alert_registered'])) {
             $GLOBALS['radius_alert_registered'] = true;
@@ -318,6 +345,22 @@ function radius_alert_deliver()
             if ($budget > 0 && radius_alert_reserve()) {
                 $GLOBALS['radius_alert_budget_ms'] = $budget;
                 Message::sendTelegram($text);
+            }
+        }
+        // the notifications (not errors), after the alert: each with the time still allowed, none once it has run out
+        $notes = (array) ($GLOBALS['radius_notify_queue'] ?? []);
+        $GLOBALS['radius_notify_queue'] = [];
+        foreach ($notes as $note) {
+            $elapsed = microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
+            $left = (int) floor((3.5 - $elapsed) * 1000);
+            $budget = $released ? 3000 : ($left >= 500 ? $left : 0);
+            if ($budget <= 0) {
+                break;
+            }
+            $GLOBALS['radius_alert_budget_ms'] = $budget;
+            try {
+                Message::sendTelegram($note);
+            } catch (Throwable $e) {
             }
         }
         // Database logging only once the answer is released (unreleased, the lines are in the error log already), after Telegram, and

@@ -51,12 +51,15 @@ class RouterMonitor
      */
     private static $cutValue = null;
     private static $cutLooked = false;
+    /** The last lookup of the boundary failed (not the same as "no boundary"): prune() then does nothing */
+    private static $cutFailed = false;
 
     /** Forget the boundary read before: the next cut() reads it again (history() starts its snapshot with this) */
     private static function resetCut()
     {
         self::$cutValue = null;
         self::$cutLooked = false;
+        self::$cutFailed = false;
     }
 
     private static function cut($create = false)
@@ -86,6 +89,7 @@ class RouterMonitor
             // a lookup that failed is not "no boundary": not remembered, and a write (create) stops here, so the reading is not saved
             // with local time over a boundary that exists; the next reading tries again. A strict edit rolls back on it (moved()).
             self::$cutLooked = false;
+            self::$cutFailed = true;
             if ($create) {
                 throw $x;
             }
@@ -347,10 +351,14 @@ class RouterMonitor
                     $readAt = time();
                     $x = $res[0] ?? [];
                     $pct = function ($free, $total) {
-                        return is_numeric($free) && is_numeric($total) && (float) $total > 0 ? (int) round((1 - (float) $free / (float) $total) * 100) : null;
+                        if (!is_numeric($free) || !is_numeric($total) || (float) $total <= 0) {
+                            return null;
+                        }
+                        $v = (int) round((1 - (float) $free / (float) $total) * 100);
+                        return $v >= 0 && $v <= 100 ? $v : null; // out of range: unknown, not a reading
                     };
                     $s['online'] = 1;
-                    $s['cpu'] = is_numeric($x['cpu-load'] ?? null) ? (int) $x['cpu-load'] : null;
+                    $s['cpu'] = is_numeric($x['cpu-load'] ?? null) && (int) $x['cpu-load'] >= 0 && (int) $x['cpu-load'] <= 100 ? (int) $x['cpu-load'] : null;
                     $s['mem'] = $pct($x['free-memory'] ?? null, $x['total-memory'] ?? null);
                     $s['disk'] = $pct($x['free-hdd-space'] ?? null, $x['total-hdd-space'] ?? null);
                     $s['uptime'] = self::seconds($x['uptime'] ?? '');
@@ -680,6 +688,11 @@ class RouterMonitor
             return;
         }
         try {
+            self::resetCut();
+            self::cut();
+            if (self::$cutFailed) {
+                return; // the boundary could not be read: a local cutoff could delete UTC rows, so nothing is deleted and the mark is not set
+            }
             $db = ORM::getDb();
             // (the cut-off on the same basis as the stored times: UTC for the rows saved as UTC, local for the older ones)
             [$sql, $vals] = self::atSql('s', '<', time() - self::KEEP_SAMPLES * 86400);
@@ -710,11 +723,10 @@ class RouterMonitor
         $db = ORM::getDb();
         $own = !$db->inTransaction();
         if ($own) {
-            try {
-                $db->beginTransaction();
-            } catch (Throwable $e) {
-                $own = false;
-            }
+            // one snapshot for both reads (READ COMMITTED would take a new one per read); a transaction that cannot start is an
+            // error for the caller to report and retry, not a read without one
+            $db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
+            $db->beginTransaction();
         }
         try {
             self::resetCut();

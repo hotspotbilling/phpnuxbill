@@ -35,6 +35,30 @@ class RadiusRestLog
         return self::legacyFile();
     }
 
+    /** The primary (hashed) log path, whether or not it is the one written to now: kept in the read/clear inventory */
+    private static function hashedFile(): string
+    {
+        global $root_path;
+        return rtrim((string) $root_path, '/\\') . DIRECTORY_SEPARATOR . 'system' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'radius_rest.' . self::secret() . '.log';
+    }
+
+    /** The lock every change to the log (append, rotate, clear) is made under: a file of its own, never rotated */
+    private static function lockHandle()
+    {
+        global $CACHE_PATH, $root_path;
+        $logs = rtrim((string) $root_path, '/\\') . DIRECTORY_SEPARATOR . 'system' . DIRECTORY_SEPARATOR . 'logs';
+        $dir = (is_dir($logs) && is_writable($logs)) ? $logs : rtrim((string) $CACHE_PATH, '/\\');
+        $h = @fopen($dir . DIRECTORY_SEPARATOR . 'radius_rest.lock', 'c');
+        if (!$h) {
+            return null;
+        }
+        if (!flock($h, LOCK_EX)) {
+            fclose($h);
+            return null;
+        }
+        return $h;
+    }
+
     /** The secret part of the file name (see the class note): stable for one installation */
     private static function secret(): string
     {
@@ -60,7 +84,8 @@ class RadiusRestLog
     private static function files(): array
     {
         $f = self::file();
-        $all = [$f, $f . '.1', self::plainFile(), self::plainFile() . '.1', self::legacyFile(), self::legacyFile() . '.1'];
+        $hashed = self::hashedFile();
+        $all = [$f, $f . '.1', $hashed, $hashed . '.1', self::plainFile(), self::plainFile() . '.1', self::legacyFile(), self::legacyFile() . '.1'];
         return array_values(array_unique($all));
     }
 
@@ -81,20 +106,32 @@ class RadiusRestLog
             if ($line === false) {
                 return;
             }
-            $fh = @fopen($file, 'ab');
-            if (!$fh) {
+            $lock = self::lockHandle();
+            if (!$lock) {
                 return;
             }
-            if (flock($fh, LOCK_EX)) {
+            try {
                 clearstatcache(true, $file);
                 if ((int) @filesize($file) > self::MAX_BYTES) {
-                    @rename($file, $file . '.1'); // the handle still points at the old file: this line goes to it, the next ones start a new file
+                    @rename($file, $file . '.1');
                 }
-                fwrite($fh, $line . "\n");
-                fflush($fh);
-                flock($fh, LOCK_UN);
+                $fh = @fopen($file, 'ab');
+                if (!$fh) {
+                    return;
+                }
+                $before = (int) (fstat($fh)['size'] ?? 0);
+                $line .= "\n";
+                if (@fwrite($fh, $line) !== strlen($line)) {
+                    // a partial record would corrupt the next line: back to what was there (not appended to if that fails)
+                    @ftruncate($fh, $before);
+                } else {
+                    fflush($fh);
+                }
+                fclose($fh);
+            } finally {
+                flock($lock, LOCK_UN);
+                fclose($lock);
             }
-            fclose($fh);
         } catch (Throwable $e) {
         }
     }
@@ -119,7 +156,7 @@ class RadiusRestLog
                 if ($level !== '' && ($r['level'] ?? '') !== $level) {
                     continue;
                 }
-                if ($q !== '' && stripos(implode(' ', array_map('strval', $r)), $q) === false) {
+                if ($q !== '' && mb_stripos(implode(' ', array_map('strval', $r)), $q, 0, 'UTF-8') === false) {
                     continue;
                 }
                 $rows[] = $r;
@@ -132,10 +169,15 @@ class RadiusRestLog
     public static function clear(): bool
     {
         $ok = true;
+        $lock = self::lockHandle();
         foreach (self::files() as $file) {
             if (is_file($file) && !@unlink($file)) {
                 $ok = false;
             }
+        }
+        if ($lock) {
+            flock($lock, LOCK_UN);
+            fclose($lock);
         }
         return $ok;
     }

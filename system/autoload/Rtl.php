@@ -300,11 +300,11 @@ class Rtl
             $stamp = $head ? self::stamp($mtime, self::depUrls($head['deps'])) : null;
             if (!$head || !is_file($out) || filemtime($out) < (int) $mtime || $head['stamp'] !== $stamp) {
                 if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
-                    return null;
+                    return self::fail($rel, 'the folder ' . $cache . ' could not be created (it must be writable)');
                 }
                 $css = @file_get_contents($path);
                 if ($css === false) {
-                    return null;
+                    return self::fail($rel, 'the stylesheet could not be read');
                 }
                 // a local stylesheet it imports is mirrored as well, and imported from its copy
                 $deps = [];
@@ -361,9 +361,10 @@ class Rtl
                 $stamp = self::stamp($mtime, $urls);
                 // the copy lives in ui/cache/rtl/: links to fonts and images are pointed back to the stylesheet's own folder
                 $css = $css === null ? null : self::rebase($css, self::relative($cache, dirname($rel)));
-                $flipped = $css === null ? null : self::flip($css);
+                $flipped = $css === null ? null : self::flipLarge($css);
                 if ($flipped === null) {
-                    return null; // a step failed: the page keeps the original stylesheet, and no copy is written
+                    // a step failed: the page keeps the original stylesheet, and no copy is written
+                    return self::fail($rel, 'mirroring failed (' . preg_last_error_msg() . ')');
                 }
                 $tmp = $out . '.' . getmypid() . '.tmp';
                 // Published under a lock, as one step: the copy and its stamp go together, and a worker that read an older source
@@ -388,7 +389,7 @@ class Rtl
                             @unlink($tmp);
                             @unlink($tmp . '.stamp');
                             @unlink($out . '.stamp');
-                            return null;
+                            return self::fail($rel, 'the copy could not be written to ' . $cache . ' (it must be writable)');
                         }
                     }
                 } finally {
@@ -400,6 +401,54 @@ class Rtl
             unset(self::$busy[$path]);
         }
         return APP_URL . '/' . $cache . '/' . $name . '?' . $stamp;
+    }
+
+    /**
+     * A stylesheet that could not be mirrored: the page keeps the original (left to right), and the reason goes to the PHP error log
+     * once per file and request, so a server where right-to-left pages stay left to right can be told why. Returns null.
+     */
+    private static function fail($rel, $why)
+    {
+        static $told = [];
+        if (!isset($told[$rel])) {
+            $told[$rel] = true;
+            @error_log('[RTL] ' . $rel . ' not mirrored: ' . $why);
+        }
+        return null;
+    }
+
+    /**
+     * flip() with room for a large stylesheet: a server's lower PCRE limits (backtracking, recursion, or a JIT stack that runs out) can
+     * make a regular expression give up on a big file, which leaves the whole layout left to right. The limits are raised for the
+     * mirroring and put back after; a JIT failure is tried once more without JIT.
+     */
+    private static function flipLarge($css)
+    {
+        $old = [];
+        foreach (['pcre.backtrack_limit' => '10000000', 'pcre.recursion_limit' => '1000000'] as $k => $v) {
+            $cur = ini_get($k);
+            if ($cur !== false && (int) $cur < (int) $v) {
+                $old[$k] = $cur;
+                @ini_set($k, $v);
+            }
+        }
+        try {
+            $out = self::flip($css);
+            if ($out === null && preg_last_error() === PREG_JIT_STACKLIMIT_ERROR && ini_get('pcre.jit')) {
+                $jit = ini_get('pcre.jit');
+                @ini_set('pcre.jit', '0');
+                try {
+                    $out = self::flip($css);
+                } finally {
+                    @ini_set('pcre.jit', $jit);
+                }
+            }
+            return $out;
+        } finally {
+            foreach ($old as $k => $v) {
+                @ini_set($k, $v);
+            }
+        }
     }
 
     /** The stamp of a copy: the source's time and the mirroring version, and the addresses of the copies it imports */
@@ -451,6 +500,9 @@ class Rtl
         if ($href === '' || preg_match('#^(data:|javascript:)#i', $href)) {
             return null;
         }
+        if (strpos($href, '//') === 0) {
+            $href = (parse_url(APP_URL, PHP_URL_SCHEME) ?: 'http') . ':' . $href; // scheme-relative: same scheme as the site
+        }
         $path = preg_replace('/[?#].*$/', '', $href);
         $base = rtrim(APP_URL, '/');
         if (stripos($path, $base . '/') === 0) {
@@ -474,6 +526,9 @@ class Rtl
     private static function sitePath($site)
     {
         $path = rawurldecode(preg_replace('/[?#].*$/', '', (string) $site));
+        if (strpos($path, '//') === 0) {
+            $path = (parse_url(APP_URL, PHP_URL_SCHEME) ?: 'http') . ':' . $path;
+        }
         $base = rtrim(APP_URL, '/');
         if (stripos($path, $base . '/') === 0) {
             $path = substr($path, strlen($base) + 1);

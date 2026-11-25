@@ -67,7 +67,9 @@ if ($step == 1) {
         $_SESSION['forgot_username'] = $username;
         $ui->assign('username', $username);
         $user = ORM::for_table('tbl_customers')->selects(['id', 'phonenumber', 'email'])->where('username', $username)->find_one();
-        $age = Otp::age('forgot', $username);
+        // the code belongs to this account (its id is part of the key): a username reassigned later never inherits a live code
+        $otpKey = $user ? $username . '|' . (int) $user['id'] : $username;
+        $age = Otp::age('forgot', $otpKey);
         // the account this session asked about (checked when a code is used): set whenever the username exists, cleared when it does not,
         // so a stale value from an earlier request never stands for this one
         if ($user) {
@@ -76,7 +78,7 @@ if ($step == 1) {
             unset($_SESSION['forgot_uid']);
         }
         if ($user && ($age < 0 || $age >= Otp::TTL)) {
-            $otp = Otp::issue('forgot', $username);
+            $otp = Otp::issue('forgot', $otpKey);
             forgot_notify($user['phonenumber'], $user['email'], $config['CompanyName'] . " C0de: $otp", $config['CompanyName'] . ' ' . Lang::T("Your Verification Code") . ' : ' . $otp);
         }
         $ui->assign('notify_t', 's');
@@ -93,9 +95,9 @@ if ($step == 1) {
     if ($waitIp > 0 || $waitUser > 0) {
         r2(getUrl('forgot&step=1'), 'e', Lang::T('Too many requests. Please try again later.') . ' (' . AuthThrottle::waitText(max($waitIp, $waitUser)) . ')');
     }
-    if (Otp::check('forgot', $username, $otp_code) === 'ok') {
+    $owner = ORM::for_table('tbl_customers')->selects(['id'])->where('username', $username)->find_one();
+    if (Otp::check('forgot', $owner ? $username . '|' . (int) $owner['id'] : $username, $otp_code) === 'ok') {
         // bound to the account's id as well, so a username reassigned before the reset cannot move the ticket to another account
-        $owner = ORM::for_table('tbl_customers')->selects(['id'])->where('username', $username)->find_one();
         // a username reassigned since the code was issued does not carry the code to the new account
         // the id is mandatory: a code is never carried to an account the session did not ask about (no id, or another one, is refused)
         if (!$owner || !isset($_SESSION['forgot_uid']) || (int) $_SESSION['forgot_uid'] !== (int) $owner['id']) {
@@ -200,7 +202,10 @@ if ($step == 1) {
             RedisCache::forgetRadiusCustomer($username);
         }
         User::revokeCookies($user['id']); // every session and remember-me cookie opened with the old password ends
-        _log('[' . $username . ']: Password reset with a verification code', 'User', $user['id']);
+        try {
+            _log('[' . $username . ']: Password reset with a verification code', 'User', $user['id']);
+        } catch (Throwable $ignored) { // the audit line is best effort: the reset is saved and the router warning must still reach the customer
+        }
         forgot_notify($user['phonenumber'], $user['email'], $config['CompanyName'] . ': ' . Lang::T('Your password was just changed. If this was not you, contact us at once.'), $config['CompanyName'] . ' - ' . Lang::T('Your password was changed'));
     } else {
         unset($_SESSION['forgot_ok'], $_SESSION['forgot_username']); // no such account: the code is used up all the same

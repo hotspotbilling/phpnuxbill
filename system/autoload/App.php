@@ -66,7 +66,8 @@ class App{
 
     /** Takes back a setVoucher() mark (the action it guarded failed), so the same link can be used again */
     public static function clearVoucher($token){
-        if (!empty($token)) {
+        // only a token of the shape getVoucher()/getToken() issue: a request value must never unset other session state
+        if (is_string($token) && preg_match('/^[a-f0-9]{32}$/', $token)) {
             unset($_SESSION[$token]);
         }
     }

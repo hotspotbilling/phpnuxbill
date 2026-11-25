@@ -89,7 +89,7 @@ function pnb_requirements()
     }
     foreach (['system/cache', 'system/logs', 'system/uploads', 'ui/compiled', 'ui/cache', 'pages_template'] as $dir) {
         $p = $root . '/' . $dir;
-        $rows[] = ['Folder ' . $dir . ' is writable', $dir !== 'pages_template', is_dir($p) && is_writable($p), is_dir($p) ? (is_writable($p) ? 'writable' : 'not writable') : 'missing'];
+        $rows[] = ['Folder ' . $dir . ' is writable', !in_array($dir, ['pages_template', 'system/logs'], true), is_dir($p) && is_writable($p), is_dir($p) ? (is_writable($p) ? 'writable' : 'not writable') : 'missing'];
     }
     $rows[] = ['The site folder is writable (config.php is created there)', true, is_writable($root), is_writable($root) ? 'writable' : 'not writable: you will have to create config.php by hand'];
     return $rows;

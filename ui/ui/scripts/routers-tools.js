@@ -14,11 +14,7 @@
     var t = cfg.t;
     var LIMIT = 30000; // ms a tab may take to load
 
-    function esc(s) {
-        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-        });
-    }
+    var esc = window.RtChart.esc; // the chart pieces shared with the Live graphs (routers-chart.js)
     function size(b) {
         if (b == null) return '';
         var u = ['B', 'KB', 'MB', 'GB', 'TB'], i = 0;
@@ -136,7 +132,9 @@
         return request('sessions', id).then(function (d) {
             if (!d.ok) { pane.innerHTML = head(t.user) + fail(d); return; }
             // a list that was not read can come back missing (or null): no rows from it, and d.read says it was not read
-            var hs = Array.isArray(d.hotspot) ? d.hotspot : [], pp = Array.isArray(d.pppoe) ? d.pppoe : [];
+            // (PHP writes an array whose keys have gaps, after filtering, as an object: its values are the sessions)
+            var toList = function (v) { return Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.keys(v).map(function (k) { return v[k]; }) : []); };
+            var hs = toList(d.hotspot), pp = toList(d.pppoe);
             var rows = hs.map(function (r) { r.kind = 'hotspot'; return r; }).concat(pp.map(function (r) { r.kind = 'pppoe'; return r; }));
             // a disconnect sent from here (still on its way, or done) stays shown on its row, even in a list read from the router
             // before it went through; kept per router settings, as a session ID only means something on the router it came from
@@ -327,23 +325,13 @@
     }
 
     /* ---------- history (readings kept by the cron) ---------- */
-    function bps(v) {
-        if (v == null) return '';
-        var u = ['bps', 'kbps', 'Mbps', 'Gbps'], i = 0;
-        while (v >= 1000 && i < u.length - 1) { v /= 1000; i++; }
-        return (v >= 100 || i === 0 ? Math.round(v) : v.toFixed(1)) + ' ' + u[i];
-    }
+    var bps = window.RtChart.bps;
     function stamp(at, long) {
         var d = new Date(at * 1000);
         var hm = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
         return long ? d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' ' + hm : hm;
     }
-    function niceMax(v) {
-        if (!v || v <= 0) return 1;
-        var p = Math.pow(10, Math.floor(Math.log10(v)));
-        var n = v / p;
-        return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
-    }
+    var niceMax = window.RtChart.niceMax;
     // one y axis, 2px lines, a crosshair and tooltip; series: [{ label, cls, points: [[at, v]] }]; gaps (null) break the line
     // empty: the text shown when no series has a value; title: the chart's name, for the keyboard and screen readers
     function lineChart(series, fmt, max, from, to, long, empty, title) {
@@ -353,29 +341,7 @@
         var top = max != null ? max : niceMax(Math.max.apply(null, vals.concat([0])) * 1.1);
         function X(at) { return padL + (at - from) / (to - from) * (W - padL - padR); }
         function Y(v) { return padT + (1 - Math.min(v, top) / top) * (H - padT - padB); }
-        var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" class="rt-chart__svg" aria-hidden="true">';
-        [0, 0.5, 1].forEach(function (f) {
-            svg += '<line class="rt-chart__grid" x1="' + padL + '" x2="' + (W - padR) + '" y1="' + Y(top * f) + '" y2="' + Y(top * f) + '"></line>';
-        });
-        series.forEach(function (s) {
-            var d = '', pen = false;
-            s.points.forEach(function (p) {
-                if (p[1] == null) { pen = false; return; }
-                d += (pen ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1) + ' ';
-                pen = true;
-            });
-            if (d) svg += '<path class="rt-chart__line ' + s.cls + '" d="' + d + '"></path>';
-            // a reading with no reading next to it on either side has no line to be part of: a dot shows it
-            s.points.forEach(function (p, i) {
-                var before = s.points[i - 1], after = s.points[i + 1];
-                if (p[1] != null && !(before && before[1] != null) && !(after && after[1] != null)) {
-                    svg += '<circle class="rt-chart__pt ' + s.cls + '" r="2.5" cx="' + X(p[0]).toFixed(1) + '" cy="' + Y(p[1]).toFixed(1) + '"></circle>';
-                }
-            });
-        });
-        svg += '<line class="rt-chart__cross" x1="0" x2="0" y1="' + padT + '" y2="' + (H - padB) + '" hidden></line>';
-        series.forEach(function (s) { svg += '<circle class="rt-chart__dot ' + s.cls + '" r="4" cx="0" cy="0" hidden></circle>'; });
-        svg += '</svg>';
+        var svg = window.RtChart.svg(series, { W: W, H: H, padL: padL, padR: padR, padT: padT, padB: padB, top: top, X: X, Y: Y });
         // with readings, the plot takes the keyboard focus: the arrow keys move the crosshair from reading to reading, and each
         // one is also said in a hidden live region for screen readers (the drawing itself is hidden from them)
         var html = '<div class="rt-chart__plot" data-from="' + from + '" data-to="' + to + '"'

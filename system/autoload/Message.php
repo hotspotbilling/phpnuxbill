@@ -26,9 +26,10 @@ class Message
         // Answering FreeRADIUS, from the middle of a login (no budget set by radius.php: a voucher's purchase alert, say): the message is
         // handed to radius.php's alert queue, which sends it once the answer is out. Neither the send_telegram hook (a plugin's code,
         // which PHP cannot time-limit) nor the request runs while the router waits.
+        // (a notification, not an error: it is not written to the RADIUS REST log, and it is not limited to one in five minutes)
         if (!empty($GLOBALS['radius_request']) && !isset($GLOBALS['radius_alert_budget_ms']) && empty($chat_id) && $topik === ''
-            && function_exists('radius_alert')) {
-            radius_alert((string) $txt);
+            && function_exists('radius_notify')) {
+            radius_notify((string) $txt);
             return false;
         }
         if (!empty($GLOBALS['radius_request']) && !isset($GLOBALS['radius_alert_budget_ms'])) {
@@ -40,7 +41,8 @@ class Message
             return false;
         }
         $hookStart = microtime(true);
-        if ($runHook) {
+        // a plugin's code cannot be time-limited: never run it while the router waits (before radius.php's post-response budget is set)
+        if ($runHook && (empty($GLOBALS['radius_request']) || isset($GLOBALS['radius_alert_budget_ms']))) {
             run_hook('send_telegram', [$txt, $chat_id, $topik]); #HOOK
         }
         $hookMs = (int) ((microtime(true) - $hookStart) * 1000);
@@ -106,7 +108,9 @@ class Message
                 return $ok;
             }
             try {
-                self::MikrotikSendSMS($config['sms_url'], $phone, $txt, $timeout);
+                if (self::MikrotikSendSMS($config['sms_url'], $phone, $txt, $timeout) !== true) {
+                    return false; // Demo mode: nothing was sent, nothing is logged as sent
+                }
                 self::logMessage('MikroTikSMS', $phone, $txt, 'Success');
                 return true;
             } catch (Throwable $e) {
@@ -181,6 +185,7 @@ class Message
         if (($err = RouterApi::error($res)) !== null) {
             throw new \Exception($err, 403);
         }
+        return true; // confirmed by the router (null above: Demo mode, nothing sent)
     }
 
     /** Returns the gateway's answer (or true) when the message was handed over, false when it was not. $timeout: seconds for the gateway */
@@ -263,8 +268,12 @@ class Message
             }
 
             if (!file_exists($PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html')) {
-                if (!copy($PAGES_PATH . '_template' . DIRECTORY_SEPARATOR . 'Email.html', $PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html')) {
-                    file_put_contents($PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html', Http::getData('https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/pages_template/Email.html'));
+                if (!@copy($PAGES_PATH . '_template' . DIRECTORY_SEPARATOR . 'Email.html', $PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html')) {
+                    $tpl = Http::getData('https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/pages_template/Email.html', [], 3000, 15000, $tplError, $tplStatus);
+                    // cached only when it really came: an error text or error page must never become the template
+                    if ($tplError === '' && $tplStatus >= 200 && $tplStatus <= 299 && is_string($tpl) && $tpl !== '') {
+                        file_put_contents($PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html', $tpl);
+                    }
                 }
             }
 

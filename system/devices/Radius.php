@@ -281,6 +281,7 @@ class Radius
                 // we just change the password
                 $r->value = md5(time() . $username . $radius_pass);
                 $r->save();
+                $this->deactivatedMarker($username, true); // the password is a placeholder from now on, until a renewal restores it
                 if ($radiusDisconnect)
                     return $this->disconnectCustomer($username);
             }
@@ -288,8 +289,31 @@ class Radius
         return '';
     }
 
+    /**
+     * The deactivation marker of an account (tbl_appconfig): set when customerDeactivate() replaced the password, cleared when the
+     * configured one is written back. $set true sets it, false clears it, null reads it (the value, or null when absent).
+     */
+    private function deactivatedMarker($username, $set = null)
+    {
+        $key = 'radius_deactivated_' . md5((string) $username);
+        $row = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
+        if ($set === null) {
+            return $row ? (string) $row['value'] : null;
+        }
+        if ($set && !$row) {
+            $row = ORM::for_table('tbl_appconfig')->create();
+            $row->setting = $key;
+            $row->value = '1';
+            $row->save();
+        } elseif (!$set && $row) {
+            $row->delete();
+        }
+        return null;
+    }
+
     public function customerDelete($username)
     {
+        $this->deactivatedMarker($username, false);
         $this->getTableCustomer()->where_equal('username', $username)->delete_many();
         $this->getTableUserPackage()->where_equal('username', $username)->delete_many();
         $this->getTableCustomerAttr()->where_equal('username', $username)->delete_many();
@@ -408,21 +432,27 @@ class Radius
         $row = $plan['type'] === 'VPN' ? $this->getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Cleartext-Password')->find_one() : null;
         // customerDeactivate() leaves a 32-character hex placeholder (an md5) as the password: a row holding one was taken off by a
         // remove-then-add (a plan change), not renewed, and the configured credential is restored whatever the old recharge says
-        $placeholder = $row && preg_match('/^[0-9a-f]{32}$/', (string) $row['value']) === 1;
+        // (a marker kept apart from the password, set by customerDeactivate(): a live credential is never mistaken for it by its format)
+        $placeholder = $row && $this->deactivatedMarker($customer['username']) !== null;
         $vpnLive = $row && !$placeholder
             && ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->where('type', 'VPN')->find_one();
+        $ok = true;
         if ($vpnLive) {
             // kept
         } elseif (in_array($plan['type'], ['PPPOE', 'VPN'], true)) { // a dialled connection: the dial password
-            $this->upsertCustomer($customer['username'], 'Cleartext-Password', (empty($customer['pppoe_password'])) ? $customer['password'] : $customer['pppoe_password']);
+            $ok = $this->upsertCustomer($customer['username'], 'Cleartext-Password', (empty($customer['pppoe_password'])) ? $customer['password'] : $customer['pppoe_password']) && $ok;
         } else {
-            $this->upsertCustomer($customer['username'], 'Cleartext-Password',  $customer['password']);
+            $ok = $this->upsertCustomer($customer['username'], 'Cleartext-Password',  $customer['password']) && $ok;
         }
-        $this->upsertCustomer($customer['username'], 'Simultaneous-Use', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']);
+        if ($ok && $placeholder) {
+            $this->deactivatedMarker($customer['username'], false); // the configured credential is back
+        }
+        // a write that was refused without throwing is a failure the caller sees, never a success with the old credential
+        $ok = $this->upsertCustomer($customer['username'], 'Simultaneous-Use', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']) && $ok;
         // Mikrotik Spesific
-        $this->upsertCustomer($customer['username'], 'Port-Limit', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']);
-        $this->upsertCustomer($customer['username'], 'Mikrotik-Wireless-Comment', $customer['fullname']);
-        return true;
+        $ok = $this->upsertCustomer($customer['username'], 'Port-Limit', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']) && $ok;
+        $ok = $this->upsertCustomer($customer['username'], 'Mikrotik-Wireless-Comment', $customer['fullname']) && $ok;
+        return $ok;
     }
 
     /**

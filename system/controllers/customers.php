@@ -333,7 +333,15 @@ switch ($action) {
                                     foreach ($pend as $pr) {
                                         (new $p['device'])->change_username($p, $pr[0], $pr[1]);
                                     }
-                                    User::setAttribute('Pending Rename ' . $p['id'], '', $id_customer);
+                                    // only the entries replayed are removed: a rename added by an edit meanwhile is kept
+                                    $now = json_decode((string) User::getAttribute('Pending Rename ' . $p['id'], $id_customer), true);
+                                    $left = [];
+                                    foreach ((is_array($now) ? $now : []) as $e) {
+                                        if (!in_array($e, $pend, true)) {
+                                            $left[] = $e;
+                                        }
+                                    }
+                                    User::setAttribute('Pending Rename ' . $p['id'], $left ? json_encode($left) : '', $id_customer);
                                 }
                                 if (method_exists($p['device'], 'sync_customer')) {
                                     $syncRes = (new $p['device'])->sync_customer($c, $p);
@@ -1013,6 +1021,7 @@ switch ($action) {
             $skippedPlans = []; // plans with no driver file: nothing was sent to their device
             $toProvision = []; // plans given their new credentials once every rename has gone through
             $provisionSkipped = false; // a PPPoE / VPN recharge that was not provisioned (expired or off): its secret may still use the old address
+            $stagedPend = []; // plan id => renames kept for Sync (plans with no driver file)
             $passwordOnly = ($passDiff || $pppoePassDiff) && !$userDiff && !$pppoeDiff && !$pppoeIpDiff;
             if ($passwordOnly) {
                 // only a password changed: just the password goes to the devices (Package::sendPassword), not a full re-provisioning
@@ -1155,8 +1164,8 @@ switch ($action) {
                                     }
                                 }
                                 if ($pend) {
-                                    $oldPend = json_decode((string) User::getAttribute('Pending Rename ' . $p['id'], $c['id']), true);
-                                    User::setAttribute('Pending Rename ' . $p['id'], json_encode(array_merge(is_array($oldPend) ? $oldPend : [], $pend)), $c['id']);
+                                    // staged: written only once the whole pass has succeeded, so a rollback leaves no entry for a rename it undid
+                                    $stagedPend[$p['id']] = array_merge($stagedPend[$p['id']] ?? [], $pend);
                                 }
                             }
                         }
@@ -1168,6 +1177,11 @@ switch ($action) {
                     $tur->save();
                     $doneTurs[] = $tur;
                 }
+            }
+            // every rename is done: the renames kept for Sync are merged with those of earlier edits
+            foreach ($stagedPend as $planId => $newPend) {
+                $oldPend = json_decode((string) User::getAttribute('Pending Rename ' . $planId, $c['id']), true);
+                User::setAttribute('Pending Rename ' . $planId, json_encode(array_merge(is_array($oldPend) ? $oldPend : [], $newPend)), $c['id']);
             }
             // every rename is done: the new credentials are sent now
             foreach ($toProvision as $p) {

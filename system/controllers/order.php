@@ -690,8 +690,16 @@ switch ($action) {
                     $d->status = 1;
                     $d->save();
                     $id = $d->id();
-                    Package::followRename('tbl_payment_gateway', $id, $router['name'], $plan['id'], (int) $router['id']);
-                    $d = ORM::for_table('tbl_payment_gateway')->find_one($id) ?: $d; // the row as the rename left it
+                    try {
+                        Package::followRename('tbl_payment_gateway', $id, $router['name'], $plan['id'], (int) $router['id']);
+                        $d = ORM::for_table('tbl_payment_gateway')->find_one($id) ?: $d; // the row as the rename left it
+                    } catch (Throwable $renameErr) {
+                        // the saved row is usable as it is, and the cron's repair (Package::repairRenames) picks the rename up later
+                        try {
+                            _log('Order #' . $id . ': router rename not reconciled: ' . $renameErr->getMessage(), 'Router');
+                        } catch (Throwable $ignored) {
+                        }
+                    }
                 } else {
                     $d->username = $user['username'];
                     $d->user_id = $user['id'];
@@ -715,8 +723,16 @@ switch ($action) {
                     $d->created_date = date('Y-m-d H:i:s');
                     $d->status = 1;
                     $d->save();
-                    Package::followRename('tbl_payment_gateway', $d->id(), $router['name'], $plan['id'], (int) $router['id']);
-                    $d = ORM::for_table('tbl_payment_gateway')->find_one($d->id()) ?: $d; // the row as the rename left it
+                    $orderId = $d->id();
+                    try {
+                        Package::followRename('tbl_payment_gateway', $orderId, $router['name'], $plan['id'], (int) $router['id']);
+                        $d = ORM::for_table('tbl_payment_gateway')->find_one($orderId) ?: $d; // the row as the rename left it
+                    } catch (Throwable $renameErr) {
+                        try {
+                            _log('Order #' . $orderId . ': router rename not reconciled: ' . $renameErr->getMessage(), 'Router');
+                        } catch (Throwable $ignored) {
+                        }
+                    }
                 }
                 break;
         }

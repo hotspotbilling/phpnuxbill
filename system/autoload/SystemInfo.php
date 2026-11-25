@@ -742,15 +742,13 @@ class SystemInfo
         $radiusEnabled = !empty($config['radius_enable']);
 
         // 1. Radius REST Online Users (table rad_acct in database)
-        // Sessions updated by radius.php with acctstatustype IN ('Start', 'Interim-Update') OR NULL, and != 'Stop'
+        // One positive predicate for every REST count and list: Start, Interim-Update or no status. Stop and Stale are not in it.
         $restActive = "(acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL)";
-        $restNotStopped = "(acctstatustype NOT IN ('Stop', 'Stale') OR acctstatustype IS NULL)";
         $restOnline = 0;
         $restUsers = 0;
         try {
             $restOnline = (int) ORM::for_table('rad_acct')
                 ->where_raw($restActive)
-                ->where_raw($restNotStopped)
                 ->count();
         } catch (Throwable $e) {
             $restOnline = 0;
@@ -759,7 +757,6 @@ class SystemInfo
             $row = ORM::for_table('rad_acct')
                 ->select_expr('COUNT(DISTINCT username)', 'n')
                 ->where_raw($restActive)
-                ->where_raw($restNotStopped)
                 ->find_one();
             $restUsers = $row ? (int) $row->n : 0;
         } catch (Throwable $e) {
@@ -804,8 +801,7 @@ class SystemInfo
         try {
             $restSessions = ORM::for_table('rad_acct')
                 ->select_many('radacctid', 'username', 'nasipaddress', 'framedipaddress', 'callingstationid', 'acctstarttime', 'acctstatustype')
-                ->where_raw("(acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL)")
-                ->where_raw("(acctstatustype NOT IN ('Stop', 'Stale') OR acctstatustype IS NULL)")
+                ->where_raw($restActive)
                 ->order_by_desc('radacctid')
                 ->limit(10)
                 ->find_array();

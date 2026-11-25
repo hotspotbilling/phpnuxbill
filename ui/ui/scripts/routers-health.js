@@ -34,23 +34,14 @@
     var livePainted = {};    // id => a Live reading has put its answer in the row's Health cell
     var LIMIT = 20000;       // ms a request (and reading its answer) may take before it counts as failed
 
-    function esc(s) {
-        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-        });
-    }
+    var esc = window.RtChart.esc; // the chart pieces shared with the History graphs (routers-chart.js)
     function size(b) {
         if (b == null) return '';
         var u = ['B', 'KB', 'MB', 'GB', 'TB'], i = 0;
         while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
         return (b >= 10 || i === 0 ? Math.round(b) : b.toFixed(1)) + ' ' + u[i];
     }
-    function bps(v) {
-        if (v == null) return '';
-        var u = ['bps', 'kbps', 'Mbps', 'Gbps'], i = 0;
-        while (v >= 1000 && i < u.length - 1) { v /= 1000; i++; }
-        return (v >= 100 || i === 0 ? Math.round(v) : v.toFixed(1)) + ' ' + u[i];
-    }
+    var bps = window.RtChart.bps;
     function pct(used, total) {
         return used != null && total ? Math.round(used / total * 100) : null;
     }
@@ -175,7 +166,7 @@
         // L.ifs is the list shown in the picker: kept apart from L.prev, the counter baseline, which a pause, a failed reading or
         // a hidden page clears, so the traffic graph stays shown (with its history) while it waits for two new readings
         // PHP gives a keyed object when filtering left gaps in the keys (two interfaces at keys 1 and 3): one list either way
-        var ifaces = d.ifaces ? (Array.isArray(d.ifaces) ? d.ifaces : Object.keys(d.ifaces).map(function (k) { return d.ifaces[k]; })) : null;
+        var ifaces = d.ifaces ? (Array.isArray(d.ifaces) ? d.ifaces : Object.keys(d.ifaces).map(function (k) { return d.ifaces[k]; })).filter(function (i) { return i && i.name != null; }) : null; // (an entry that is not an interface is left out: it must not stop the polling)
         if (ifaces) {
             var now = Object.create(null); // (an interface may be called "constructor": no inherited names here)
             ifaces.forEach(function (i) { now[i.name] = { type: i.type, total: i.rx + i.tx }; });
@@ -187,7 +178,7 @@
         (ifaces || []).forEach(function (i) {
             var p = L.prev[i.name];
             // an interface with the same name but another internal id is another interface (removed and made again): a new baseline
-            if (p && (p.id || '') !== (i.id || '')) p = null;
+            if (p && (p.id || '') !== (i.id || '')) { p = null; delete L.rate[i.name]; } // (the old interface's readings are not the new one's)
             if (!p && L.rate[i.name] && L.rate[i.name].length) {
                 // a new baseline after a failed reading or a pause: a gap in the graph, so the next speed is not joined to the
                 // last one from before
@@ -231,12 +222,7 @@
     }
 
     /* ---------- line chart: one y axis, 2px lines, crosshair and tooltip ---------- */
-    function niceMax(v) {
-        if (!v || v <= 0) return 1;
-        var p = Math.pow(10, Math.floor(Math.log10(v)));
-        var n = v / p;
-        return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
-    }
+    var niceMax = window.RtChart.niceMax;
     // series: [{ key, label, cls, points: [[at, v]] }], fmt: value -> text, max: fixed top (or null), title: the chart's name,
     // hover: { f } where the pointer is (0..1 across the chart), { at } the reading picked with the keyboard: kept so the
     // crosshair (and the keyboard focus) stay put when a new reading redraws the chart every second
@@ -248,34 +234,7 @@
         var x0 = now - WINDOW;
         function X(at) { return padL + (at - x0) / WINDOW * (W - padL - padR); }
         function Y(v) { return padT + (1 - Math.min(v, top) / top) * (H - padT - padB); }
-        var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" class="rt-chart__svg" aria-hidden="true">';
-        [0, 0.5, 1].forEach(function (f) {
-            var y = Y(top * f);
-            svg += '<line class="rt-chart__grid" x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '"></line>';
-        });
-        series.forEach(function (s) {
-            // a missing value (null) breaks the line there
-            var d = '', pen = false;
-            s.points.forEach(function (p) {
-                if (p[1] == null) { pen = false; return; }
-                d += (pen ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1) + ' ';
-                pen = true;
-            });
-            if (d) svg += '<path class="rt-chart__line ' + s.cls + '" d="' + d + '"></path>';
-            // a reading with no reading next to it on either side (a failed reading before and after) has no line to be part of:
-            // a dot shows it, as on the History charts; the gaps stay gaps
-            s.points.forEach(function (p, i) {
-                var before = s.points[i - 1], after = s.points[i + 1];
-                if (p[1] != null && !(before && before[1] != null) && !(after && after[1] != null)) {
-                    svg += '<circle class="rt-chart__pt ' + s.cls + '" r="2.5" cx="' + X(p[0]).toFixed(1) + '" cy="' + Y(p[1]).toFixed(1) + '"></circle>';
-                }
-            });
-        });
-        svg += '<line class="rt-chart__cross" x1="0" x2="0" y1="' + padT + '" y2="' + (H - padB) + '" hidden></line>';
-        series.forEach(function (s) {
-            svg += '<circle class="rt-chart__dot ' + s.cls + '" r="4" cx="0" cy="0" hidden></circle>';
-        });
-        svg += '</svg>';
+        var svg = window.RtChart.svg(series, { W: W, H: H, padL: padL, padR: padR, padT: padT, padB: padB, top: top, X: X, Y: Y });
         // axis text sits in HTML over the drawing, so it keeps its size when the drawing stretches
         var axis = '<span class="rt-chart__y" style="top:' + (Y(top) / H * 100) + '%">' + esc(fmt(top)) + '</span>'
             + '<span class="rt-chart__y" style="top:' + (Y(top / 2) / H * 100) + '%">' + esc(fmt(top / 2)) + '</span>'
@@ -473,15 +432,19 @@
     function draw(id) {
         var L = live[id], d = data[id];
         var box = document.querySelector('[data-rt-panel="' + id + '"]');
-        if (!L || !d || !d.ok || !box || !box.querySelector('.rt-charts')) return;
+        if (!L || !d || !box || !box.querySelector('.rt-charts')) return;
         var now = d.at || Date.now() / 1000;
         var load = box.querySelector('[data-rt-chart="load"]');
+        // after a failed reading only the traffic chart is drawn again (a different interface picked), from the readings kept;
+        // the failure message stays and no current speed is shown
+        if (d.ok) {
         var sLoad = [
             { label: t.cpu, cls: 'rt-s1', points: L.cpu.filter(function (p) { return p[0] >= now - WINDOW; }) },
             { label: t.memory, cls: 'rt-s2', points: L.mem.filter(function (p) { return p[0] >= now - WINDOW; }) }
         ];
         chart(load.querySelector('.rt-chart__box'), sLoad, function (v) { return Math.round(v) + '%'; }, 100, now, L.hover.load, t.cpuMem);
         load.querySelector('.rt-legend').innerHTML = legend(sLoad, [d.cpu != null ? d.cpu + '%' : null, pct(d.mem_used, d.mem_total) != null ? pct(d.mem_used, d.mem_total) + '%' : null]);
+        }
 
         var traffic = box.querySelector('[data-rt-chart="traffic"]');
         var pick = traffic.querySelector('.rt-chart__pick');
@@ -503,7 +466,7 @@
         chart(traffic.querySelector('.rt-chart__box'), sNet, bps, null, now, L.hover.traffic, t.traffic);
         var lastRow = rows[rows.length - 1];
         // the current speed only from the newest reading: after a pause or a failed reading there is none until a new pair
-        var current = !L.paused && lastRow && lastRow[1] != null && lastRow[0] === L.lastAt && L.prev[L.iface];
+        var current = d.ok && !L.paused && lastRow && lastRow[1] != null && lastRow[0] === L.lastAt && L.prev[L.iface];
         traffic.querySelector('.rt-legend').innerHTML = legend(sNet, current ? [bps(lastRow[1]), bps(lastRow[2])] : [null, null]);
     }
 

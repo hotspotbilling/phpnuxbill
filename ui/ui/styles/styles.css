@@ -10233,7 +10233,7 @@ body:is(.as-chrome, .cm-chrome) .pagination {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 4px;
+  gap: 6px 4px;
   margin: 14px 0;
 }
 body:is(.as-chrome, .cm-chrome) .pagination > li {
@@ -10243,6 +10243,12 @@ body:is(.as-chrome, .cm-chrome) .pagination > li {
 body:is(.as-chrome, .cm-chrome) .pagination > li > a,
 body:is(.as-chrome, .cm-chrome) .pagination > li > span {
   float: none;
+  /* a box of its own: as an inline link its padding spilled over the row above when the pager wrapped (on a phone) */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  line-height: 1.4;
   margin: 0;
   padding: 6px 12px;
   border-radius: 8px;

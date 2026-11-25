@@ -455,6 +455,14 @@ class Communicator
                 InvalidArgumentException::CODE_SEEKABLE_REQUIRED
             );
         }
+        // PHPNuxBill: the original source is checked before any conversion (the converted copy is always in memory); under a deadline the source must be one whose reads cannot block: refused before any word is written
+        if (null !== $this->trans->timeLeft() && !T\Stream::isBoundedSource($stream)) {
+            throw new InvalidArgumentException(
+                'A deadline needs an in-memory source stream.',
+                InvalidArgumentException::CODE_SEEKABLE_REQUIRED
+            );
+        }
+
         if (null !== ($remoteCharset = $this->getCharset(self::CHARSET_REMOTE))
             && null !== ($localCharset = $this->getCharset(self::CHARSET_LOCAL))
         ) {
@@ -467,14 +475,6 @@ class Communicator
                 $localCharset,
                 $remoteCharset . '//IGNORE//TRANSLIT',
                 $stream
-            );
-        }
-
-        // PHPNuxBill: under a deadline the source must be one whose reads cannot block: refused before any word is written
-        if (null !== $this->trans->timeLeft() && !T\Stream::isBoundedSource($stream)) {
-            throw new InvalidArgumentException(
-                'A deadline needs an in-memory source stream.',
-                InvalidArgumentException::CODE_SEEKABLE_REQUIRED
             );
         }
 

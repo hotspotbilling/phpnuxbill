@@ -339,11 +339,11 @@
                 // a stalled answer is given up on after 10 seconds, and then goes through the same cleanup as any other
                 var ctl = window.AbortController ? new AbortController() : null;
                 var stop = setTimeout(function () { if (ctl) ctl.abort(); }, 10000);
-                // the page address without its query: a link that did something (an extend, a confirmation) must not be repeated by this
-                // check, which only asks whether the site answers again
-                fetch(location.pathname, { cache: 'no-store', credentials: 'same-origin', headers: { 'X-Requested-With': 'maintenance-check' }, signal: ctl ? ctl.signal : undefined })
+                // the login page, never the address shown here: that can be a path that does something (a delete, an extend), and this
+                // check must only ask whether the site answers again (login answers 503 itself while Maintenance Mode is on)
+                fetch('{$app_url}/?_route=login', { cache: 'no-store', credentials: 'same-origin', headers: { 'X-Requested-With': 'maintenance-check' }, signal: ctl ? ctl.signal : undefined })
                     // reloads only when the application itself answered: a 502, 503 or 504 (a proxy or the maintenance page) keeps waiting
-                    .then(function (r) { if (r.ok) location.reload(); })
+                    .then(function (r) { if (r.ok) location.href = '{$app_url}/'; })
                     .catch(function () { })
                     .then(function () { clearTimeout(stop); })
                     .then(function () {

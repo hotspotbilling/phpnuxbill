@@ -193,7 +193,8 @@ class RadiusSessions
         // older packet that arrives late never turns the counters back
         // A Start for a session that is already stored (the NAS's resend, or an Interim that came first) only inserts or restores the
         // start date (below): a later receivedAt is no proof that its zero counters are newer than the usage already recorded
-        $apply = "({$newer} AND COALESCE(VALUES(acctstatustype), '') <> 'Start')";
+        // a Stop also replaces a row that is not stopped yet, whatever its receivedAt: it carries the final usage
+        $apply = "(({$newer} AND COALESCE(VALUES(acctstatustype), '') <> 'Start') OR (VALUES(acctstatustype) = 'Stop' AND COALESCE(acctstatustype, '') <> 'Stop'))";
         $parts = [];
         foreach ($set as $col => $expr) {
             $parts[] = "{$col} = IF({$apply}, {$expr}, {$col})";

@@ -57,7 +57,8 @@ class RouterAddress
         if ($text === '' || preg_match('/^0+$/', $text)) {
             return null;
         }
-        if (!preg_match('/^\d{1,8}$/', $text) || (int) $text > 65535) {
+        $digits = ltrim($text, '0');
+        if (!preg_match('/^\d+$/', $text) || strlen($digits) > 5 || (int) $digits > 65535) {
             throw new InvalidArgumentException('Invalid router port: ' . mb_substr($text, 0, 20));
         }
         return (string) (int) $text;

@@ -518,7 +518,7 @@ class RouterApi
                 }
             }
             if (!$routers) {
-                return [];
+                return $log;
             }
             $keep = max(1, min(30, (int) ($config['router_backup_keep'] ?? 7)));
             $name = 'phpnuxbill-auto-' . str_replace('-', '', $today); // the same day as the progress kept above, across midnight too

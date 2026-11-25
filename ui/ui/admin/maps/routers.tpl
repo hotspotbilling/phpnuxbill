@@ -49,7 +49,7 @@
             // JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT: a closing script tag in a name cannot end this script
             var routers = {/literal}{($d|default:[])|json_encode:15}{literal};
             var checked = {/literal}{if $_c['router_check']}true{else}false{/if}{literal};
-            var words = {/literal}{ldelim}online: '{Lang::T('Online')|escape:'javascript'}', offline: '{Lang::T('Offline')|escape:'javascript'}', disabled: '{Lang::T('Disabled')|escape:'javascript'}', unknown: '{Lang::T('Not checked yet')|escape:'javascript'}', seen: '{Lang::T('Last Seen')|escape:'javascript'}', name: '{Lang::T('Name')|escape:'javascript'}', info: '{Lang::T('Info')|escape:'javascript'}', more: '{Lang::T('More Info')|escape:'javascript'}', way: '{Lang::T('Get Direction')|escape:'javascript'}'{rdelim}{literal};
+            var words = {/literal}{ldelim}online: '{Lang::T('Online')|escape:'javascript'}', offline: '{Lang::T('Offline')|escape:'javascript'}', enabled: '{Lang::T('Enabled')|escape:'javascript'}', disabled: '{Lang::T('Disabled')|escape:'javascript'}', unknown: '{Lang::T('Not checked yet')|escape:'javascript'}', seen: '{Lang::T('Last Seen')|escape:'javascript'}', name: '{Lang::T('Name')|escape:'javascript'}', info: '{Lang::T('Info')|escape:'javascript'}', more: '{Lang::T('More Info')|escape:'javascript'}', way: '{Lang::T('Get Direction')|escape:'javascript'}'{rdelim}{literal};
             function esc(s) {
                 return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
                     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -73,7 +73,7 @@
             var state = router.enabled != 1 ? 'disabled' : (!checked ? 'enabled' : router.status === 'Offline' ? 'offline' : !router.last_seen ? 'unknown' : 'online');
             var color = { online: '#16a34a', offline: '#dc2626', unknown: '#d97706', enabled: '#2563eb', disabled: '#94a3b8' }[state];
             var popupContent = '<strong>' + esc(words.name) + '</strong>: ' + esc(router.name) + '<br>'
-                + (state !== 'enabled' ? '<strong>' + esc(words[state]) + '</strong>' + (router.last_seen ? ' &middot; ' + esc(words.seen) + ': ' + esc(router.last_seen) : '') + '<br>' : '')
+                + '<strong>' + esc(words[state]) + '</strong>' + (router.last_seen ? ' &middot; ' + esc(words.seen) + ': ' + esc(router.last_seen) : '') + '<br>'
                 + (router.description ? '<strong>' + esc(words.info) + '</strong>: ' + esc(router.description) + '<br>' : '')
                 + '<a href="{/literal}{Text::url('routers/edit/')}{literal}' + encodeURIComponent(router.id) + '">' + esc(words.more) + '</a> &bull; '
                 + '<a href="https://www.google.com/maps/dir//' + encodeURIComponent(router.coordinates) + '" target="maps" rel="noopener">' + esc(words.way) + '</a><br>';
