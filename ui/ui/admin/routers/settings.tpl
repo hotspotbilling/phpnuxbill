@@ -85,13 +85,13 @@
                 </header>
                 <div class="mc-rows nf__switches">
                     {rt_switch key='router_backup' def='0' icon='fa-clock' title=Lang::T('Nightly backups')
-                        hint=Lang::T('The cron saves phpnuxbill-auto-YYYYMMDD.backup on each enabled router. Files named that way count as nightly backups and are removed when older than the number below, so do not use the name for your own; other backups are never removed.')}
+                        hint=Lang::T('The cron saves phpnuxbill-auto-YYYYMMDD.backup on each enabled router. Files named that way count as nightly backups and beyond the newest ones (the number below) are removed from the router, whatever their age, so do not use the name for your own; other backups are never removed.')}
                     {rt_switch key='router_backup_plain_ok' def='0' icon='fa-unlock' title=Lang::T('Allow backups over plain API')
                         hint=Lang::T('The backup password is sent to the router in the save command. Off: only over API-SSL (port 8729) with a certificate this server trusts. On: also over plain API, but only to routers on a private address (your LAN or a VPN), never across the internet.')}
                 </div>
                 <div class="st-card-body">
                     <div class="nf__field">
-                        <label class="nf__label" for="router_backup_keep">{Lang::T('Nightly backups to keep on each router')}</label>
+                        <label class="nf__label" for="router_backup_keep">{Lang::T('Newest nightly backups to keep on each router (a count, not days)')}</label>
                         <input type="number" class="form-control" id="router_backup_keep" name="router_backup_keep" min="1" max="30" step="1"
                             value="{$_c['router_backup_keep']|default:'7'|escape}">
                         <p class="nf__hint">{Lang::T('Older nightly backups are removed from the router. To keep a copy elsewhere, download it from Files in Winbox or WebFig.')}</p>

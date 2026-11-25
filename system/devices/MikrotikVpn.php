@@ -395,7 +395,10 @@ class MikrotikVpn
             try {
                 $this->removeVpnActive($client, $from);
             } catch (Exception $e) {
-                _log('VPN ' . $from . ': ' . $e->getMessage(), 'Router');
+                try {
+                    _log('VPN ' . $from . ': ' . $e->getMessage(), 'Router');
+                } catch (Throwable $ignored) { // diagnostic only: the router has taken the rename, which the caller must keep
+                }
             }
         }
     }
@@ -494,6 +497,11 @@ class MikrotikVpn
             RouterOS\Query::where('name', $old_name['name_plan'])
         );
         $profileID = $client->sendSync($printRequest)->getProperty('.id');
+        if (empty($profileID) && $old_name['name_plan'] !== $new_plan['name_plan']) {
+            // a retry after the profile was renamed already (or created under the new name): the existing one is updated, not added again
+            $printNew = new RouterOS\Request('/ppp profile print .proplist=.id', RouterOS\Query::where('name', $new_plan['name_plan']));
+            $profileID = $client->sendSync($printNew)->getProperty('.id');
+        }
         if (empty($profileID)) {
             $this->add_plan($new_plan);
         } else {
@@ -879,7 +887,9 @@ class MikrotikVpn
             }
             $customer->service_type = 'VPN';
             $customer->pppoe_ip = $ips;
-            $customer->save();
+            if ($customer->save() === false) {
+                throw new Exception(Lang::T('The address could not be saved for this customer.')); // never provision with an address that is not recorded
+            }
             return true;
         } finally {
             $this->unlockIn($lock);
@@ -1020,14 +1030,26 @@ class MikrotikVpn
         if (($err = RouterApi::error($res)) !== null) {
             throw new Exception($err, self::PARTIAL);
         }
-        $id = self::prop($res, '.id');
-        if (empty($id)) {
-            return; // no active session: nothing to remove
+        // every matching session (a customer can be connected more than once), each one tried; the first refusal is reported after all
+        $ids = [];
+        foreach ($res as $r) {
+            if ($r->getType() === RouterOS\Response::TYPE_DATA) {
+                $one = RouterApi::text($r->getProperty('.id'));
+                if ($one !== null && $one !== '') {
+                    $ids[] = $one;
+                }
+            }
         }
-        $removeRequest = new RouterOS\Request('/ppp/active/remove');
-        $removeRequest->setArgument('numbers', $id);
-        if (($err = RouterApi::error($client->sendSync($removeRequest))) !== null) {
-            throw new Exception($err, self::PARTIAL);
+        $first = null;
+        foreach ($ids as $one) { // none: no active session, nothing to remove
+            $removeRequest = new RouterOS\Request('/ppp/active/remove');
+            $removeRequest->setArgument('numbers', $one);
+            if (($err = RouterApi::error($client->sendSync($removeRequest))) !== null) {
+                $first = $first ?? $err;
+            }
+        }
+        if ($first !== null) {
+            throw new Exception($first, self::PARTIAL);
         }
     }
 

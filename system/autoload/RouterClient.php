@@ -99,7 +99,12 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
     {
         $this->aborted = true;
         $this->callbacks = [];
-        $this->responseBuffer = [];
+        // Unfinished requests are dropped (their replies can never arrive), but a request whose closing reply (!done) is already
+        // buffered is complete: it stays for the call that owns it to collect, so a nested request that timed out does not take
+        // away the outer command's confirmed answer.
+        $this->responseBuffer = array_filter($this->responseBuffer, function ($replies) {
+            return is_array($replies) && $replies && end($replies)->getType() === PEAR2\Net\RouterOS\Response::TYPE_FINAL;
+        });
         $this->pendingRequestsCount = 0;
         try {
             $this->com->close();

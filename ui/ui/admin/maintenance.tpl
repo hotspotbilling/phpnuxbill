@@ -294,7 +294,7 @@
 <body>
     <div class="background"></div>
     <main class="mt-wrap">
-        <section class="mt-card" role="status" aria-live="polite">
+        <section class="mt-card">
             <button type="button" class="mt-toggle" id="mtToggle" aria-label="{Lang::T('Toggle theme')}">
                 <i class="fas fa-adjust" aria-hidden="true"></i>
             </button>
@@ -314,7 +314,7 @@
             {if $date}<p class="mt-back" id="mtBack" hidden>{Lang::T('Expected back')}: <b id="mtBackAt"></b></p>{/if}
             <div class="mt-actions">
                 <button type="button" class="mt-btn" id="mtCheck"><i class="fas fa-sync-alt" aria-hidden="true"></i> <span>{Lang::T('Check again')}</span></button>
-                <p class="mt-note" id="mtNote">{Lang::T('This page checks by itself and opens the site as soon as it is back.')}</p>
+                <p class="mt-note" id="mtNote" role="status" aria-live="polite">{Lang::T('This page checks by itself and opens the site as soon as it is back.')}</p>
             </div>
             {if $_c['phone'] neq '' or $_c['address'] neq ''}
             <p class="mt-contact">
@@ -336,9 +336,14 @@
                 busy = true;
                 btn.disabled = true;
                 btn.classList.add('is-busy');
-                fetch(location.pathname + location.search, { cache: 'no-store', credentials: 'same-origin', headers: { 'X-Requested-With': 'maintenance-check' } })
-                    .then(function (r) { if (r.status !== 503) location.reload(); })
+                // a stalled answer is given up on after 10 seconds, and then goes through the same cleanup as any other
+                var ctl = window.AbortController ? new AbortController() : null;
+                var stop = setTimeout(function () { if (ctl) ctl.abort(); }, 10000);
+                fetch(location.pathname + location.search, { cache: 'no-store', credentials: 'same-origin', headers: { 'X-Requested-With': 'maintenance-check' }, signal: ctl ? ctl.signal : undefined })
+                    // reloads only when the application itself answered: a 502, 503 or 504 (a proxy or the maintenance page) keeps waiting
+                    .then(function (r) { if (r.ok) location.reload(); })
                     .catch(function () { })
+                    .then(function () { clearTimeout(stop); })
                     .then(function () {
                         busy = false;
                         wait = 30;
@@ -379,7 +384,7 @@
             }
             function tick() {
                 var left = end - Date.now();
-                if (left <= 0) { box.hidden = true; return false; }
+                if (left <= 0) { box.hidden = true; var bk = document.getElementById('mtBack'); if (bk) bk.hidden = true; return false; }
                 box.hidden = false;
                 var s = Math.floor(left / 1000);
                 document.getElementById('mtD').textContent = Math.floor(s / 86400);

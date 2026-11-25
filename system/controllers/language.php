@@ -18,8 +18,17 @@ setcookie('user_language', $name, time() + 365 * 86400, '/');
 
 // back to the page the admin was on, when that page is on this site
 $back = (string) ($_SERVER['HTTP_REFERER'] ?? '');
-$appHost = parse_url(APP_URL, PHP_URL_HOST);
-if ($back === '' || !$appHost || strcasecmp((string) parse_url($back, PHP_URL_HOST), $appHost) !== 0) {
+// the referrer must be of this site's origin: scheme, host and port (the default port of the scheme when none is written)
+$origin = function ($url) {
+    $p = parse_url((string) $url);
+    if (!$p || empty($p['host']) || empty($p['scheme'])) {
+        return null;
+    }
+    $scheme = strtolower($p['scheme']);
+    $port = $p['port'] ?? ($scheme === 'https' ? 443 : 80);
+    return $scheme . '://' . strtolower($p['host']) . ':' . $port;
+};
+if ($back === '' || $origin($back) === null || $origin($back) !== $origin(APP_URL)) {
     $back = getUrl('dashboard');
 }
 r2($back, 's', ucwords(str_replace(['-', '_'], ' ', $name)));

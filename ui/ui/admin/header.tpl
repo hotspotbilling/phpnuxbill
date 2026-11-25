@@ -609,6 +609,8 @@
                                     href="{Text::url('logs/radius')}">Radius</a>
                             </li>
                             {/if}
+                            <li {if $_routes[0] eq 'logs' and $_routes[1] eq 'radius-rest'}class="active" {/if}><a
+                                    href="{Text::url('logs/radius-rest')}">Radius REST</a></li>
                             <li {if $_routes[0] eq 'logs' and $_routes[1] eq 'message'}class="active" {/if}><a
                                     href="{Text::url('logs/message')}">Message</a></li>
                             {$_MENU_LOGS}

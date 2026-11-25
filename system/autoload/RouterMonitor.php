@@ -717,9 +717,10 @@ class RouterMonitor
     {
         $spans = ['24h' => 86400, '7d' => 7 * 86400, '30d' => 30 * 86400];
         $span = $spans[$range] ?? 86400;
-        $from = time() - $span;
+        $to = time(); // one end for the samples, the events and the answer: a reading saved meanwhile is in none of them
+        $from = $to - $span;
         // (oldest first by ID: the same order as the time, whichever of local time or UTC a row was saved in)
-        $rows = self::atWhere(ORM::for_table('tbl_router_samples')->where('router_id', (int) $id), 's', '>=', $from)
+        $rows = self::atWhere(self::atWhere(ORM::for_table('tbl_router_samples')->where('router_id', (int) $id), 's', '>=', $from), 's', '<=', $to)
             ->order_by_asc('id')->find_array();
         $bucket = max(300, (int) ceil($span / 300));
         // address changes in the period: no speed between a reading from before one and a reading from after it
@@ -799,11 +800,11 @@ class RouterMonitor
             $out[] = ['at' => $b + $bucket / 2, 'online' => $p['on'] > 0 ? 1 : 0, 'n' => $p['n'], 'on' => $p['on'], 'cpu' => $avg($p['cpu']), 'mem' => $avg($p['mem']),
                 'users' => $avg($p['users']), 'down' => $avg($p['down']), 'up' => $avg($p['up'])];
         }
-        $events = self::atWhere(ORM::for_table('tbl_router_events')->where('router_id', (int) $id), 'e', '>=', $from)
+        $events = self::atWhere(self::atWhere(ORM::for_table('tbl_router_events')->where('router_id', (int) $id), 'e', '>=', $from), 'e', '<=', $to)
             ->order_by_desc('id')->limit(50)->find_array();
         // step: how long a stretch each point stands for (its 'at' is the middle); gap: how far apart two readings can be and
         // still follow on from each other, so the charts break their lines across a stretch with no readings
-        return ['from' => $from, 'to' => time(), 'points' => $out, 'step' => $bucket, 'gap' => self::GAP, 'samples' => count($rows),
+        return ['from' => $from, 'to' => $to, 'points' => $out, 'step' => $bucket, 'gap' => self::GAP, 'samples' => count($rows),
             'uptime' => $rows ? round($online / count($rows) * 100, 2) : null,
             'events' => array_map(function ($e) {
                 // (a change of address keeps where its readings stop in its detail: nothing to show)

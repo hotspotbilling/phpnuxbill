@@ -262,6 +262,10 @@ switch ($action) {
             // only an explicit choice retires it: Yes, or No after it was Yes. A site still on the legacy minutes that saves an
             // unrelated setting (the form posts No for it) keeps its 20-minute REST-only behaviour
             $csPosted = (string) ($_POST['clear_stale_sessions'] ?? '');
+            if ($csPosted === 'legacy') {
+                // "REST only (legacy)": the former REST-only minutes stay as they are; the new setting is not saved as that word
+                $_POST['clear_stale_sessions'] = '0';
+            }
             // "touched": the administrator changed this field in the form, so a No over the legacy minutes retires them too
             $csTouched = (string) ($_POST['clear_stale_touched'] ?? '') === '1';
             unset($_POST['clear_stale_touched']);
@@ -273,13 +277,16 @@ switch ($action) {
                 $staleMinutes = is_string($_POST['stale_session_timeout']) ? (int) trim($_POST['stale_session_timeout']) : 0;
                 $_POST['stale_session_timeout'] = (string) ($staleMinutes < 1 ? 10 : min(RadiusSessions::MAX_STALE_MINUTES, $staleMinutes));
             }
+            if (isset($_POST['radius_rest_log_all'])) {
+                $_POST['radius_rest_log_all'] = $_POST['radius_rest_log_all'] === '1' ? '1' : '0';
+            }
             // days of finished RADIUS REST sessions kept in rad_acct (0 = all), removed by cron.php
             if (isset($_POST['frrest_keep_days'])) {
                 // the whole value must be a whole number: anything else leaves the saved value as it is
                 if (is_string($_POST['frrest_keep_days']) && preg_match('/^\s*\d{1,6}\s*$/', $_POST['frrest_keep_days'])) {
                     $_POST['frrest_keep_days'] = (string) min(3650, (int) $_POST['frrest_keep_days']);
                 } else {
-                    unset($_POST['frrest_keep_days']);
+                    r2(getUrl('settings/app'), 'e', Lang::T('Keep Finished Sessions must be a whole number of days, 0 to 3650'));
                 }
             }
             // Captcha: which logins are protected, one check box each
@@ -1194,8 +1201,17 @@ switch ($action) {
             // the end date and time ("2026-12-01T09:30" from the form), kept as "2026-12-01 09:30"; anything else is dropped
             $date = '';
             $posted = is_string($_POST['maintenance_date'] ?? null) ? trim($_POST['maintenance_date']) : '';
-            if (preg_match('/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}))?$/', $posted, $dm) && strtotime($dm[1]) !== false) {
-                $date = $dm[1] . ' ' . ($dm[2] ?? '00:00');
+            if ($posted !== '') {
+                // the whole value is checked: a real calendar date and a real time (00:00 to 23:59); date-only input is midnight
+                $validDate = false;
+                if (preg_match('/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?$/', $posted, $dm)) {
+                    $validDate = checkdate((int) $dm[2], (int) $dm[3], (int) $dm[1])
+                        && (!isset($dm[4]) || ((int) $dm[4] <= 23 && (int) $dm[5] <= 59));
+                }
+                if (!$validDate) {
+                    r2(getUrl('settings/maintenance'), 'e', Lang::T('The maintenance end date or time is not valid'));
+                }
+                $date = $dm[1] . '-' . $dm[2] . '-' . $dm[3] . ' ' . (isset($dm[4]) ? $dm[4] . ':' . $dm[5] : '00:00');
             }
 
             $settings = [

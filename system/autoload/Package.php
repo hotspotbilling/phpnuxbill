@@ -234,17 +234,23 @@ class Package
 
 
 
-        // every refusal that leaves things as they were (an inactive customer, a disabled plan) is above this line
-        self::$wrote = true;
-        if (self::$claims) {
-            end(self::$claims)->wrote = true; // only the claim whose recharge this is
-        }
+        // Marks the recharge as having (possibly) changed something, so a voucher is not given back. Called right before the first
+        // operation that can change state: the read-only checks below (the active-recharge lookup) can still fail and leave things as
+        // they were, and then the voucher stays unused.
+        $markWrote = function () {
+            self::$wrote = true;
+            if (self::$claims) {
+                end(self::$claims)->wrote = true; // only the claim whose recharge this is
+            }
+        };
 
         if ($router_name == 'balance') {
+            $markWrote();
             return self::rechargeBalance($c, $p, $gateway, $channel);
         }
 
         if ($router_name == 'Custom Balance') {
+            $markWrote();
             return self::rechargeCustomBalance($c, $p, $gateway, $channel);
         }
 
@@ -311,6 +317,7 @@ class Package
             }
         }
 
+        $markWrote(); // the hook below may write
         run_hook("recharge_user");
 
         if ($p['validity_unit'] == 'Months') {
@@ -1098,7 +1105,15 @@ class Package
             ORM::raw_execute("UPDATE `$table` t JOIN `tbl_routers` r2 ON r2.id = ? SET t.routers = r2.name
                 WHERE t.id IN (" . implode(',', $ids) . ") AND t.routers = ? AND r2.name <> t.routers", [(int) $router_id, $router_name]);
         } catch (Throwable $e) {
-            // the recharge itself is saved: a failed check leaves it as it was
+            // the recharge itself is saved. A failed move is tried once more (a lock wait or a dropped connection is usually brief),
+            // so a rename that committed meanwhile does not leave the row on the old name; still failing, it keeps the saved row
+            try {
+                usleep(200000);
+                ORM::raw_execute("UPDATE `$table` t JOIN `tbl_routers` r2 ON r2.id = ? SET t.routers = r2.name
+                    WHERE t.id IN (" . implode(',', $ids) . ") AND t.routers = ? AND r2.name <> t.routers", [(int) $router_id, $router_name]);
+            } catch (Throwable $e2) {
+                _log('Router rename not followed by ' . $table . ' ' . implode(',', $ids) . ': ' . $e2->getMessage(), 'Package');
+            }
         }
     }
 
@@ -1190,7 +1205,8 @@ class Package
             $share = [];
             foreach ($turs as $tur) {
                 try {
-                    if ($plans[$tur['id']][1] === null) {
+                    // only a recharge that is sent the password below counts: an expired one is skipped there, so it cannot conflict
+                    if ($plans[$tur['id']][1] === null && strtotime($tur['expiration'] . ' ' . $tur['time']) > time()) {
                         $share[(string) self::radiusShare($plans[$tur['id']][0])] = true;
                     }
                 } catch (Throwable $e) {
@@ -1219,6 +1235,11 @@ class Package
                 if (!$p) {
                     // an active recharge whose plan is gone is a failure to say (it may hold a device account), not to skip
                     throw new Exception(Lang::T('The plan of this recharge no longer exists') . ' (' . Lang::T('Plan') . ' #' . $tur['plan_id'] . ')');
+                }
+                // a plan saved before the device column existed has none yet: filled in (from its type) now, so the checks below
+                // and the router of the recharge apply to it as to any other
+                if ((string) $p['device'] === '' && is_object($p)) {
+                    self::getDevice($p);
                 }
                 if ($p['device'] === 'Voucher') {
                     continue;
@@ -1276,12 +1297,29 @@ class Package
     public static function passwordLock($customer_id, $on = true, $wait = 20)
     {
         $name = 'phpnuxbill_pw_c_' . (int) $customer_id;
+        // taken again by the same request (a recharge started from a recharge_user hook): counted here instead of asking the database
+        // again, which on a database that holds one lock at a time (MySQL before 5.7.5, MariaDB before 10.0.2) would free the
+        // outer one, and whose first release would free it for the outer recharge on any database
+        static $held = [];
         try {
             if (!$on) {
+                if (($held[$name] ?? 0) > 1) {
+                    $held[$name]--;
+                    return true;
+                }
+                unset($held[$name]);
                 ORM::getDb()->query("SELECT RELEASE_LOCK('$name')");
                 return true;
             }
-            return (int) ORM::getDb()->query("SELECT GET_LOCK('$name', " . (int) $wait . ")")->fetchColumn() === 1;
+            if (($held[$name] ?? 0) > 0) {
+                $held[$name]++;
+                return true;
+            }
+            $got = (int) ORM::getDb()->query("SELECT GET_LOCK('$name', " . (int) $wait . ")")->fetchColumn() === 1;
+            if ($got) {
+                $held[$name] = 1;
+            }
+            return $got;
         } catch (Throwable $e) {
             return !$on;
         }
@@ -1307,7 +1345,12 @@ class Package
             $set();
             return;
         }
-        $hasGroup = $dev->getTableUserPackage()->where_equal('username', $customer['username'])->where_not_equal('groupname', '')->count() > 0;
+        // the built-in driver names a plan's group plan_<id>: that group must be the account's, not any other. A third-party driver
+        // names its groups its own way, so for it any group counts
+        $groupQuery = $dev->getTableUserPackage()->where_equal('username', $customer['username']);
+        $hasGroup = (get_class($dev) === 'Radius' && !empty($plan['id']))
+            ? $groupQuery->where_equal('groupname', 'plan_' . $plan['id'])->count() > 0
+            : $groupQuery->where_not_equal('groupname', '')->count() > 0;
         $set();
         if (!$hasGroup) {
             throw new Exception(Lang::T('The new password was written to RADIUS, but the account has no plan group there. Use Sync customers to restore it.'));

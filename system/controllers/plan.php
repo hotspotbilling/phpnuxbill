@@ -444,14 +444,29 @@ switch ($action) {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             $p['plan_expired'] = 0;
+                            $partial = null;
                             try {
-                                (new $p['device'])->remove_customer($customer, $p);
+                                $r = (new $p['device'])->remove_customer($customer, $p);
+                                if (is_string($r) && $r !== '') {
+                                    $partial = $r; // MikrotikPppoe returns what it could not finish
+                                }
                             } catch (Exception $e) {
-                                // code 207: done on the router except a later step it refused: logged, and the action stands
+                                // code 207: done on the router except a later step it refused
                                 if ($e->getCode() !== 207) {
                                     throw $e;
                                 }
-                                _log('[' . $customer['username'] . '] remove: ' . $e->getMessage(), 'Router');
+                                $partial = $e->getMessage();
+                            }
+                            if ($partial !== null) {
+                                try {
+                                    _log('[' . $customer['username'] . '] remove: ' . $partial, 'Router');
+                                } catch (Throwable $ignored) {
+                                }
+                                if ($routerMoved) {
+                                    // the access on the old router is not confirmed off (a step is left): the customer is not given the
+                                    // new router on top of it, and the recharge keeps pointing at the old one, as the customer delete does
+                                    r2(getUrl('plan/edit/') . $id, 'e', Lang::T('The old router did not finish taking the access off, so the plan was not moved') . ': ' . htmlspecialchars($partial, ENT_QUOTES));
+                                }
                             }
                         } else {
                             throw new Exception(Lang::T("Devices Not Found"));
@@ -1476,6 +1491,11 @@ switch ($action) {
         $id = $routes[2];
         $days = $routes[3];
         $svoucher = (string) ($_GET['svoucher'] ?? '');
+        if ($svoucher !== '') {
+            // the page's one token is shared by all its rows: bound here to this recharge and these days, so extending another
+            // recharge from the same page is not taken for this one, and a retry of the same link still is
+            $svoucher .= '_' . substr(hash('sha256', (int) $id . '|' . (int) $days), 0, 12);
+        }
         if (App::getVoucherValue($svoucher)) {
             r2(getUrl('plan'), 's', "Extend already done");
         }
@@ -1499,11 +1519,15 @@ switch ($action) {
                 if ($p) {
                     // the marker holds what was provisioned (recharge, plan, router) and the expiry it was given: valid only for the
                     // same three, and then the expiry is the one first worked out (not worked out again on the retry)
+                    // what the device is given for this customer: a changed username or password since the earlier try means the
+                    // marker no longer describes the router, and it is provisioned again
+                    $credHash = hash('sha256', $c['username'] . "\0" . $c['password'] . "\0" . $c['pppoe_username'] . "\0" . $c['pppoe_password']);
                     $mark = $provKey !== '' ? ($_SESSION[$provKey] ?? null) : null;
                     $alreadyProvisioned = is_array($mark) && (string) $mark['id'] === (string) $id
                         && (string) $mark['plan'] === (string) $tur['plan_id'] && (string) $mark['router'] === (string) $p['routers']
                         && (string) ($mark['prev'] ?? '') === (string) $tur['expiration'] // the recharge is as it was (not renewed and expired again since)
-                        && strtotime($mark['expiration'] . ' ' . $tur['time']) > time(); // a mark whose expiry has passed is not reused
+                        && strtotime($mark['expiration'] . ' ' . $tur['time']) > time() // a mark whose expiry has passed is not reused
+                        && hash_equals((string) ($mark['cred'] ?? ''), $credHash); // the customer's login is the one the device was given
                     if (!$alreadyProvisioned && $provKey !== '') {
                         unset($_SESSION[$provKey]);
                     }
@@ -1532,7 +1556,7 @@ switch ($action) {
                             _log('[' . $c['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
                         }
                         if ($provKey !== '') {
-                            $_SESSION[$provKey] = ['id' => $id, 'plan' => $tur['plan_id'], 'router' => $p['routers'], 'expiration' => $expiration, 'prev' => $tur['expiration']];
+                            $_SESSION[$provKey] = ['id' => $id, 'plan' => $tur['plan_id'], 'router' => $p['routers'], 'expiration' => $expiration, 'prev' => $tur['expiration'], 'cred' => $credHash];
                         }
                     }
                     $tur->expiration = $expiration;

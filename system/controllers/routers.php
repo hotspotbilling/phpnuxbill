@@ -63,15 +63,24 @@ $joinAddress = function ($host, $port) {
     if ($port === '' || $host === '') {
         return $host;
     }
-    if (preg_match('/^\[([^\[\]]+)\](?::\d+)?$/', $host, $m)) {
-        if (!filter_var($m[1], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+    // a port typed into the address is checked before it is dropped in favour of the port field: only whole digits 1 to 65535
+    // (or none, or 0) are a port; anything else is kept as typed and refused by the address checks
+    $embeddedOk = function ($p) {
+        return $p === '' || (ctype_digit($p) && (int) $p <= 65535);
+    };
+    if (preg_match('/^\[([^\[\]]+)\](?::(\d+))?$/', $host, $m)) {
+        if (!filter_var($m[1], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) || !$embeddedOk($m[2] ?? '')) {
             return $host; // brackets hold only an IPv6 address: "[router.example]" is kept as typed and refused by the address checks
         }
         $host = $m[1]; // "[v6]" or "[v6]:port" typed into the address: the port field wins
     } elseif ($host[0] === '[') {
         return $host; // brackets around something else ("[v6]:abc"): kept as typed, and refused by the address checks
     } elseif (substr_count($host, ':') === 1) {
-        $host = explode(':', $host)[0]; // a port typed into the address too: the port field wins
+        [$h0, $p0] = explode(':', $host);
+        if (!$embeddedOk(trim($p0))) {
+            return $host;
+        }
+        $host = $h0; // a port typed into the address too: the port field wins
     }
     if ((int) $port === 8728) {
         return $host;
@@ -1294,6 +1303,11 @@ switch ($action) {
                                     // rules are tried in order: a drop or reject that may cover the site, met before an accept, means a later
                                     // accept does not let it through, so the warning stays
                                     if (!in_array(strtolower((string) $w['action']), ['', 'accept'], true)) {
+                                        // a rule for another protocol (udp, icmp) cannot block this TCP site: skipped, as the accept branch does
+                                        $dp = strtolower(trim((string) $w['protocol']));
+                                        if ($dp !== '' && (($dp[0] === '!') === in_array(ltrim($dp, '!'), ['tcp', '6'], true))) {
+                                            continue;
+                                        }
                                         if ($hostIn($w['dst-host']) !== false && $portIn($w['dst-port']) !== false) {
                                             break;
                                         }
@@ -1636,7 +1650,10 @@ switch ($action) {
             // a live reading is shared for under a second (several admins on one router), timed by when it was read, since the
             // file time only counts whole seconds
             $fresh = !$live || (isset($cached['done']) && microtime(true) - (float) $cached['done'] < 0.9);
-            if (is_array($cached) && ($cached['key'] ?? '') === $key && $fresh) {
+            // a reading begun before the router was last reset (enabled or disabled, details changed) is not handed out, even when
+            // the details are the same again: it is the same check the fresh answer below goes through
+            $resetSince = (float) @file_get_contents($dir . DIRECTORY_SEPARATOR . $id . '.reset');
+            if (is_array($cached) && ($cached['key'] ?? '') === $key && $fresh && $resetSince <= (float) ($cached['observed'] ?? 0)) {
                 unset($cached['key']);
                 // the stored answer is shared by every admin: its words are put in this admin's language here
                 if (($cached['code'] ?? '') === 'no_read') {
@@ -1864,7 +1881,9 @@ switch ($action) {
             // the history's readings and alert states are too (RouterMonitor starts again from the change)
             $moved = $endpointKey($d['ip_address']) !== $endpointKey($ip_address);
             $enabledChanged = (int) $d['enabled'] !== (int) $enabled;
-            if ($moved) {
+            // enabling a router whose address did not change: with Router Check off nothing else writes its status, so it is read now
+            $refreshStatus = !$moved && $enabledChanged && $enabled && empty($config['router_check']);
+            if ($moved || $refreshStatus) {
                 $d->status = null;
                 $d->last_seen = null;
                 // with Router Check off nothing else ever writes the status, and the dashboard counts only routers that are

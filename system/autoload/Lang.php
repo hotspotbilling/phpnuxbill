@@ -75,7 +75,7 @@ class Lang
     /** The one rule for a language name that may become a file name: letters, digits, "_" and "-" (portuguese-brazil), no path characters */
     public static function validName($name)
     {
-        return is_string($name) && preg_match('/^[a-z][a-z0-9_-]{0,31}$/', $name) === 1;
+        return is_string($name) && preg_match('/^[a-z][a-z0-9_-]{0,31}$/D', $name) === 1;
     }
 
     public static function sanitize($str)
@@ -268,8 +268,10 @@ class Lang
     {
         global $CACHE_PATH;
         static $downUntil = 0; // when the pause after a failure ends (not for ever: a long-running worker asks again after it)
+        static $emptyUntil = []; // per text and language: an answer with no translation only holds back that text
         $pause = ($CACHE_PATH ?: sys_get_temp_dir()) . DIRECTORY_SEPARATOR . 'lang_translate_pause';
-        if (time() < $downUntil || (is_file($pause) && time() - filemtime($pause) < 900)) {
+        $emptyKey = $to . '|' . $txt;
+        if (time() < $downUntil || (is_file($pause) && time() - filemtime($pause) < 900) || time() < ($emptyUntil[$emptyKey] ?? 0)) {
             return null;
         }
         $ch = curl_init();
@@ -294,6 +296,9 @@ class Lang
             if ($out !== '') {
                 return $out;
             }
+            // the service answered but had nothing for this text: only this text and language wait, not every other
+            $emptyUntil[$emptyKey] = time() + 900;
+            return null;
         }
         $downUntil = time() + 900;
         @touch($pause);

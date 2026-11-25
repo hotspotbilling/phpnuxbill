@@ -66,10 +66,11 @@ if ($step == 1) {
         AuthThrottle::hit('forgot-send-ip', $ip, 3600);
         $_SESSION['forgot_username'] = $username;
         $ui->assign('username', $username);
-        $user = ORM::for_table('tbl_customers')->selects(['phonenumber', 'email'])->where('username', $username)->find_one();
+        $user = ORM::for_table('tbl_customers')->selects(['id', 'phonenumber', 'email'])->where('username', $username)->find_one();
         $age = Otp::age('forgot', $username);
         if ($user && ($age < 0 || $age >= Otp::TTL)) {
             $otp = Otp::issue('forgot', $username);
+            $_SESSION['forgot_uid'] = (int) $user['id']; // the account the code was issued for (checked when it is used)
             forgot_notify($user['phonenumber'], $user['email'], $config['CompanyName'] . " C0de: $otp", $config['CompanyName'] . ' ' . Lang::T("Your Verification Code") . ' : ' . $otp);
         }
         $ui->assign('notify_t', 's');
@@ -89,6 +90,11 @@ if ($step == 1) {
     if (Otp::check('forgot', $username, $otp_code) === 'ok') {
         // bound to the account's id as well, so a username reassigned before the reset cannot move the ticket to another account
         $owner = ORM::for_table('tbl_customers')->selects(['id'])->where('username', $username)->find_one();
+        // a username reassigned since the code was issued does not carry the code to the new account
+        if ($owner && isset($_SESSION['forgot_uid']) && (int) $_SESSION['forgot_uid'] !== (int) $owner['id']) {
+            unset($_SESSION['forgot_uid']);
+            r2(getUrl('forgot&step=1'), 'e', Lang::T('Invalid Username or Verification Code'));
+        }
         $_SESSION['forgot_ok'] = ['u' => $username, 't' => time(), 'id' => $owner ? (int) $owner['id'] : 0];
         $ui->assign('username', $username);
         $ui->assign('csrf_token', Csrf::generateAndStoreToken());
@@ -143,15 +149,24 @@ if ($step == 1) {
             $ui->display('customer/forgot.tpl');
             exit;
         }
-        $user = ORM::for_table('tbl_customers')->find_one($user['id']);
+        $lockedId = $user['id'];
+        $user = ORM::for_table('tbl_customers')->find_one($lockedId);
         if ($user && (string) $user['username'] !== $username) {
             $user = null; // renamed while waiting for the lock
         }
+        if (!$user) {
+            Package::passwordLock($lockedId, false);
+        }
     }
     if ($user) {
-        Package::keepDialPassword($user); // a PPPoE / VPN connection keeps the password its router dials with (in memory: saved below)
-        $user->password = $npass;
-        $user->save();
+        try {
+            Package::keepDialPassword($user); // a PPPoE / VPN connection keeps the password its router dials with (in memory: saved below)
+            $user->password = $npass;
+            $user->save();
+        } catch (Throwable $saveErr) {
+            Package::passwordLock($user['id'], false);
+            throw $saveErr;
+        }
         // the code is used up once the new password is saved, whatever the devices do next (a lock failure above kept it)
         unset($_SESSION['forgot_ok'], $_SESSION['forgot_username']);
         // the routers sign the customer in with their own copy of the password (a Mikrotik hotspot or PPPoE user): every

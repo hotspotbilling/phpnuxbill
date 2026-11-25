@@ -209,7 +209,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                             throw $e;
                         }
                         try {
-                            _log('[' . $user['username'] . '] extend' . ': ' . $e->getMessage() . ' (pending: a Sync customers run repairs it)', 'Router');
+                            _log('[' . $user['username'] . '] extend' . ': ' . $e->getMessage() . ' (the router step is still pending: an admin can run Sync customers to send the plan again)', 'Router');
                         } catch (Throwable $ignored) { // diagnostic only: the extension goes on
                         }
                         $extendPartial = true;
@@ -255,7 +255,16 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             if (file_exists($dvc)) {
                 require_once $dvc;
                 try {
-                    (new $p['device'])->remove_customer($user, $p);
+                    $r = (new $p['device'])->remove_customer($user, $p);
+                    if (is_string($r) && $r !== '') {
+                        // MikrotikPppoe returns what it could not finish (the expired profile is on, an address clear is pending): the
+                        // plan is not marked off until it has, as the admin's deactivation does, and the admins are told in the log
+                        try {
+                            _log('[' . $user['username'] . '] deactivate incomplete: ' . $r, 'Router');
+                        } catch (Throwable $ignored) {
+                        }
+                        r2(getUrl('home'), 'w', Lang::T('The router did not finish taking the access off, so the plan was not marked as expired. Contact support if this stays.'));
+                    }
                 } catch (Exception $e) {
                     // code 207: the plan was taken off but a later step was refused (a fixed IP not cleared, a port forward left): the
                     // deactivation stands, and the admins are told in the log; any other error stops as before

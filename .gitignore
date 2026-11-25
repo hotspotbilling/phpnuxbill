@@ -71,3 +71,8 @@ CLAUDE.md
 
 /mobile_app/
 /skeletons/
+
+# logs written at runtime (Logs > Radius REST); the folder itself is kept
+system/logs/**
+!system/logs/.htaccess
+!system/logs/index.html

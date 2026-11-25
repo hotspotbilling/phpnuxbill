@@ -252,7 +252,7 @@ switch ($action) {
                 $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
                 $c = User::_info($id_customer);
                 $dvc = Package::getDevice($p);
-                if ($_app_stage != 'Demo') {
+                if (strcasecmp((string) $_app_stage, 'demo') !== 0) {
                     if (file_exists($dvc)) {
                         require_once $dvc;
                         $partial = null;
@@ -270,7 +270,10 @@ switch ($action) {
                             $partial = $e->getMessage();
                         }
                         if ($partial !== null) {
-                            _log('[' . $c['username'] . '] deactivate incomplete: ' . $partial, 'Router');
+                            try {
+                                _log('[' . $c['username'] . '] deactivate incomplete: ' . $partial, 'Router');
+                            } catch (Throwable $logErr) { // the warning below must reach the admin whatever the log does
+                            }
                             r2(getUrl('customers/view/') . $id_customer, 'w', Lang::T('The router did not finish taking the access off, so the plan was not marked as expired') . ': ' . htmlspecialchars($partial, ENT_QUOTES));
                         }
                     } else {
@@ -299,6 +302,7 @@ switch ($action) {
         if ($bs) {
             $routers = [];
             $failedSync = [];
+            $partialSync = []; // plans whose device did the main work but reported a step left over (a result string, or code 207)
             foreach ($bs as $b) {
                 if (strtotime($b['expiration'] . ' ' . $b['time']) <= time()) {
                     continue; // expired (the cron may still be retrying a clean-up): access is not sent back
@@ -310,13 +314,24 @@ switch ($action) {
                 }
                 if ($p) {
                     $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'Demo') {
+                    if (strcasecmp((string) $_app_stage, 'demo') !== 0) {
                         if (file_exists($dvc)) {
                             require_once $dvc;
-                            if (method_exists($p['device'], 'sync_customer')) {
-                                (new $p['device'])->sync_customer($c, $p);
-                            }else{
-                                (new $p['device'])->add_customer($c, $p);
+                            try {
+                                if (method_exists($p['device'], 'sync_customer')) {
+                                    $syncRes = (new $p['device'])->sync_customer($c, $p);
+                                } else {
+                                    $syncRes = (new $p['device'])->add_customer($c, $p);
+                                }
+                                if (is_string($syncRes) && $syncRes !== '') {
+                                    $partialSync[] = $p['name_plan'] . ': ' . $syncRes;
+                                }
+                            } catch (Exception $e) {
+                                // code 207: saved on the router, a later step refused: said for this plan, and the others still go
+                                if ($e->getCode() !== 207) {
+                                    throw $e;
+                                }
+                                $partialSync[] = $p['name_plan'] . ': ' . $e->getMessage();
                             }
                         } else {
                             $failedSync[] = $b['routers']; // no driver file: not synced, and not reported as done
@@ -326,9 +341,18 @@ switch ($action) {
                     $routers[] = $b['routers']; // only once the driver has finished
                 }
             }
+            if ($partialSync) {
+                try {
+                    _log('[' . $c['username'] . '] sync incomplete: ' . implode(' | ', $partialSync), 'Router');
+                } catch (Throwable $ignored) {
+                }
+            }
             if ($failedSync) {
                 r2(getUrl('customers/view/') . $id_customer, 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars(implode(', ', array_unique($failedSync)), ENT_QUOTES)
                     . ($routers ? '. ' . Lang::T('Synced') . ': ' . htmlspecialchars(implode(', ', $routers), ENT_QUOTES) : ''));
+            }
+            if ($partialSync && $routers) {
+                r2(getUrl('customers/view/') . $id_customer, 'w', 'Sync to ' . implode(", ", $routers) . '. ' . Lang::T('The router update is incomplete for') . ': ' . htmlspecialchars(implode('; ', $partialSync), ENT_QUOTES));
             }
             if ($routers) { // nothing applied (every recharge expired or without a plan) is no success
                 r2(getUrl('customers/view/') . $id_customer, 's', 'Sync success to ' . implode(", ", $routers));
@@ -464,11 +488,12 @@ switch ($action) {
         if ($c) {
             //Delete active package (the customer's attributes, the router port numbers among them, go only after every router is cleaned up)
             $turs = ORM::for_table('tbl_user_recharges')->where('username', $c['username'])->find_many();
+            $alreadyRemoved = []; // plans whose access was taken off and recharge row deleted before a later one stopped the delete
             foreach ($turs as $tur) {
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 if ($p) {
                     $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'Demo') {
+                    if (strcasecmp((string) $_app_stage, 'demo') !== 0) {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             $p['plan_expired'] = 0;
@@ -486,17 +511,23 @@ switch ($action) {
                                 $partial = $e->getMessage();
                             }
                             if ($partial !== null) {
-                                _log('[' . $c['username'] . '] delete incomplete: ' . $partial, 'Router');
-                                r2(getUrl('customers/view/') . $id, 'e', Lang::T('The router did not finish taking the access off, so the customer was not deleted') . ': ' . htmlspecialchars($partial, ENT_QUOTES));
+                                try {
+                                    _log('[' . $c['username'] . '] delete incomplete: ' . $partial, 'Router');
+                                } catch (Throwable $logErr) {
+                                }
+                                r2(getUrl('customers/view/') . $id, 'e', Lang::T('The router did not finish taking the access off, so the customer was not deleted') . ': ' . htmlspecialchars((string) $p['name_plan'] . ' - ' . $partial, ENT_QUOTES)
+                                    . ($alreadyRemoved ? '. ' . Lang::T('Already removed') . ': ' . htmlspecialchars(implode(', ', $alreadyRemoved), ENT_QUOTES) : ''));
                             }
                         } else {
                             // nothing is deleted: the access could not be taken off the router, and the cleanup can be tried again
-                            r2(getUrl('customers/view/') . $id, 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars((string) $p['device'], ENT_QUOTES) . '. ' . Lang::T('The customer was not deleted'));
+                            r2(getUrl('customers/view/') . $id, 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars((string) $p['name_plan'] . ' (' . (string) $p['device'] . ')', ENT_QUOTES) . '. ' . Lang::T('The customer was not deleted')
+                                . ($alreadyRemoved ? '. ' . Lang::T('Already removed') . ': ' . htmlspecialchars(implode(', ', $alreadyRemoved), ENT_QUOTES) : ''));
                         }
                     }
                 }
                 try {
                     $tur->delete();
+                    $alreadyRemoved[] = $tur['namebp'] . ' (' . $tur['routers'] . ')';
                 } catch (Exception $e) {
                 }
             }
@@ -788,7 +819,16 @@ switch ($action) {
                     }
                     $imgPath = $folder . $hash . '.jpg';
                     if (!file_exists($imgPath)) {
-                        File::resizeCropImage($_FILES['photo']['tmp_name'], $imgPath, 1600, 1600, 100);
+                        try {
+                            File::resizeCropImage($_FILES['photo']['tmp_name'], $imgPath, 1600, 1600, 100);
+                        } catch (Throwable $photoErr) {
+                            // not a picture the server can convert: the locks taken above are let go before the error goes on
+                            if ($vpnLocks) {
+                                MikrotikVpn::unlockAddressEdit($vpnLocks);
+                            }
+                            Package::passwordLock((int) $id, false);
+                            throw $photoErr;
+                        }
                     }
                     if (!file_exists($imgPath . '.thumb.jpg')) {
                         if (_post('faceDetect') == 'yes') {
@@ -846,6 +886,16 @@ switch ($action) {
             $c->district = $district;
             $c->state = $state;
             $c->zip = $zip;
+            // The customer lock is kept through the device updates and a rollback, not only the save: a later edit or password change
+            // then waits, so it cannot write the routers (or be undone by this edit's rollback) in between. Not where a database
+            // frees the locks a connection holds when it takes another (MikrotikVpn::nestedLocks() false): the VPN device takes its
+            // own, so there the lock is let go after the save, as before.
+            $holdThrough = (class_exists('MikrotikVpn') || DeviceLoader::load('MikrotikVpn')) ? MikrotikVpn::nestedLocks() : true;
+            $releaseEdit = function () use ($holdThrough, $id) {
+                if ($holdThrough) {
+                    Package::passwordLock((int) $id, false);
+                }
+            };
             try {
                 $c->save();
                 if ($vpnLocks && (string) $oldPppoeIp !== '' && (string) $oldPppoeIp !== $pppoe_ip) {
@@ -858,7 +908,9 @@ switch ($action) {
                 if ($vpnLocks) {
                     MikrotikVpn::unlockAddressEdit($vpnLocks);
                 }
-                Package::passwordLock((int) $id, false);
+                if (!$holdThrough) {
+                    Package::passwordLock((int) $id, false);
+                }
             }
             if ($oldPhoto !== '') {
                 if (file_exists($UPLOAD_PATH . $oldPhoto)) {
@@ -946,7 +998,10 @@ switch ($action) {
                 foreach ($turs as $tur) {
                     $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                     $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'Demo') {
+                    // a recharge past its expiry (the cron has not switched it off yet) is renamed on its device but not given its access
+                    // back: add_customer() below would enable it again
+                    $expiredTur = strtotime($tur['expiration'] . ' ' . $tur['time']) <= time();
+                    if (strcasecmp((string) $_app_stage, 'demo') !== 0) {
                         // if has active package (a Voucher plan has no account on a device: its add_customer() would issue a new voucher)
                         if ($tur['status'] == 'on' && $p['device'] !== 'Voucher') {
                             if (file_exists($dvc)) {
@@ -1039,11 +1094,14 @@ switch ($action) {
                                         RedisCache::forgetRadiusCustomer($pppoe_username);
                                     }
                                     _log('[' . $oldusername . '] edit not saved, rename refused: ' . $e->getMessage(), 'Router');
+                                    $releaseEdit();
                                     r2(getUrl('customers/edit/') . $id, 'e', Lang::T('The router did not accept the username change and it was reverted on the routers. Other profile changes in this form may have been saved') . ': ' . htmlspecialchars($e->getMessage(), ENT_QUOTES)
                                         . ($undoFailed ? '. ' . Lang::T('The rename could not be undone on') . ': ' . htmlspecialchars(implode(', ', $undoFailed), ENT_QUOTES) : ''));
                                 }
                                 try {
-                                    (new $p['device'])->add_customer($c, $p);
+                                    if (!$expiredTur) {
+                                        (new $p['device'])->add_customer($c, $p);
+                                    }
                                 } catch (Exception $e) {
                                     // code 207: saved on the router, one later step refused (a fixed IP not cleared, a port forward not
                                     // made): the change stands, so it is saved here too, logged for the admins and named in a warning;
@@ -1072,7 +1130,15 @@ switch ($action) {
             }
             if ($heldOld && !$keepHeld && !$deviceSkipped) {
                 MikrotikVpn::releaseHeld($oldPppoeIp); // every device update finished: no secret uses the old address any more
+            } elseif ((string) $oldPppoeIp !== '' && (string) $oldPppoeIp !== $pppoe_ip && ($keepHeld || $deviceSkipped) && $vpnLocks && class_exists('MikrotikVpn')) {
+                // not confirmed cleared on the router: the address stays out of reach of other customers for 30 days instead of the
+                // short hold, long enough for Sync to finish the job
+                try {
+                    MikrotikVpn::holdAddress($oldPppoeIp, 30 * 86400);
+                } catch (Throwable $ignored) {
+                }
             }
+            $releaseEdit();
             if ($partialPlans || $skippedPlans) {
                 r2(getUrl('customers/view/') . $id, 'w', Lang::T('User Updated, but the router update is incomplete for') . ': '
                     . htmlspecialchars(implode(', ', array_unique(array_merge($partialPlans, $skippedPlans))), ENT_QUOTES) . '. ' . Lang::T('See the Router logs.') . ' ' . Lang::T('Use Sync to send it again.'));

@@ -75,6 +75,12 @@ class RouterApi
      */
     public static function deviceClient($host, $user, $pass, $port = null, $connectTimeout = null, $readTimeout = 30)
     {
+        global $_app_stage;
+        // the guard sits here, where a real connection is made, so no caller can reach a saved router address in Demo mode
+        // (the stage is written "Demo" in some places and "demo" in others)
+        if (strcasecmp(trim((string) $_app_stage), 'demo') === 0) {
+            throw new Exception(Lang::T('Not available in Demo mode'));
+        }
         $old = ini_get('default_socket_timeout');
         // the stream takes its read time limit from this when it opens, whatever it is set to (even "never")
         ini_set('default_socket_timeout', (string) $readTimeout);
@@ -124,6 +130,7 @@ class RouterApi
         do {
             $tag = 'nb' . (++$n);
         } while (method_exists($c, 'isRequestActive') && $c->isRequestActive($tag));
+        $req = clone $req; // the tag goes on a copy: the caller's request keeps its own tag, sent or not
         $req->setTag($tag);
         self::transmit($c, $req, $deadline);
         $recvErr = null;
@@ -470,8 +477,8 @@ class RouterApi
             // 'blocked' => the last try was not sent over an unprotected connection (it counts as a try)]
             $entry = function ($key) use (&$state) {
                 $s = $state['routers'][$key] ?? null;
-                return is_array($s) ? $s + ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false, 'pending' => '']
-                    : ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false, 'pending' => ''];
+                return is_array($s) ? $s + ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false, 'pending' => '', 'attempt' => '']
+                    : ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false, 'pending' => '', 'attempt' => ''];
             };
             $pending = function ($key) use ($entry) {
                 $s = $entry($key);
@@ -567,18 +574,10 @@ class RouterApi
                     // before listing. Used only once that very file is listed, with something in it and an identity; otherwise
                     // saved again (an unacknowledged save is never taken as made)
                     if (!$made && $pendingPath !== '') {
-                        $pf = $find($pendingPath);
-                        $pid = $pf !== null ? self::fileIdentity($pf) : null;
+                        // The file's identity was not recorded with the save, so a file at that path now cannot be proven to be the one
+                        // saved (a same-named file, even of the same size, may be someone else's). It is not adopted as ours: it stays
+                        // unowned (never removed), and a new backup is saved and confirmed before anything is pruned.
                         $s['pending'] = '';
-                        if ($pf !== null && $pid !== null && self::hasData($pf['size'] ?? null)) {
-                            $savedPath = $pendingPath;
-                            $records[$savedPath] = ['name' => $savedPath, 'id' => $pid];
-                            $state['made'][$key] = array_values($records);
-                            $s['saved'] = $savedPath;
-                            $state['routers'][$key] = $s;
-                            self::saveBackupState($state);
-                            $made = true;
-                        }
                     }
                     if (!$made) {
                         $s['saved'] = false;
@@ -599,6 +598,14 @@ class RouterApi
                             continue; // (the connection is dropped in finally)
                         }
                         $s['blocked'] = false;
+                        // A save that fails or times out may still have made the file. The name tried is kept before the command goes
+                        // out, apart from confirmed backups: it is reported by a later run and never counts as made or removed.
+                        if (($s['attempt'] ?? '') !== '') {
+                            $log[] = $r['name'] . ': ' . Lang::T('an earlier backup attempt was not confirmed; the file may exist on the router') . ' (' . $s['attempt'] . ')';
+                        }
+                        $s['attempt'] = $folder . $base . '.backup';
+                        $state['routers'][$key] = $s;
+                        self::saveBackupState($state);
                         // encrypted with the backup password (never written to the log or the output)
                         self::run($c, '/system/backup/save', ['name' => $folder . $base, 'password' => $password], self::now() + 60);
                         $savedPath = $folder . $base . '.backup';
@@ -623,6 +630,7 @@ class RouterApi
                         }
                         $s['saved'] = $savedPath;
                         $s['pending'] = '';
+                        $s['attempt'] = '';
                         $state['routers'][$key] = $s;
                         $records[$savedPath] = ['name' => $savedPath, 'id' => $ident];
                         $state['made'][$key] = array_values($records);
@@ -641,7 +649,8 @@ class RouterApi
                         // size or ID) is not ours any more and is left alone; an unchanged one is removed by its current ID
                         $current = null;
                         $todays = null;
-                        foreach ($autoFiles($c) as $f) {
+                        $fresh = $autoFiles($c);
+                        foreach ($fresh as $f) {
                             if ((string) $f['name'] === (string) $old['name']) {
                                 $current = $f;
                             }
@@ -652,6 +661,14 @@ class RouterApi
                         // nothing older goes unless today's backup is still, in this fresh listing, the very file recorded and not empty
                         if ($todays === null || !$isOurs($todays) || !self::hasData($todays['size'] ?? null)) {
                             throw new Exception(Lang::T('The backup file was not saved on the router'));
+                        }
+                        // the places kept are worked out again from this fresh listing: files that came or went since the first one change
+                        // which are the newest, and a file that is among them now is not removed
+                        $freshOlder = array_values(array_filter(array_filter($fresh, $isOurs), function ($f) use ($savedPath) {
+                            return (string) $f['name'] !== $savedPath;
+                        }));
+                        if (in_array((string) $old['name'], array_map('strval', array_column(array_slice($freshOlder, 0, $keep - 1), 'name')), true)) {
+                            continue;
                         }
                         if ($current === null) {
                             unset($records[(string) $old['name']]); // already gone
@@ -736,7 +753,9 @@ class RouterApi
         $d = ORM::for_table('tbl_appconfig')->where('setting', 'router_backup_state')->find_one() ?: ORM::for_table('tbl_appconfig')->create();
         $d->setting = 'router_backup_state';
         $d->value = $json;
-        $d->save();
+        if ($d->save() === false) {
+            throw new Exception('router backup state not saved'); // never report progress that was not kept
+        }
         $config['router_backup_state'] = $json;
     }
 }

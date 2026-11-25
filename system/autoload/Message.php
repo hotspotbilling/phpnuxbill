@@ -18,11 +18,31 @@ class Message
 {
 
     /** $timeout: seconds to connect and to wait for Telegram's answer (3000 and up is read as milliseconds, the default Http uses everywhere) */
-    public static function sendTelegram($txt, $chat_id = null, $topik = '', $timeout = 3000)
+    public static function sendTelegram($txt, $chat_id = null, $topik = '', $timeout = 3000, $runHook = true)
     {
         global $config;
+        // converted to milliseconds once, here: a bare 15 is 15 seconds, 3000 and up is already milliseconds
+        $timeout = Http::timeoutMs($timeout);
+        // Answering FreeRADIUS, from the middle of a login (no budget set by radius.php: a voucher's purchase alert, say): the message is
+        // handed to radius.php's alert queue, which sends it once the answer is out. Neither the send_telegram hook (a plugin's code,
+        // which PHP cannot time-limit) nor the request runs while the router waits.
+        if (!empty($GLOBALS['radius_request']) && !isset($GLOBALS['radius_alert_budget_ms']) && empty($chat_id) && $topik === ''
+            && function_exists('radius_alert')) {
+            radius_alert((string) $txt);
+            return false;
+        }
+        if (!empty($GLOBALS['radius_request']) && !isset($GLOBALS['radius_alert_budget_ms'])) {
+            $left = (int) floor((3.5 - (microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)))) * 1000);
+            if ($left < 500) {
+                return false;
+            }
+        } elseif (!empty($GLOBALS['radius_request']) && (int) $GLOBALS['radius_alert_budget_ms'] < 500) {
+            return false;
+        }
         $hookStart = microtime(true);
-        run_hook('send_telegram', [$txt, $chat_id, $topik]); #HOOK
+        if ($runHook) {
+            run_hook('send_telegram', [$txt, $chat_id, $topik]); #HOOK
+        }
         $hookMs = (int) ((microtime(true) - $hookStart) * 1000);
         // while answering FreeRADIUS (radius.php) the router is waiting: 3 seconds at most, whatever the caller asked for
         // (a voucher login's purchase alert comes from Package::rechargeUser, in the middle of the login)
@@ -38,7 +58,7 @@ class Message
                 $budget = (int) floor((3.5 - $elapsed) * 1000);
             }
             // never more than 3 s; 0 or less would mean no limit at all. Under 500 ms left nothing usable can be sent
-            $timeout = min(Http::timeoutMs($timeout), $budget, 3000);
+            $timeout = min($timeout, $budget, 3000);
             if ($timeout < 500) {
                 return false;
             }
@@ -51,16 +71,21 @@ class Message
                 $topik = "message_thread_id=$topik&";
             }
             // one conversion to milliseconds, here (a caller's seconds, or the milliseconds of the RADIUS budget above)
-            $ms = ['ms' => Http::timeoutMs($timeout)]; // converted once; passed on as milliseconds
+            $ms = ['ms' => $timeout]; // already milliseconds
             return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?' . $topik . 'chat_id=' . $chat_id . '&text=' . urlencode($txt), [], $ms, $ms);
         }
     }
 
 
     /** Returns the gateway's answer (or true) when the message was handed over, false when it was not. $timeout: seconds for an HTTP gateway */
-    public static function sendSMS($phone, $txt, $timeout = 3000)
+    public static function sendSMS($phone, $txt, $timeout = null)
     {
         global $config;
+        // the default depends on the transport: 30 seconds for a router (MikrotikSendSMS's own), 3000 ms for an HTTP gateway
+        $routerSms = !empty($config['sms_url']) && strlen($config['sms_url']) > 4 && substr($config['sms_url'], 0, 4) != "http";
+        if ($timeout === null) {
+            $timeout = $routerSms ? 30 : 3000;
+        }
         if (empty($txt)) {
             return false;
         }
@@ -258,8 +283,12 @@ class Message
         }
     }
 
+    /** Whether the last sendPackageNotification() handed its message over (false when the channel refused or failed, or nothing was sent) */
+    public static $lastDelivered = false;
+
     public static function sendPackageNotification($customer, $package, $price, $message, $via)
     {
+        self::$lastDelivered = false;
         global $ds, $config;
         if (empty($message)) {
             return "";
@@ -335,23 +364,26 @@ class Message
             && !empty($message) && in_array($via, ['sms', 'wa', 'email', 'inbox', 'push'])
         ) {
             try {
+                $sent = false;
                 switch ($via) {
                     case 'sms':
-                        Message::sendSMS($customer['phonenumber'], $msg);
+                        $sent = Message::sendSMS($customer['phonenumber'], $msg);
                         break;
                     case 'email':
-                        self::sendEmail($customer['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Internet Plan Reminder"), $msg);
+                        $sent = self::sendEmail($customer['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Internet Plan Reminder"), $msg);
                         break;
                     case 'wa':
-                        Message::sendWhatsapp($customer['phonenumber'], $msg);
+                        $sent = Message::sendWhatsapp($customer['phonenumber'], $msg);
                         break;
                     case 'inbox':
-                        Message::addToInbox($customer['id'], 'Package Expiry Notification', $msg);
+                        $sent = Message::addToInbox($customer['id'], 'Package Expiry Notification', $msg);
                         break;
                     case 'push':
-                        Message::sendPush($customer['id'], 'Package Expiry Notification', $msg, $url);
+                        $r = Message::sendPush($customer['id'], 'Package Expiry Notification', $msg, $url ?? null);
+                        $sent = is_array($r) ? !empty($r['success']) : (bool) $r;
                         break;
                 }
+                self::$lastDelivered = $sent !== false && $sent !== null;
                 return "$via: $msg";
             } catch (Exception $e) {
                 _log('Error sending message: ' . $e->getMessage());

@@ -169,6 +169,28 @@ class Rtl
     /** dir="rtl" and the language code on <html>, unless the template set a direction itself */
     private static function htmlTag($part)
     {
+        // comments are left alone: a "<html>" written inside one (a conditional comment, commented-out markup) is not the root element
+        $pieces = preg_split('/(<!--.*?-->)/s', $part, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if ($pieces === false) {
+            return null;
+        }
+        $done = false;
+        foreach ($pieces as $i => $piece) {
+            if ($done || $i % 2 === 1 || stripos($piece, '<html') === false) {
+                continue;
+            }
+            $new = self::htmlTagIn($piece);
+            if ($new === null) {
+                return null;
+            }
+            $done = $new !== $piece || preg_match('/<html\b/i', $piece) === 1;
+            $pieces[$i] = $new;
+        }
+        return implode('', $pieces);
+    }
+
+    private static function htmlTagIn($part)
+    {
         // the start tag is read to its real end (a ">" inside a quoted value does not end it), and its attributes by name
         return preg_replace_callback('/<html\b((?:[^>"\']|"[^"]*"|\'[^\']*\')*)>/i', function ($m) {
             $attrs = $m[1];
@@ -263,14 +285,20 @@ class Rtl
         $dir = $root_path . $cache;
         $name = substr(sha1($rel), 0, 12) . '-' . preg_replace('/[^A-Za-z0-9_.-]/', '_', basename($rel));
         $out = $dir . '/' . $name;
-        $mtime = filemtime($path);
+        // the source's time and a short hash of its bytes: a file replaced with the same time (a deploy that keeps times, a fast edit)
+        // still makes the copy again
+        $fingerprint = function () use ($path) {
+            $h = @hash_file('crc32b', $path);
+            return filemtime($path) . ($h !== false ? '-' . $h : '');
+        };
+        $mtime = $fingerprint();
         self::$busy[$path] = true;
         try {
             // the copy's first line names its stamp and the local stylesheets it imports: those are checked too, and a change
             // to one of them makes this copy again, with the new address of the import's own copy
             $head = self::readStamp($out);
             $stamp = $head ? self::stamp($mtime, self::depUrls($head['deps'])) : null;
-            if (!$head || !is_file($out) || filemtime($out) < $mtime || $head['stamp'] !== $stamp) {
+            if (!$head || !is_file($out) || filemtime($out) < (int) $mtime || $head['stamp'] !== $stamp) {
                 if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
                     return null;
                 }
@@ -338,13 +366,34 @@ class Rtl
                     return null; // a step failed: the page keeps the original stylesheet, and no copy is written
                 }
                 $tmp = $out . '.' . getmypid() . '.tmp';
-                // the stamp goes after the copy: a copy with no matching stamp is simply made again
-                if (@file_put_contents($tmp, $flipped) === false || !@rename($tmp, $out)
-                    || @file_put_contents($tmp . '.stamp', self::stampLine($stamp, $deps)) === false || !@rename($tmp . '.stamp', $out . '.stamp')) {
-                    @unlink($tmp);
-                    @unlink($tmp . '.stamp');
-                    @unlink($out . '.stamp');
+                // Published under a lock, as one step: the copy and its stamp go together, and a worker that read an older source
+                // (or was slow) cannot write over what a newer one published. Under the lock the source is read again: changed since,
+                // this copy is out of date and not written (the page keeps the original this time, the next request makes the new one).
+                $lock = @fopen($out . '.lock', 'c');
+                if (!$lock || !flock($lock, LOCK_EX)) {
+                    if ($lock) {
+                        fclose($lock);
+                    }
                     return null;
+                }
+                try {
+                    if ($fingerprint() !== $mtime) {
+                        return null;
+                    }
+                    $now = self::readStamp($out);
+                    if (!($now && $now['stamp'] === $stamp && is_file($out))) {
+                        // the stamp goes after the copy: a copy with no matching stamp is simply made again
+                        if (@file_put_contents($tmp, $flipped) === false || !@rename($tmp, $out)
+                            || @file_put_contents($tmp . '.stamp', self::stampLine($stamp, $deps)) === false || !@rename($tmp . '.stamp', $out . '.stamp')) {
+                            @unlink($tmp);
+                            @unlink($tmp . '.stamp');
+                            @unlink($out . '.stamp');
+                            return null;
+                        }
+                    }
+                } finally {
+                    flock($lock, LOCK_UN);
+                    fclose($lock);
                 }
             }
         } finally {
@@ -550,22 +599,53 @@ class Rtl
             return null;
         }
         $css = $out . substr($css, $pos);
-        // the innermost blocks hold the declarations; what comes before the brace is the selector
-        $css = preg_replace_callback('/([^{}]*)\{([^{}]*)\}/', function ($m) {
-            $selector = $m[1];
-            if (preg_match('/\x01\d+n\x01(?:\s*\x01\d+c\x01)*[^\x01;]*$/', $selector)) {
-                return $m[0]; // the rule is marked @noflip
+        // Rules are read from the innermost out, each one replaced by a placeholder (\x05) holding its result, so the rule around
+        // it is read next and the declarations it has of its own (before, between or after nested rules) are mirrored too. What
+        // comes before the brace is the selector; in a nested rule it is preceded by the parent's declarations up to the last ";".
+        $done = [];
+        $flipText = function ($text) {
+            $pieces = preg_split('/(\x05\d+\x05)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+            foreach ($pieces as $i => $piece) {
+                if ($i % 2 === 0 && $piece !== '') {
+                    $pieces[$i] = self::declarations($piece);
+                }
             }
-            $plain = preg_replace('/\x01\d+[nc]\x01/', '', $selector);
-            if (preg_match('/@font-face\s*$/i', $plain)) {
-                return $m[0];
+            return implode('', $pieces);
+        };
+        for ($guard = 0; $guard < 64; $guard++) {
+            $count = 0;
+            $css = preg_replace_callback('/([^{}]*)\{([^{}]*)\}/', function ($m) use (&$done, &$count, $flipText) {
+                $count++;
+                $selector = $m[1];
+                $head = '';
+                if (($semi = strrpos($selector, ';')) !== false && !preg_match('/^\s*@/', $selector)) {
+                    $head = $flipText(substr($selector, 0, $semi + 1)); // the parent's declarations that come before this rule
+                    $selector = substr($selector, $semi + 1);
+                }
+                $plain = preg_replace('/\x01\d+[nc]\x01/', '', $selector);
+                if (preg_match('/\x01\d+n\x01(?:\s*\x01\d+c\x01)*[^\x01;]*$/', $selector)
+                    || preg_match('/@font-face\s*$/i', $plain)
+                    // a rule written for right to left already ([dir="rtl"] ..., :dir(rtl), .swal2-rtl) is right as it is
+                    || preg_match('/\[\s*dir\s*=\s*\x02?\d*\x02?\s*rtl|\[\s*dir\s*=|:dir\(\s*rtl|[-_]rtl\b|\.rtl\b/i', $plain)) {
+                    $done[] = $head . $selector . '{' . $m[2] . '}'; // (@noflip, @font-face and rtl rules keep their declarations)
+                } else {
+                    $done[] = $head . $selector . '{' . $flipText($m[2]) . '}';
+                }
+                return "\x05" . (count($done) - 1) . "\x05";
+            }, $css);
+            if ($css === null) {
+                return null;
             }
-            // a rule written for right to left already ([dir="rtl"] ..., :dir(rtl), .swal2-rtl) is right as it is
-            if (preg_match('/\[\s*dir\s*=\s*\x02?\d*\x02?\s*rtl|\[\s*dir\s*=|:dir\(\s*rtl|[-_]rtl\b|\.rtl\b/i', $plain)) {
-                return $m[0];
+            if ($count === 0) {
+                break;
             }
-            return $selector . '{' . self::declarations($m[2]) . '}';
-        }, $css);
+        }
+        // what is left outside any rule (a ";"-ended @import) is a list of declarations of no kind: kept as it is
+        for ($guard = 0; $guard < 64 && $css !== null && strpos($css, "\x05") !== false; $guard++) {
+            $css = preg_replace_callback('/\x05(\d+)\x05/', function ($m) use ($done) {
+                return $done[(int) $m[1]];
+            }, $css);
+        }
         $css = $css === null ? null : preg_replace_callback('/\x04(\d+)\x04/', function ($m) use ($kept) {
             return $kept[(int) $m[1]];
         }, $css);
@@ -729,6 +809,11 @@ class Rtl
                 }
                 if (isset($t[$h]) && preg_match('/^[+-]?0*\.?0+(?:px)?$/i', $t[$h])) {
                     $t[$h] = '100%'; // (0 is the left edge: the right one when mirrored)
+                    $layers[$i] = self::lead($layer) . implode(' ', $t) . self::trail($layer);
+                    continue;
+                }
+                if (isset($t[$h]) && preg_match('/^[+-]?(?:\d*\.)?\d+(?:px|em|rem|ch|ex|vw|vh|vmin|vmax|cm|mm|in|pt|pc)$/i', $t[$h])) {
+                    $t[$h] = 'calc(100% - ' . ltrim($t[$h], '+') . ')'; // (a length from the left edge is the same length from the right)
                     $layers[$i] = self::lead($layer) . implode(' ', $t) . self::trail($layer);
                     continue;
                 }

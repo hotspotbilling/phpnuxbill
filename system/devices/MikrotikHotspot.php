@@ -390,6 +390,7 @@ class MikrotikHotspot
      */
     function addHotspotUserChecked($client, $plan, $customer)
     {
+        $this->assertLimitType($plan); // a Limited plan with no valid limit type would be made as unlimited: refused before the router is touched
         $was = $this->strict;
         $this->strict = true;
         try {

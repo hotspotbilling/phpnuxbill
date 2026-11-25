@@ -54,21 +54,42 @@ class RadiusSessions
         $cutoff = date('Y-m-d H:i:s', time() - $seconds);
         // updates still queued (the database was busy and a replay has not written them): an older row does not show that a
         // session is gone, so the REST sessions are left as they are until the queue is written
-        $queued = self::hasQueued();
-        if ($queued) {
-            $out['lines'][] = 'REST: accounting updates are still queued; stale sessions are not closed until they are written';
+        // The queue is checked and the sessions closed under the queue's own lock: radius.php appends a packet under it, so an update
+        // queued while this runs is either seen here (nothing is closed) or comes after the close: it can no longer slip in between
+        // the check and the close. (A session closed here has the status Stop, like one the NAS stopped: telling the two apart
+        // would need a column of its own, so a late update does not reopen either.)
+        $qlock = @fopen(self::queueFile() . '.lock', 'c');
+        $gotLock = $qlock && flock($qlock, LOCK_EX | LOCK_NB);
+        try {
+            if (!$gotLock) {
+                $out['lines'][] = 'REST: the accounting queue is being written; stale sessions are checked on the next run';
+            } else {
+                // updates still queued (the database was busy and a replay has not written them): an older row does not show that a
+                // session is gone, so the REST sessions are left as they are until the queue is written
+                $queued = self::hasQueued();
+                if ($queued) {
+                    $out['lines'][] = 'REST: accounting updates are still queued; stale sessions are not closed until they are written';
+                }
+                $queued || self::close(
+                    $out,
+                    'REST',
+                    'rad_acct',
+                    null,
+                    'acctstatustype = ?',
+                    ['Stop'],
+                    // a row with receivedAt (epoch microseconds, set by radius.php) is judged by it, not by the date text; an older row by its dates
+                    "(acctstatustype IN (?, ?) OR acctstatustype IS NULL) AND IF(receivedAt IS NOT NULL AND receivedAt > ?, receivedAt < ?, COALESCE(dateUpdated, dateAdded) > ? AND COALESCE(dateUpdated, dateAdded) < ?)",
+                    ['Start', 'Interim-Update', 946684800000000, (time() - $seconds) * 1000000, '2000-01-01 00:00:00', $cutoff]
+                );
+            }
+        } finally {
+            if ($qlock) {
+                if ($gotLock) {
+                    flock($qlock, LOCK_UN);
+                }
+                fclose($qlock);
+            }
         }
-        $queued || self::close(
-            $out,
-            'REST',
-            'rad_acct',
-            null,
-            'acctstatustype = ?',
-            ['Stop'],
-            // a row with receivedAt (epoch microseconds, set by radius.php) is judged by it, not by the date text; an older row by its dates
-            "(acctstatustype IN (?, ?) OR acctstatustype IS NULL) AND IF(receivedAt IS NOT NULL AND receivedAt > ?, receivedAt < ?, COALESCE(dateUpdated, dateAdded) > ? AND COALESCE(dateUpdated, dateAdded) < ?)",
-            ['Start', 'Interim-Update', 946684800000000, (time() - $seconds) * 1000000, '2000-01-01 00:00:00', $cutoff]
-        );
 
         // MySQL RADIUS sessions, in the separate "radius" database when one is configured. FreeRADIUS fills these dates
         // itself, so the cutoff is computed by MySQL. The stop time is the last update: the session ended when the NAS went quiet.
@@ -90,6 +111,37 @@ class RadiusSessions
     }
 
     /**
+     * One spelling for a NAS address: an IPv6 address in its shortest lowercase form (2001:0DB8::1 and 2001:db8:0:0:0:0:0:1 are one
+     * NAS, and the unique session key compares text), an IPv4 address or a NAS-Identifier as it is.
+     */
+    public static function normalizeNas($v): string
+    {
+        $v = trim((string) $v);
+        if (strpos($v, ':') !== false && filter_var($v, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false && ($bin = @inet_pton($v)) !== false) {
+            return (string) inet_ntop($bin);
+        }
+        return $v;
+    }
+
+    /**
+     * The NAS key for a packet that carries only a NAS-Identifier: '' when a session of that username and id was stored with a blank
+     * address before the upgrade (its Stop then closes that row), otherwise the identifier (cut to the column). Throws when the
+     * lookup cannot be made, so the caller can keep the question open (see radius.php and replayAccounting).
+     */
+    public static function legacyNasAddress(string $username, string $sessionId, string $nasid): string
+    {
+        $nasid = mb_substr(trim($nasid), 0, 45);
+        if ($nasid === '') {
+            return '';
+        }
+        $known = ORM::for_table('rad_acct')->select('nasipaddress')
+            ->where('username', $username)->where('acctsessionid', $sessionId)
+            ->where('nasid', trim($nasid))->where_in('nasipaddress', ['', $nasid])
+            ->order_by_desc('nasipaddress')->find_one();
+        return ($known && (string) $known['nasipaddress'] === '') ? '' : $nasid;
+    }
+
+    /**
      * Write one REST accounting packet to rad_acct (radius.php, and the replay of queued ones). One statement keyed on the
      * unique (username, acctsessionid, nasipaddress): Acct-Session-Id is only unique per NAS, so two routers can send the
      * same pair. A new session is added, a known one updated, atomically. $p holds the columns of the INSERT below;
@@ -108,6 +160,7 @@ class RadiusSessions
             $p['receivedAt'] = (int) strtotime((string) ($p['dateUpdated'] ?? '')) * 1000000;
         }
         $p['receivedAt'] = (int) $p['receivedAt'];
+        $p['nasipaddress'] = self::normalizeNas($p['nasipaddress'] ?? ''); // also for packets queued before the spelling was unified
         $set = [
             'acctinputoctets' => 'VALUES(acctinputoctets)',
             'acctoutputoctets' => 'VALUES(acctoutputoctets)',
@@ -193,7 +246,8 @@ class RadiusSessions
             foreach (self::snapshots($file) as $snap) {
                 $spool += (int) @filesize($snap);
             }
-            if (($p['acctstatustype'] ?? null) !== 'Stop' && $spool > 50 * 1024 * 1024) {
+            // a Stop has more room than the rest, but not unlimited: the spool shares the disk with the application
+            if ($spool > (($p['acctstatustype'] ?? null) === 'Stop' ? 200 : 50) * 1024 * 1024) {
                 return false;
             }
             $fh = @fopen($file, 'ab');
@@ -257,6 +311,7 @@ class RadiusSessions
             if ($out['replayed'] > 0 || $out['failed'] > 0) {
                 try {
                     _log("RADIUS accounting queue: {$out['replayed']} packet(s) written, {$out['failed']} still waiting", 'CRON');
+                    RadiusRestLog::write($out['failed'] > 0 ? 'error' : 'info', "Accounting queue replayed by the cron: {$out['replayed']} packet(s) written, {$out['failed']} still waiting");
                 } catch (Throwable $ignored) {
                 }
             }
@@ -289,7 +344,12 @@ class RadiusSessions
             return false;
         }
         $line = rtrim($line, "\r\n") . "\n";
-        $ok = @fwrite($fh, $line) === strlen($line) && fflush($fh);
+        $before = (int) (fstat($fh)['size'] ?? 0);
+        // written whole and synced to the disk, or taken back: the caller drops the packet from the queue on true
+        $ok = @fwrite($fh, $line) === strlen($line) && fflush($fh) && (!function_exists('fsync') || @fsync($fh));
+        if (!$ok) {
+            @ftruncate($fh, $before);
+        }
         fclose($fh);
         return $ok;
     }
@@ -354,7 +414,12 @@ class RadiusSessions
                 // the unique index compares with a case-insensitive collation that ignores trailing spaces (utf8mb4_general_ci): the
                 // parts are folded alike and kept as a tuple, so no delimiter inside one can make two sessions look like one
                 $fold = function ($v) {
-                    return mb_strtolower(rtrim((string) $v, ' '));
+                    $v = rtrim((string) $v, ' ');
+                    // utf8mb4_general_ci also treats an accented letter as its plain one (Café = Cafe): accents are taken off before the case is folded
+                    if (class_exists('Normalizer') && ($d = Normalizer::normalize($v, Normalizer::FORM_D)) !== false) {
+                        $v = preg_replace('/\p{Mn}+/u', '', $d) ?? $v;
+                    }
+                    return mb_strtolower($v);
                 };
                 $key = json_encode([$fold($p['nasipaddress'] ?? ''), $fold($p['username']), $fold($p['acctsessionid'])], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
                 // held back behind an earlier packet of its session that is waiting
@@ -375,6 +440,11 @@ class RadiusSessions
                 }
                 $state['tried']++; // a Stop counts like any other: the bound holds for every packet
                 try {
+                    if (!empty($p['_nasid_unresolved'])) {
+                        // the lookup for a blank-address row of the old format failed when this was received: made now
+                        $p['nasipaddress'] = self::legacyNasAddress((string) $p['username'], (string) $p['acctsessionid'], (string) ($p['nasid'] ?? ''));
+                        unset($p['_nasid_unresolved']);
+                    }
                     self::saveAccounting($p, true);
                     $out['replayed']++;
                     $state['streak'] = 0;

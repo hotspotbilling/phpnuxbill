@@ -778,6 +778,7 @@
                             <input type="hidden" name="clear_stale_touched" value="0">
                             <select name="clear_stale_sessions" id="clear_stale_sessions" class="form-control text-muted" onchange="this.form.clear_stale_touched.value='1'">
                                 <option value="0">{Lang::T('No')}</option>
+                                {if $rs_legacy}<option value="legacy" selected="selected">{Lang::T('REST only (legacy)')}</option>{/if}
                                 <option value="1" {if $_c['clear_stale_sessions'] == '1'}selected="selected" {/if}>{Lang::T('Yes')}
                                 </option>
                             </select>
@@ -795,7 +796,7 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label" for="frrest_keep_days">{Lang::T('Keep Finished Sessions (days)')}</label>
                         <div class="col-md-5">
-                            <input type="number" min="0" max="3650" step="1" class="form-control" id="frrest_keep_days" name="frrest_keep_days"
+                            <input type="text" inputmode="numeric" pattern="[0-9]{literal}{1,6}{/literal}" maxlength="6" class="form-control" id="frrest_keep_days" name="frrest_keep_days"
                                 value="{$_c['frrest_keep_days']|default:'0'|escape}">
                         </div>
                         <p class="help-block col-md-4">{Lang::T('For radius.php (REST): the cron removes finished sessions older than this many days, so the accounting table stays small and RADIUS stays fast. Sessions inside a customer\'s active plan are always kept, as limited plans count their usage from them. 0 keeps every session.')}</p>
@@ -807,6 +808,16 @@
                                 autocomplete="off" value="{$_c['radius_rest_secret']|escape}">
                         </div>
                         <p class="help-block col-md-4">{Lang::T('When set, radius.php only answers FreeRADIUS requests that send it as the X-Radius-Token header or as ?token= in the REST uri')}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Log every accounting packet')}</label>
+                        <div class="col-md-5">
+                            <select name="radius_rest_log_all" id="radius_rest_log_all" class="form-control">
+                                <option value="0">{Lang::T('No')}</option>
+                                <option value="1" {if $_c['radius_rest_log_all'] == '1'}selected="selected" {/if}>{Lang::T('Yes')}</option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('Problems with accounting packets are always written to Logs > Radius REST. Turn this on only while you look into what a router sends: it adds one line for every update of every online customer, and the file keeps about 5 MB.')}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label"></label>
@@ -1376,7 +1387,7 @@
                         <br>
                         <h4><b>{Lang::T('Cron Settings to clear freeradius stale sessions')}</b></h4>
                         <p>
-                            <span class="st-cmd-note">{Lang::T('The main cron job (system/cron.php) clears stale FreeRADIUS sessions on every run, but only while Clear Stale Sessions is on with a timeout above 0; running it every 5 minutes or less does not clean up by itself.')}</span>
+                            <span class="st-cmd-note">{Lang::T('The main cron job (system/cron.php) clears stale FreeRADIUS sessions on every run, but only while Clear Stale Sessions is on with a timeout above 0; running it every 5 minutes or less does not turn cleanup on by itself, and once it is on no separate cleanup job is needed. A site still on the legacy REST-only minutes shows Clear Stale Sessions as REST only (legacy): cleanup stays active for REST until Yes or No is chosen.')}</span>
                             <span class="st-cmd-note">{Lang::T('Optional: if cleanup is on and the main cron job runs less often than every 5 minutes, add this to clear stale sessions sooner. Updates still waiting in the accounting queue delay it until they are written.')}</span>
                             <span class="st-cmd"><code>*/5 * * * * cd {$dir}cron && {$php} cleanup_stale_sessions.php</code></span>
                         </p>

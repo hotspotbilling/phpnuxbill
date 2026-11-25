@@ -681,6 +681,13 @@
                     return dropKey(dCfg, r.kind, r.sid, r.user, r.address, r.mac) === dKey && sameStart(r.started, dStarted);
                 })[0] : null;
             };
+            // the row an answer is carried to afterwards: the dispatched one, or a refreshed one only when both starts are known
+            // and equal (a refreshed row with no start is not shown as the session that was disconnected)
+            var findStrict = function (model) {
+                return model && (model.opts.cfg || '') === dCfg ? model.opts.rows.filter(function (r) {
+                    return dropKey(dCfg, r.kind, r.sid, r.user, r.address, r.mac) === dKey && (r === dRow || knownSame(r.started, dStarted));
+                })[0] : null;
+            };
             var dRow = find(dModel);
             var busy = function () { // waiting for an answer, or done; a failed one can be tried again
                 var s = dPane._drops && dPane._drops[dKey];
@@ -720,7 +727,7 @@
                     dPane._drops[dKey] = d.ok ? 'gone' : { err: d.error || t.fail, user: dUser };
                     // the answer goes to the row it was sent from and to the same session in the list shown now (a Refresh may
                     // have replaced it); a list from other router settings is left alone
-                    var cur = find(dPane._lv);
+                    var cur = findStrict(dPane._lv);
                     [dRow, cur].forEach(function (r) {
                         if (!r) return;
                         r.pending = false;

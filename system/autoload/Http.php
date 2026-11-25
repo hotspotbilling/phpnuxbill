@@ -27,7 +27,8 @@ class Http
         }
         self::$notifying = true;
         try {
-            Message::sendTelegram($label . "\n" . _get('_route') . "\n\n" . $url . "\n" . $error, null, '', 15);
+            // no send_telegram hook here (a plugin's code cannot be time-limited): the 15 seconds are those of the request itself
+            Message::sendTelegram($label . "\n" . _get('_route') . "\n\n" . $url . "\n" . $error, null, '', 15, false);
         } catch (Throwable $e) {
         } finally {
             self::$notifying = false;

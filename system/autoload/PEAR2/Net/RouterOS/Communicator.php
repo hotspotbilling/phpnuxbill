@@ -473,7 +473,12 @@ class Communicator
         // PHPNuxBill: under a deadline the lock is waited for only as long as there is time (a blocking flock() could hold the
         // request past it); the connection is closed when it runs out, as earlier words of the request may already be sent
         $left = $this->trans->timeLeft();
-        if (null === $left) {
+        // a private in-memory stream (php://memory, php://temp) is shared with no one and cannot be locked: nothing to wait for
+        $smeta = stream_get_meta_data($stream);
+        $lockable = !in_array(strtoupper((string) ($smeta['stream_type'] ?? '')), array('MEMORY', 'TEMP'), true);
+        if (!$lockable) {
+            // no lock needed
+        } elseif (null === $left) {
             flock($stream, LOCK_SH);
         } else {
             while (!flock($stream, LOCK_SH | LOCK_NB)) {

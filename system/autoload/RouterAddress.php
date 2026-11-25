@@ -33,14 +33,33 @@ class RouterAddress
     public static function split($address)
     {
         $address = self::normalize($address);
-        if (preg_match('/^\[([^\]]+)\](?::(\d+))?$/', $address, $m)) {
-            return [$m[1], isset($m[2]) && (int) $m[2] > 0 ? $m[2] : null];
+        if (preg_match('/^\[([^\]]+)\]:(.*)$/', $address, $m)) {
+            return [$m[1], self::port($m[2])];
+        }
+        if (preg_match('/^\[([^\]]+)\]$/', $address, $m)) {
+            return [$m[1], null];
         }
         if (substr_count($address, ':') > 1) {
             return [$address, null]; // a bare IPv6 address, no port
         }
-        $parts = explode(':', $address);
-        // ":0" (or no number) is no port at all: the default API port is used
-        return [$parts[0], isset($parts[1]) && (int) $parts[1] > 0 ? $parts[1] : null];
+        $parts = explode(':', $address, 2);
+        return [$parts[0], isset($parts[1]) ? self::port($parts[1]) : null];
+    }
+
+    /**
+     * An explicit port: whole decimal digits, 1 to 65535 ("08729" is 8729); empty or 0 is no port (the default is used). Anything else
+     * (letters after the digits, out of range) is refused here, before a socket is opened, rather than connecting to some other port.
+     * @return string|null the port without leading zeros, or null for the default
+     */
+    private static function port($text)
+    {
+        $text = trim((string) $text);
+        if ($text === '' || preg_match('/^0+$/', $text)) {
+            return null;
+        }
+        if (!preg_match('/^\d{1,8}$/', $text) || (int) $text > 65535) {
+            throw new InvalidArgumentException('Invalid router port: ' . mb_substr($text, 0, 20));
+        }
+        return (string) (int) $text;
     }
 }

@@ -351,17 +351,27 @@ switch ($do) {
                     // An existing customer's password is never replaced here: typing someone's username with a voucher of your own must
                     // not let you sign in as them. The voucher only adds its plan; the owner keeps their own password.
                     // voucher activation
+                    // The account this request made is removed only when it is still wholly this request's: it still has the voucher
+                    // code as its password and no recharge points at it. Another request that adopted the account meanwhile (the same
+                    // username typed with its own voucher) has a recharge on it, or has changed the password, and then it stays.
+                    $dropNewAccount = function () use ($user, $voucher) {
+                        ORM::raw_execute(
+                            "DELETE FROM tbl_customers WHERE id = ? AND password = ? AND NOT EXISTS (SELECT 1 FROM tbl_user_recharges r WHERE r.customer_id = tbl_customers.id)",
+                            [(int) $user['id'], (string) $voucher]
+                        );
+                    };
                     try {
                         $redeemed = Package::redeemVoucher($v1, $user['id'], $user['username'], $voucher);
                     } catch (Throwable $e) {
                         // refused before anything was written: the new account is not left holding an unused voucher as its password
                         if ($createdHere && !Package::rechargeWrote()) {
-                            ORM::for_table('tbl_customers')->where('id', $user['id'])->delete_many();
+                            $dropNewAccount();
                         }
                         throw $e;
                     }
-                    if (!$redeemed && $createdHere) {
-                        ORM::for_table('tbl_customers')->where('id', $user['id'])->delete_many();
+                    // a recharge that began to write and then reported failure left rows for this account: it is kept
+                    if (!$redeemed && $createdHere && !Package::rechargeWrote()) {
+                        $dropNewAccount();
                     }
                     if ($redeemed) {
                         $v1->status = "1";

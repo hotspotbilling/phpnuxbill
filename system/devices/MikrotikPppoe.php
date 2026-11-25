@@ -217,14 +217,37 @@ class MikrotikPppoe
             $setRequest->setArgument('numbers', $cid);
             $setRequest->setArgument('name', $to);
             // a refused rename (the new name is taken, say) is thrown, so the caller does not go on as if it had worked
-            if (($err = RouterApi::error($client->sendSync($setRequest))) !== null) {
+            try {
+                $err = RouterApi::error($client->sendSync($setRequest));
+            } catch (Exception $lost) {
+                // The connection dropped (no answer, or closed: RouterApi's 408 and 503) before the reply: the router may have taken the
+                // rename. Looked at on a new connection: the secret under the new name and none under the old one means it was done,
+                // and then only the disconnect below is left; anything else is the original failure, so the caller can retry.
+                if (!in_array($lost->getCode(), [408, 503], true)) {
+                    throw $lost;
+                }
+                try {
+                    $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    $done = !empty($this->secretId($client, $to, true)) && empty($this->secretId($client, $from, true));
+                } catch (Exception $check) {
+                    $done = false;
+                }
+                if (!$done) {
+                    throw $lost;
+                }
+                $err = null;
+            }
+            if ($err !== null) {
                 throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
             }
             //disconnect then (the rename stands if this fails: the session ends by itself on its next login)
             try {
                 $this->removePpoeActive($client, $from);
             } catch (Exception $e) {
-                _log('PPPoE ' . $from . ': ' . $e->getMessage(), 'Router');
+                try {
+                    _log('PPPoE ' . $from . ': ' . $e->getMessage(), 'Router');
+                } catch (Throwable $ignored) { // diagnostic only: the router has taken the rename, which the caller must keep
+                }
             }
         }
     }
@@ -315,9 +338,34 @@ class MikrotikPppoe
             $id = $this->secretId($client, $customer['pppoe_username'], $checked);
         }
         if (empty($id)) {
-            $id = $this->secretId($client, $customer['username'], $checked);
+            if (!empty($customer['pppoe_username'])) {
+                // a dial login is set: a secret under the portal name is this customer's only when its comment (written by
+                // addPpoeUser: full name | email | ...) says so; someone else's secret of that name is never taken for it
+                $id = $this->ownSecretId($client, $customer['username'], $customer, $checked);
+            } else {
+                $id = $this->secretId($client, $customer['username'], $checked);
+            }
         }
         return $id;
+    }
+
+    /** The .id of the secret with this name when its comment names this customer (empty otherwise) */
+    private function ownSecretId($client, $name, $customer, $checked)
+    {
+        $printRequest = new RouterOS\Request('/ppp/secret/print');
+        $printRequest->setQuery(RouterOS\Query::where('name', $name));
+        $res = $client->sendSync($printRequest);
+        if ($checked && ($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err);
+        }
+        $res->rewind();
+        $id = $res->getProperty('.id');
+        if (empty($id)) {
+            return '';
+        }
+        $comment = (string) RouterApi::text($res->getProperty('comment'));
+        $mine = $customer['fullname'] . ' | ' . $customer['email'];
+        return strncmp($comment, $mine, strlen($mine)) === 0 ? $id : '';
     }
 
     /** The .id of the secret with this name (empty when none); with $checked, the router's refusal is thrown */
@@ -542,13 +590,7 @@ class MikrotikPppoe
     function addPpoeUserChecked($client, $plan, $customer)
     {
         $isExp = ORM::for_table('tbl_plans')->select("id")->where('plan_expired', $plan['id'])->find_one();
-        $was = $this->strict;
-        $this->strict = true;
-        try {
-            $this->addPpoeUser($client, $plan, $customer, $isExp);
-        } finally {
-            $this->strict = $was;
-        }
+        $this->addPpoeUser($client, $plan, $customer, $isExp);
     }
 
     function removePpoeActive($client, $username)

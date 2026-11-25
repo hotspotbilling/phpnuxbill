@@ -31,6 +31,7 @@
     // to the newest request of either kind, so an older list success cannot replace a newer Live failure (or the other way)
     var sentAll = {};
     var shownAll = {};
+    var livePainted = {};    // id => a Live reading has put its answer in the row's Health cell
     var LIMIT = 20000;       // ms a request (and reading its answer) may take before it counts as failed
 
     function esc(s) {
@@ -540,10 +541,12 @@
                 var newest = order >= (shownAll[id] || 0);
                 // a queued first check does not replace what Live has shown in the cell (a cached success over a Live failure);
                 // Check now and the Live readings themselves always do
-                if (newest && !opts.live && !opts.fresh && live[id]) newest = false;
+                // (only once Live has put an answer in the cell: until then the first check is what replaces "loading")
+                if (newest && !opts.live && !opts.fresh && live[id] && livePainted[id]) newest = false;
                 if (newest) {
                     shownAll[id] = order;
                     cell(id, d);
+                    if (opts.live) livePainted[id] = true;
                 }
                 if (!opts.live) {
                     // a list check: the row's cell only. Once the details panel has been opened (reading, or paused), the panel,

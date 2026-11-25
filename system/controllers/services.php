@@ -492,6 +492,11 @@ switch ($action) {
             }
             // the router the plan names now (the lock is held) must still be there
             $planRouterCheck($d, getUrl('services/edit/') . (int) _post('id'));
+            // live mode: the device driver must be there before the change is saved, or the rename would be saved and reported as done
+            if (strcasecmp((string) $_app_stage, 'demo') !== 0 && !file_exists(Package::getDevice($d))) {
+                $routerLock(false);
+                r2(getUrl('services/edit/') . (int) _post('id'), 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars((string) $d['device'], ENT_QUOTES) . '. ' . Lang::T('Nothing was saved'));
+            }
             $d->save();
             if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
@@ -829,7 +834,7 @@ switch ($action) {
         $old = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         // the router cannot be changed after the package is saved: it stays as the database has it (read under the lock, so a
         // rename is followed). The form sends it back as shown; a value left out keeps it, and a different one is refused
-        if ($d && $routers !== '' && (string) $routers !== (string) $d['routers']) {
+        if ($d && empty($d['is_radius']) && $routers !== '' && (string) $routers !== (string) $d['routers']) { // (a RADIUS plan has no router: its form may send one)
             $msg .= Lang::T('The router assignment changed while this form was open. Reload the page and try again.') . '<br>';
         }
         if ($d) {
@@ -881,6 +886,11 @@ switch ($action) {
             }
             // the router the plan names now (the lock is held) must still be there
             $planRouterCheck($d, getUrl('services/pppoe-edit/') . (int) _post('id'));
+            // live mode: the device driver must be there before the change is saved, or the rename would be saved and reported as done
+            if (strcasecmp((string) $_app_stage, 'demo') !== 0 && !file_exists(Package::getDevice($d))) {
+                $routerLock(false);
+                r2(getUrl('services/pppoe-edit/') . (int) _post('id'), 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars((string) $d['device'], ENT_QUOTES) . '. ' . Lang::T('Nothing was saved'));
+            }
             $d->save();
             if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
@@ -1338,7 +1348,7 @@ switch ($action) {
         $old = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         // the router cannot be changed after the package is saved: it stays as the database has it (read under the lock, so a
         // rename is followed). The form sends it back as shown; a value left out keeps it, and a different one is refused
-        if ($d && $routers !== '' && (string) $routers !== (string) $d['routers']) {
+        if ($d && empty($d['is_radius']) && $routers !== '' && (string) $routers !== (string) $d['routers']) { // (a RADIUS plan has no router: its form may send one)
             $msg .= Lang::T('The router assignment changed while this form was open. Reload the page and try again.') . '<br>';
         }
         if ($d) {
@@ -1390,6 +1400,11 @@ switch ($action) {
             }
             // the router the plan names now (the lock is held) must still be there
             $planRouterCheck($d, getUrl('services/vpn-edit/') . (int) _post('id'));
+            // live mode: the device driver must be there before the change is saved, or the rename would be saved and reported as done
+            if (strcasecmp((string) $_app_stage, 'demo') !== 0 && !file_exists(Package::getDevice($d))) {
+                $routerLock(false);
+                r2(getUrl('services/vpn-edit/') . (int) _post('id'), 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars((string) $d['device'], ENT_QUOTES) . '. ' . Lang::T('Nothing was saved'));
+            }
             $d->save();
             if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 

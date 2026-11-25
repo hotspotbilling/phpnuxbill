@@ -94,9 +94,13 @@ try {
             }
             break;
         case 'accounting':
+            // Accounting is always accepted (HTTP 200): the NAS gets its Accounting-Response whatever happens here, so it never
+            // resends or logs "no response" because of a problem on this side. Anything that goes wrong is written to the logs
+            // (Logs > System, type RADIUS, and the PHP error log) after the answer is out.
             $username = _req('username');
             if (empty($username)) {
-                show_radius_result(['Reply-Message' => 'Username empty'], 401);
+                radius_log('Accounting packet without a username was not stored. NAS: ' . (string) _req('nasIpAddress', _req('nasipaddress', _req('nasid'))) . ', session: ' . (string) _req('acctSessionId', _req('acctsessionid')));
+                show_radius_result(['Reply-Message' => 'Accepted'], 200);
                 die();
             }
             header("HTTP/1.1 200 OK");
@@ -112,7 +116,8 @@ try {
                 + intval(_req('acctOutputGigawords', _req('acctoutputgigawords', 0))) * 4294967296;
             $acctSessionTime = intval(_req('acctSessionTime', _req('acctsessiontime', 0)));
             $framedIPAddress = _req('framedIPAddress', _req('framedipaddress'));
-            $nasIpAddress = _req('nasIpAddress', _req('nasipaddress'));
+            $nasIpAddress = RadiusSessions::normalizeNas(_req('nasIpAddress', _req('nasipaddress')));
+            $nasUnresolved = false;
             if ((string) $nasIpAddress === '') {
                 // A NAS that sends no NAS-IP-Address is keyed by its own NAS-Identifier (stable, one per NAS; the column holds it,
                 // see the 2026.11.28 update). Never the address the request came from: that is FreeRADIUS's, the same for every NAS
@@ -123,14 +128,10 @@ try {
                     // a session whose Start was stored before the upgrade has a blank address and this nasid: its Stop closes that
                     // row instead of adding a second one (a row already under the nasid wins)
                     try {
-                        $known = ORM::for_table('rad_acct')->select('nasipaddress')
-                            ->where('username', $username)->where('acctsessionid', $acctSessionId)
-                            ->where('nasid', _req('nasid'))->where_in('nasipaddress', ['', $nasIpAddress])
-                            ->order_by_desc('nasipaddress')->find_one();
-                        if ($known && (string) $known['nasipaddress'] === '') {
-                            $nasIpAddress = '';
-                        }
+                        $nasIpAddress = RadiusSessions::legacyNasAddress((string) $username, (string) $acctSessionId, (string) _req('nasid'));
                     } catch (Throwable $e) {
+                        // not looked up now: the packet says so, and a queued one is looked up again when it is replayed
+                        $nasUnresolved = true;
                     }
                 }
             }
@@ -140,7 +141,8 @@ try {
             $realm = _req('realm');
 
             if ((string) $acctSessionId === '') {
-                show_radius_result(['Reply-Message' => 'Session ID empty'], 401);
+                radius_log("Accounting packet without a session ID was not stored. Username: {$username}, type: {$acctStatusType}");
+                show_radius_result(['Reply-Message' => 'Accepted'], 200);
                 die();
             }
 
@@ -159,8 +161,16 @@ try {
                 // when it was received, to the microsecond: the order of packets that arrive within one second
                 'receivedAt' => (int) round(microtime(true) * 1000000),
             ];
+            if ($nasUnresolved) {
+                $packet['_nasid_unresolved'] = true;
+            }
             try {
                 RadiusSessions::saveAccounting($packet);
+                if (($config['radius_rest_log_all'] ?? '0') === '1') {
+                    // Settings > FreeRadius > Log every accounting packet: for finding out what a NAS really sends
+                    RadiusRestLog::write('info', 'Accounting ' . ($packet['acctstatustype'] ?? 'unknown type') . ' stored: ' . $packet['acctsessiontime'] . ' s, in '
+                        . $packet['acctinputoctets'] . ' B, out ' . $packet['acctoutputoctets'] . ' B, address ' . $packet['framedipaddress'], radius_log_context());
+                }
                 show_radius_result(['Reply-Message' => 'Saved'], 200);
             } catch (Throwable $e) {
                 // Not written: the packet is queued on disk (the cron writes it later, RadiusSessions::replayAccounting) and
@@ -169,10 +179,12 @@ try {
                 // carries the session's final usage. A lost Start or Interim-Update is made up by the next update.
                 $queued = RadiusSessions::queueAccounting($packet);
                 radius_alert("Database save error on RADIUS accounting (" . ($queued ? 'queued for retry' : 'NOT queued') . ").\nUsername: {$username}\nSession ID: {$acctSessionId}\nError: " . $e->getMessage());
-                if (!$queued && $packet['acctstatustype'] === 'Stop') {
-                    show_radius_result(['Reply-Message' => 'Not saved'], 500);
+                if (!$queued) {
+                    // kept nowhere else: the whole packet is in the PHP error log, so it can be entered by hand. The NAS is still
+                    // answered 200, as for every accounting packet.
+                    @error_log('[RADIUS] accounting packet NOT stored: ' . json_encode($packet, JSON_INVALID_UTF8_SUBSTITUTE));
                 }
-                show_radius_result(['Reply-Message' => $queued ? 'Queued' : 'Not saved'], 200);
+                show_radius_result(['Reply-Message' => 'Accepted'], 200);
             }
             break;
         case 'post-auth':
@@ -186,17 +198,8 @@ try {
     }
 } catch (Throwable $e) {
     radius_alert("System Error.\n" . $e->getMessage() . "\n" . $e->getTraceAsString());
-    // accounting is answered either way (see above); a login that failed is refused
-    // except a Stop that may not have been recorded: a failure status makes FreeRADIUS/the NAS send it again
-    $unsavedStop = false;
-    if ($action === 'accounting') {
-        try {
-            $type = (string) ($_REQUEST['acctStatusType'] ?? $_REQUEST['acctstatustype'] ?? '');
-            $unsavedStop = strcasecmp(trim($type), 'Stop') === 0;
-        } catch (Throwable $ignored) {
-        }
-    }
-    show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], $action === 'accounting' ? ($unsavedStop ? 500 : 200) : 401);
+    // accounting is always accepted (the error is in the logs, see above); a login that failed is refused
+    show_radius_result(['Reply-Message' => $action === 'accounting' ? 'Accepted' : 'Command Failed : ' . $action], $action === 'accounting' ? 200 : 401);
 }
 
 /**
@@ -210,11 +213,42 @@ function radius_alert($text)
     // write and the Telegram message come after the answer is out, because a slow or down database is the very reason most of these
     // alerts happen. The five-minute slot is taken at delivery, once there is time to send (radius_alert_reserve).
     try {
+        RadiusRestLog::write('error', (string) $text, radius_log_context());
         $GLOBALS['radius_alert_log'][] = mb_substr((string) $text, 0, 1000);
         @error_log('[RADIUS] ' . mb_substr(str_replace("\n", ' | ', (string) $text), 0, 500));
         if (empty($GLOBALS['radius_alert_text'])) {
             $GLOBALS['radius_alert_text'] = mb_substr((string) $text, 0, 3000);
         }
+        if (empty($GLOBALS['radius_alert_registered'])) {
+            $GLOBALS['radius_alert_registered'] = true;
+            register_shutdown_function('radius_alert_deliver');
+        }
+    } catch (Throwable $e) {
+    }
+}
+
+/** What the request in progress carries, for a log line: who, which session, which NAS, which accounting type */
+function radius_log_context()
+{
+    return [
+        'username' => _req('username'),
+        'session' => _req('acctSessionId', _req('acctsessionid')),
+        'nas' => _req('nasIpAddress', _req('nasipaddress', _req('nasid'))),
+        'status' => _req('acctStatusType', _req('acctstatustype')),
+    ];
+}
+
+/**
+ * Writes a line to the logs without Telegram: the PHP error log at once, and Logs > System (type RADIUS) once the answer is out
+ * (radius_alert_deliver). For events that need a record but not a message to the admins, such as an accounting packet that was
+ * accepted but could not be stored. Never throws.
+ */
+function radius_log($text, $level = 'error')
+{
+    try {
+        RadiusRestLog::write($level, (string) $text, radius_log_context()); // Logs > Radius REST: written at once, whatever the database does
+        $GLOBALS['radius_alert_log'][] = mb_substr((string) $text, 0, 1000);
+        @error_log('[RADIUS] ' . mb_substr(str_replace("\n", ' | ', (string) $text), 0, 500));
         if (empty($GLOBALS['radius_alert_registered'])) {
             $GLOBALS['radius_alert_registered'] = true;
             register_shutdown_function('radius_alert_deliver');
@@ -239,9 +273,9 @@ function radius_alert_reserve()
             if (time() - $last >= 300) {
                 ftruncate($fh, 0);
                 rewind($fh);
-                fwrite($fh, (string) time());
-                fflush($fh);
-                $send = true;
+                $stamp = (string) time();
+                // reserved only when the whole time is written and flushed: a partial write would leave a mark that reads as an old time
+                $send = fwrite($fh, $stamp) === strlen($stamp) && fflush($fh);
             }
             flock($fh, LOCK_UN);
         }

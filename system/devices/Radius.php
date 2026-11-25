@@ -406,7 +406,7 @@ class Radius
         // renewing a VPN keeps the password it already dials with (changed through customerPassword()), but only while the account
         // is live: with no active recharge the row holds what customerDeactivate() overwrote, and the configured credential is restored
         $vpnLive = $plan['type'] === 'VPN' && $this->getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Cleartext-Password')->find_one()
-            && ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->find_one();
+            && ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->where('type', 'VPN')->find_one();
         if ($vpnLive) {
             // kept
         } elseif (in_array($plan['type'], ['PPPOE', 'VPN'], true)) { // a dialled connection: the dial password

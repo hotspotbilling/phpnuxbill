@@ -147,6 +147,25 @@ switch ($action) {
         $ui->assign('q', $q);
         $ui->display('admin/logs/system.tpl');
         break;
+    case 'radius-rest':
+        // what radius.php could not do while it answered FreeRADIUS (a file, so no RADIUS database is needed)
+        $q = trim((string) (_post('q') ?: _get('q')));
+        $level = _get('level') === 'error' ? 'error' : (_get('level') === 'info' ? 'info' : '');
+        $ui->assign('rows', RadiusRestLog::read(500, $q, $level));
+        $ui->assign('q', $q);
+        $ui->assign('level', $level);
+        $ui->assign('_title', Lang::T('Radius REST Logs'));
+        $ui->display('admin/logs/radius-rest.tpl');
+        break;
+    case 'radius-rest-clear':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('logs/radius-rest'), 'e', Lang::T('Invalid or Expired CSRF Token') . '.');
+        }
+        if (RadiusRestLog::clear()) {
+            r2(getUrl('logs/radius-rest'), 's', Lang::T('Logs cleared'));
+        }
+        r2(getUrl('logs/radius-rest'), 'e', Lang::T('The log file could not be removed. Check that system/cache is writable.'));
+        break;
     case 'radius':
         // the RADIUS database is separate: when it cannot be used, say what is missing instead of the database error
         if (($problem = SystemInfo::radiusProblem('radpostauth')) !== null) {

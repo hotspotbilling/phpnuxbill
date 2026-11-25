@@ -38,7 +38,7 @@ Most current web servers with PHP and MySQL can run PHPNuxBill, a Raspberry Pi i
 
 - **PHP 8.2 or newer** with PDO MySQL, MySQLi, GD, cURL, ZIP, mbstring and JSON
 - **MySQL or MariaDB**
-- **Writable folders:** `system/cache`, `system/uploads`, `ui/compiled`, `ui/cache` and `pages`
+- **Writable folders:** `system/cache`, `system/logs`, `system/uploads`, `ui/compiled`, `ui/cache` and `pages`
 - *Recommended:* the OpenSSL and Sodium extensions, used to verify signed extensions
 - Linux or Windows. Linux is better, because cron jobs are hard to set up on Windows.
 

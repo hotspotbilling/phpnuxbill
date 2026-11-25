@@ -5914,5 +5914,14 @@
     "Seconds": "Seconds",
     "Expected_back": "Expected back",
     "The_main_cron_job__system_cron_php__clears_stale_FreeRADIUS_sessions_on_every_run__but_only_while_Clear_Stale_Sessions_is_on_with_a_timeout_above_0__running_it_every_5_minutes_or_less_does_not_clean_up_by_itself_": "The main cron job (system/cron.php) clears stale FreeRADIUS sessions on every run, but only while Clear Stale Sessions is on with a timeout above 0; running it every 5 minutes or less does not clean up by itself.",
-    "Optional__if_cleanup_is_on_and_the_main_cron_job_runs_less_often_than_every_5_minutes__add_this_to_clear_stale_sessions_sooner__Updates_still_waiting_in_the_accounting_queue_delay_it_until_they_are_written_": "Optional: if cleanup is on and the main cron job runs less often than every 5 minutes, add this to clear stale sessions sooner. Updates still waiting in the accounting queue delay it until they are written."
+    "Optional__if_cleanup_is_on_and_the_main_cron_job_runs_less_often_than_every_5_minutes__add_this_to_clear_stale_sessions_sooner__Updates_still_waiting_in_the_accounting_queue_delay_it_until_they_are_written_": "Optional: if cleanup is on and the main cron job runs less often than every 5 minutes, add this to clear stale sessions sooner. Updates still waiting in the accounting queue delay it until they are written.",
+    "More_Info": "More Info",
+    "Get_Direction": "Get Direction",
+    "Radius_REST_Logs": "Radius REST Logs",
+    "Accounting_packets_are_always_accepted_by_radius_php__Whatever_went_wrong_while_handling_them_is_recorded_here__not_sent_back_to_the_router_": "Accounting packets are always accepted by radius.php. Whatever went wrong while handling them is recorded here, not sent back to the router.",
+    "Errors": "Errors",
+    "Clear_the_whole_log_": "Clear the whole log?",
+    "Clear_Log": "Clear Log",
+    "Session": "Session",
+    "Accounting_is_always_accepted": "Accounting is always accepted"
 }

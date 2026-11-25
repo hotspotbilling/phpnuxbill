@@ -87,7 +87,7 @@ function pnb_requirements()
     ] as [$ext, $label, $req]) {
         $rows[] = [$label, $req, extension_loaded($ext), extension_loaded($ext) ? 'loaded' : 'not loaded'];
     }
-    foreach (['system/cache', 'system/uploads', 'ui/compiled', 'ui/cache', 'pages_template'] as $dir) {
+    foreach (['system/cache', 'system/logs', 'system/uploads', 'ui/compiled', 'ui/cache', 'pages_template'] as $dir) {
         $p = $root . '/' . $dir;
         $rows[] = ['Folder ' . $dir . ' is writable', $dir !== 'pages_template', is_dir($p) && is_writable($p), is_dir($p) ? (is_writable($p) ? 'writable' : 'not writable') : 'missing'];
     }

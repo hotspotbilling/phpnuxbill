@@ -34,11 +34,15 @@ switch ($action) {
             // one password change at a time for this customer (Forgot password takes the same lock): the customer is read again
             // under it, so the current password is checked against what is saved now, and the password saved is the one the
             // routers were sent
-            if (!Package::passwordLock($user['id'])) {
+            $lockedId = $user['id'];
+            if (!Package::passwordLock($lockedId)) {
                 r2(getUrl('accounts/change-password'), 'e', Lang::T('Your password is being changed by another request. Try again in a moment.'));
             }
-            $user = ORM::for_table('tbl_customers')->find_one($user['id']);
+            // every way out below that does not finish the change lets the lock go first (it would otherwise be held until the
+            // request ends and its database connection closes)
+            $user = ORM::for_table('tbl_customers')->find_one($lockedId);
             if (!$user) {
+                Package::passwordLock($lockedId, false);
                 r2(getUrl('accounts/change-password'), 'e', Lang::T('Incorrect Current Password'));
             }
             $d_pass = $user['password'];
@@ -47,14 +51,21 @@ switch ($action) {
             if (Password::_uverify($password, $d_pass)) {
                 $policy = Password::policyError($npass, $user['username']);
                 if ($policy !== '') {
+                    Package::passwordLock($lockedId, false);
                     r2(getUrl('accounts/change-password'), 'e', $policy);
                 }
                 if ($npass != $cnpass) {
+                    Package::passwordLock($lockedId, false);
                     r2(getUrl('accounts/change-password'), 'e', 'Both Password should be same');
                 }
-                Package::keepDialPassword($user); // a PPPoE / VPN connection keeps the password its router dials with
-                $user->password = $npass;
-                $user->save();
+                try {
+                    Package::keepDialPassword($user); // a PPPoE / VPN connection keeps the password its router dials with
+                    $user->password = $npass;
+                    $user->save();
+                } catch (Throwable $saveErr) {
+                    Package::passwordLock($lockedId, false);
+                    throw $saveErr;
+                }
                 // every active plan's device gets the new password (see Package::sendPassword for how each kind is told). The new
                 // password is saved already: a device that fails is logged, and the change goes on (as Forgot password does)
                 $deviceFailed = false;
@@ -81,12 +92,17 @@ switch ($action) {
                 User::revokeCookies($user['id']); // every other device and remember-me cookie signs out too
                 User::removeCookie();
                 session_destroy();
-                _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
+                try {
+                    _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
+                } catch (Throwable $logErr) {
+                    // the audit line is best effort: the warning below about the device must still reach the customer
+                }
                 // the session is gone: a failed device update is carried in the login alert
                 _alert(Lang::T('Password changed successfully, Please login again')
                     . ($deviceFailed ? '. ' . Lang::T('Your portal password was changed, but it could not be applied to your internet connection. Your internet service may not accept the new password: keep your existing connection settings as they are, and contact support if your access stops working.') : ''),
                     ($deviceFailed && empty($GLOBALS['isApi'])) ? 'warning' : 'success', "login", $deviceFailed ? 20 : 3); // the API still reports the saved change
             } else {
+                Package::passwordLock($lockedId, false);
                 r2(getUrl('accounts/change-password'), 'e', Lang::T('Incorrect Current Password'));
             }
         } else {

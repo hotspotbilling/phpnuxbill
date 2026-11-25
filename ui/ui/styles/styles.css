@@ -637,7 +637,7 @@ table.loading::after,
   display: inline-block;
   padding: 6px 12px;
   color: #fff;
-  background: #d97706;
+  background: #b45309; /* 5:1 with the white 12px text */
   border-radius: calc(var(--radius, 12px) - 2px);
   font-size: 12px;
   font-weight: 600;
@@ -647,7 +647,7 @@ table.loading::after,
 
 .notification-top-bar p a:hover,
 .notification-top-bar p a:focus {
-  background: #b45309;
+  background: #92400e;
   color: #fff;
 }
 

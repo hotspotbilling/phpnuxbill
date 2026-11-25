@@ -673,7 +673,10 @@ class SystemInfo
             return null;
         } catch (Throwable $e) {
             $msg = $e->getMessage();
-            if (stripos($msg, 'could not find driver') !== false) {
+            $dbCode = $e instanceof PDOException ? (int) ($e->errorInfo[1] ?? 0) : 0;
+            if ($dbCode === 1044 || $dbCode === 1142 || stripos($msg, 'command denied') !== false) {
+                $why = 'permission'; // logged in, but not allowed to this database or table (1045 is the login itself, below)
+            } elseif (stripos($msg, 'could not find driver') !== false) {
                 $why = 'driver';
             } elseif (stripos($msg, 'Unknown database') !== false) {
                 $why = 'database';

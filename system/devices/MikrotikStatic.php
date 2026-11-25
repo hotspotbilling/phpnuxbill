@@ -119,10 +119,31 @@ class MikrotikStatic
         }
         $listErr = $this->expiredListAdd($client, $customer);
         // the queue lookups and removals are read: an absent queue is a removal done, a refused one is not
-        $queueErr = $this->removeStaticUser($client, $customer['username']);
+        // each name is tried whatever happened to the other, and a connection that dropped is made again once
+        $mikrotikRow = $mikrotik;
+        $tryRemove = function ($name) use (&$client, $mikrotikRow) {
+            for ($attempt = 0; $attempt < 2; $attempt++) {
+                try {
+                    return $this->removeStaticUser($client, $name);
+                } catch (Exception $e) {
+                    $lost = in_array($e->getCode(), [408, 503], true); // no answer, or closed (RouterApi)
+                    if ($lost && $attempt === 0) {
+                        try {
+                            $client = $this->getClient($mikrotikRow['ip_address'], $mikrotikRow['username'], $mikrotikRow['password']);
+                            continue;
+                        } catch (Exception $e2) {
+                            return $e->getMessage();
+                        }
+                    }
+                    return $e->getMessage();
+                }
+            }
+            return null;
+        };
+        $queueErr = $tryRemove($customer['username']);
         if (!empty($customer['pppoe_username'])) {
             // tried whatever the first one answered; both refusals are said
-            $second = $this->removeStaticUser($client, $customer['pppoe_username']);
+            $second = $tryRemove($customer['pppoe_username']);
             if ($second !== null) {
                 $queueErr = $queueErr === null ? $second : $queueErr . '; ' . $second;
             }
@@ -409,15 +430,23 @@ class MikrotikStatic
         if (($err = RouterApi::error($res)) !== null) {
             return $err;
         }
-        $res->rewind(); // error() iterated the replies: back to the first, or getProperty() has no reply to read
-        $id = $res->getProperty('.id');
-        if (empty($id)) {
-            return null; // not on the list: nothing to take off
+        // every entry for this address on this list (RouterOS accepts duplicates, a disabled one among them is harmless but is taken
+        // off too): one left behind would keep the address blocked. Each is tried; the first refusal is returned after all.
+        $ids = [];
+        foreach ($res as $r) {
+            if ($r->getType() === RouterOS\Response::TYPE_DATA) {
+                $one = RouterApi::text($r->getProperty('.id'));
+                if ($one !== null && $one !== '') {
+                    $ids[] = $one;
+                }
+            }
         }
-        $removeRequest = new RouterOS\Request('/ip/firewall/address-list/remove');
-        return RouterApi::error($client->sendSync(
-            $removeRequest
-                ->setArgument('numbers', $id)
-        ));
+        $first = null;
+        foreach ($ids as $one) { // none: not on the list, nothing to take off
+            $removeRequest = new RouterOS\Request('/ip/firewall/address-list/remove');
+            $err = RouterApi::error($client->sendSync($removeRequest->setArgument('numbers', $one)));
+            $first = $first ?? $err;
+        }
+        return $first;
     }
 }

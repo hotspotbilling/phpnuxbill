@@ -1,0 +1,123 @@
+<?php
+
+/**
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
+ **/
+
+/**
+ * The log of the FreeRADIUS REST endpoint (radius.php): what could not be done while an accounting packet or a login was answered.
+ * One JSON line per event in system/logs/radius_rest.log (the folder is denied over HTTP, and a cache clean-up does not touch it), so it works without the FreeRADIUS
+ * MySQL tables, without waiting for the database (the very thing that may be failing), and without holding the router's answer:
+ * appending a line is a single short write. The file is rotated at 5 MB (the older half is kept as radius_rest.log.1).
+ * Shown in Logs > Radius REST.
+ */
+class RadiusRestLog
+{
+    const MAX_BYTES = 5242880;
+
+    /**
+     * Where the log is written: system/logs/ (denied over HTTP, and not touched when the cache is cleared). Where that folder is
+     * not writable the cache folder is used, which does not survive a cache clean-up.
+     */
+    public static function file(): string
+    {
+        global $CACHE_PATH, $root_path;
+        $logs = rtrim((string) $root_path, '/\\') . DIRECTORY_SEPARATOR . 'system' . DIRECTORY_SEPARATOR . 'logs';
+        if (is_dir($logs) && is_writable($logs)) {
+            return $logs . DIRECTORY_SEPARATOR . 'radius_rest.log';
+        }
+        return self::legacyFile();
+    }
+
+    /** Where earlier versions kept it: still read (and cleared), so nothing written there is lost */
+    private static function legacyFile(): string
+    {
+        global $CACHE_PATH;
+        return rtrim((string) $CACHE_PATH, '/\\') . DIRECTORY_SEPARATOR . 'radius_rest.log';
+    }
+
+    /** @return string[] every file that can hold entries, newest first */
+    private static function files(): array
+    {
+        $f = self::file();
+        $all = [$f, $f . '.1', self::legacyFile(), self::legacyFile() . '.1'];
+        return array_values(array_unique($all));
+    }
+
+    /**
+     * $level: 'error' or 'info'. $context: any of username, session, nas, status (what the request carried). Never throws.
+     */
+    public static function write(string $level, string $message, array $context = []): void
+    {
+        try {
+            $file = self::file();
+            $row = ['at' => date('Y-m-d H:i:s'), 'level' => $level === 'info' ? 'info' : 'error', 'message' => mb_substr($message, 0, 1000)];
+            foreach (['username', 'session', 'nas', 'status'] as $k) {
+                if (isset($context[$k]) && (string) $context[$k] !== '') {
+                    $row[$k] = mb_substr((string) $context[$k], 0, 128);
+                }
+            }
+            $line = json_encode($row, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+            if ($line === false) {
+                return;
+            }
+            $fh = @fopen($file, 'ab');
+            if (!$fh) {
+                return;
+            }
+            if (flock($fh, LOCK_EX)) {
+                clearstatcache(true, $file);
+                if ((int) @filesize($file) > self::MAX_BYTES) {
+                    @rename($file, $file . '.1'); // the handle still points at the old file: this line goes to it, the next ones start a new file
+                }
+                fwrite($fh, $line . "\n");
+                fflush($fh);
+                flock($fh, LOCK_UN);
+            }
+            fclose($fh);
+        } catch (Throwable $e) {
+        }
+    }
+
+    /**
+     * The newest entries first, at most $limit, the ones that contain $q (any field, no matter the case) and, when given, of $level.
+     * @return array<int,array<string,string>>
+     */
+    public static function read(int $limit = 300, string $q = '', string $level = ''): array
+    {
+        $rows = [];
+        foreach (self::files() as $file) {
+            if (!is_file($file) || count($rows) >= $limit) {
+                continue;
+            }
+            $lines = @file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+            for ($i = count($lines) - 1; $i >= 0 && count($rows) < $limit; $i--) {
+                $r = json_decode($lines[$i], true);
+                if (!is_array($r) || !isset($r['at'], $r['message'])) {
+                    continue;
+                }
+                if ($level !== '' && ($r['level'] ?? '') !== $level) {
+                    continue;
+                }
+                if ($q !== '' && stripos(implode(' ', array_map('strval', $r)), $q) === false) {
+                    continue;
+                }
+                $rows[] = $r;
+            }
+        }
+        return $rows;
+    }
+
+    /** Empties the log (and its rotated half) */
+    public static function clear(): bool
+    {
+        $ok = true;
+        foreach (self::files() as $file) {
+            if (is_file($file) && !@unlink($file)) {
+                $ok = false;
+            }
+        }
+        return $ok;
+    }
+}

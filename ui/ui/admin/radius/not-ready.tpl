@@ -17,6 +17,7 @@
                     {elseif $why == 'tables'}{if $problem['table']|default:'nas' == 'nas'}{Lang::T('The RADIUS database is missing the NAS table')}{else}{Lang::T('The RADIUS database is missing the log table')}{/if}
                     {elseif $why == 'columns'}{Lang::T('The RADIUS NAS table needs an upgrade')}
                     {elseif $why == 'login'}{Lang::T('PHPNuxBill cannot sign in to the RADIUS database')}
+                    {elseif $why == 'permission'}{Lang::T('The RADIUS database user is not allowed to read this table')}
                     {else}{Lang::T('The RADIUS database cannot be reached')}{/if}
                 </h3>
                 <small>{if $problem['table']|default:'nas' == 'nas'}{Lang::T('Network Access Servers (NAS) are kept in the FreeRADIUS database, separate from the PHPNuxBill one. Set it up once with the steps below, then open this page again.')}{else}{Lang::T('The RADIUS logs are kept in the FreeRADIUS database, separate from the PHPNuxBill one. Set it up once with the steps below, then open this page again.')}{/if}</small>

@@ -15,10 +15,19 @@
 
 function sendReminderNotifications($config, $customer, $planName, $price, $messageType, $days)
 {
+    global $ds;
     $methods = ['sms', 'wa', 'email', 'inbox', 'push'];
     $outputs = [];
+    // delivery is kept per channel and per expiry: a channel that delivered is not sent again on a later run (the device cleanup can
+    // be retried for days), and one that failed is tried again then
+    $stamp = isset($ds['expiration']) ? $ds['expiration'] . ' ' . ($ds['time'] ?? '') : '';
     foreach ($methods as $method) {
         if (isset($config["user_notification_expired_$method"]) && $config["user_notification_expired_$method"]) {
+            $key = isset($ds['id']) ? 'exp_notified_' . (int) $ds['id'] . '_' . $method : '';
+            $row = $key !== '' ? ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one() : null;
+            if ($row && (string) $row['value'] === $stamp) {
+                continue; // delivered already for this expiry
+            }
             try {
                 $outputs[] = Message::sendPackageNotification(
                     $customer,
@@ -27,6 +36,14 @@ function sendReminderNotifications($config, $customer, $planName, $price, $messa
                     $messageType,
                     $method
                 ) . "\n";
+                if (Message::$lastDelivered && $key !== '') {
+                    if (!$row) {
+                        $row = ORM::for_table('tbl_appconfig')->create();
+                        $row->setting = $key;
+                    }
+                    $row->value = $stamp;
+                    $row->save();
+                }
                 // After successful notification
                 _log(date('Y-m-d H:i:s') . " [SUCCESS] $method notification sent to {$customer['username']}.", 'Info');
             } catch (Exception $e) {
@@ -215,7 +232,7 @@ foreach ($d as $ds) {
 
                 // Send notification and update user status
                 try {
-                    if (!$pendingRow) {
+                    {
                         // [[expired_date]] is read from the global $ds: the expiry re-read under the lock, not the one listed earlier
                         $dsListed = $ds;
                         $ds = $u;
@@ -302,16 +319,18 @@ foreach ($d as $ds) {
 try {
     // accounting packets radius.php could not save (database busy or down) and kept in a file: written now, oldest first,
     // before stale sessions are judged (a queued update may be what shows a session is still alive)
+    $replayOk = true;
     try {
         RadiusSessions::replayAccounting();
     } catch (Throwable $e) {
+        $replayOk = false; // updates may still be queued: no session is judged stale on what the table holds now
         // a failed replay (packets stay queued for the next run) must not skip the stale-session cleanup and retention below
         echo "RADIUS accounting replay: " . ($isCli ? $e->getMessage() : htmlspecialchars($e->getMessage(), ENT_QUOTES)) . "\n";
     }
     // Clear Stale Sessions (Settings > General): sessions that stopped sending accounting updates are closed, REST and MySQL
     // alike, on every run (system/cron/cleanup_stale_sessions.php does the same, for a site that runs it more often)
     $staleMinutes = RadiusSessions::staleMinutes($config);
-    if ($staleMinutes > 0) {
+    if ($staleMinutes > 0 && $replayOk) {
         foreach (RadiusSessions::closeStale($staleMinutes)['lines'] as $line) {
             echo "RADIUS: " . ($isCli ? $line : htmlspecialchars($line, ENT_QUOTES)) . "\n";
         }
@@ -353,13 +372,11 @@ try {
 if ($config['router_check']) {
     // the alert emails are sent when the run ends: SMTP has no overall time limit (minutes for each step), so a stalled mail
     // server must not hold up the router history and the nightly backups that run after this. Never throws.
-    $routerCheckMail = function ($to, $subject, $message) {
-        register_shutdown_function(function () use ($to, $subject, $message) {
-            try {
-                Message::SendEmail($to, $subject, $message);
-            } catch (Throwable $e) {
-            }
-        });
+    // queued here and sent by one shutdown function registered at the end of the run (below), so they go after the router history's
+    // own alerts (Telegram, WhatsApp, SMS) and the backups, never before them
+    $cronMailQueue = [];
+    $routerCheckMail = function ($to, $subject, $message) use (&$cronMailQueue) {
+        $cronMailQueue[] = [$to, $subject, $message];
     };
     echo "Checking router status...\n";
     $routers = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
@@ -372,9 +389,20 @@ if ($config['router_check']) {
     $offlineRouters = [];
     $errors = [];
 
+    // the router's address-change generation: the newest "moved" event (written by routers.php under the endpoint lock whenever the
+    // address changes, RouterMonitor::moved). A probe is kept only when this is the same after it, so an address changed and changed
+    // back while it ran (the same address again) is not mistaken for no change at all.
+    $moveGeneration = function ($rid) {
+        try {
+            return RouterMonitor::ready() ? (int) ORM::for_table('tbl_router_events')->where('router_id', (int) $rid)->where('type', 'moved')->max('id') : 0;
+        } catch (Throwable $e) {
+            return -1;
+        }
+    };
     foreach ($routers as $router) {
         $ip = (string) $router->ip_address;
         $isOnline = false;
+        $probeGeneration = $moveGeneration($router->id);
         // kept for this router until the check below confirms the address checked is still the saved one and the router is
         // still enabled: an error for an address changed (or a router disabled) meanwhile must not reach the alert
         $probeError = null;
@@ -430,7 +458,8 @@ if ($config['router_check']) {
         }
         try {
             $cur = $locked ? ORM::for_table('tbl_routers')->select_many('ip_address', 'enabled')->find_one($router->id) : null;
-            if (!$cur || (string) $cur['ip_address'] !== (string) $router->ip_address || (int) $cur['enabled'] !== 1) {
+            if (!$cur || (string) $cur['ip_address'] !== (string) $router->ip_address || (int) $cur['enabled'] !== 1
+                || $moveGeneration($router->id) !== $probeGeneration) {
                 continue;
             }
             if ($probeError !== null) {
@@ -538,6 +567,18 @@ try {
     }
 } catch (Throwable $e) {
     echo "Router backup note: " . ($isCli ? $e->getMessage() : htmlspecialchars($e->getMessage(), ENT_QUOTES)) . "\n";
+}
+
+// the router check's emails, last: SMTP has no overall time limit, so it waits for everything else of the run
+if (!empty($cronMailQueue)) {
+    register_shutdown_function(function () use ($cronMailQueue) {
+        foreach ($cronMailQueue as [$to, $subject, $message]) {
+            try {
+                Message::SendEmail($to, $subject, $message);
+            } catch (Throwable $e) {
+            }
+        }
+    });
 }
 
 run_hook('cronjob_end'); #HOOK
