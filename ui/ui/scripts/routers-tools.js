@@ -132,6 +132,7 @@
         return a != null && b != null && a !== '' && b !== '' && sameStart(a, b);
     }
     function loadUsers(id, pane) {
+        var readStart = Date.now(); // a read begun before a disconnect was answered cannot show that session gone
         return request('sessions', id).then(function (d) {
             if (!d.ok) { pane.innerHTML = head(t.user) + fail(d); return; }
             // a list that was not read can come back missing (or null): no rows from it, and d.read says it was not read
@@ -145,14 +146,25 @@
             var complete = !!(d.read ? d.read.hotspot && d.read.pppoe : true) && hs.length + pp.length >= (d.total_hotspot || hs.length) + (d.total_pppoe || pp.length);
             Object.keys(pane._drops || {}).forEach(function (k) {
                 var s = pane._drops[k];
-                var r = rows.filter(function (x) {
-                    return dropKey(d.cfg, x.kind, x.sid, x.user, x.address, x.mac) === k && knownSame(x.started, (pane._dropStart || {})[k]);
-                })[0];
+                var same = rows.filter(function (x) {
+                    return dropKey(d.cfg, x.kind, x.sid, x.user, x.address, x.mac) === k;
+                });
+                var r = same.filter(function (x) { return knownSame(x.started, (pane._dropStart || {})[k]); })[0];
+                if (!r) {
+                    // the same session by key but with no start on one side: the identity cannot be told, and the disconnect is not
+                    // sent again from here (busy() refuses it), so the row says so instead of offering an action that does nothing.
+                    // A row whose start is known and different is another session, and stays actionable
+                    var unsure = same.filter(function (x) { return sameStart(x.started, (pane._dropStart || {})[k]); })[0];
+                    if (unsure && (s === 'pending' || s === 'gone')) {
+                        unsure.err = t.dropRefresh;
+                        r = null;
+                    }
+                }
                 if (r) {
                     if (s === 'gone') r.gone = true; else if (s === 'pending') r.pending = true; else if (s && s.err) r.err = s.err;
                 } else if (s && s.err && k.indexOf((d.cfg || '') + ' ') === 0) {
                     orphans.push(s.user + ': ' + s.err);
-                } else if (s === 'gone' && complete && k.indexOf((d.cfg || '') + ' ') === 0) {
+                } else if (s === 'gone' && complete && !same.length && readStart >= ((pane._dropAt || {})[k] || 0) && k.indexOf((d.cfg || '') + ' ') === 0) {
                     // the disconnected session has left the list: forgotten, so a later session that is given the same ID (the
                     // router numbers them again after a restart) is not shown as disconnected
                     delete pane._drops[k];
@@ -190,7 +202,7 @@
                         + '<td class="ls-dim">' + (r.kind === 'hotspot' ? '&darr; ' + esc(size(r.out)) + ' &middot; &uarr; ' + esc(size(r['in'])) : '') + '</td>'
                         + '<td class="rt-mini__end">' + (r.gone ? '<span class="ls-dim">' + esc(t.dropped) + '</span>'
                             : '<button type="button" class="ls-btn ls-btn--sm ls-btn--danger" data-rt-drop="' + esc(r.kind) + '" data-sid="' + esc(r.sid) + '" data-user="' + esc(r.user)
-                            + '" data-address="' + esc(r.address) + '" data-mac="' + esc(r.mac) + '" data-started="' + esc(r.started == null ? '' : r.started) + '"' + (r.pending ? ' disabled' : '') + '><i class="fa ' + (r.pending ? 'fa-spinner fa-spin' : 'fa-sign-out') + '" aria-hidden="true"></i> ' + esc(t.drop) + '</button>'
+                            + '" data-address="' + esc(r.address) + '" data-mac="' + esc(r.mac) + '" data-started="' + esc(r.started == null ? '' : r.started) + '"' + (r.pending || r.err === t.dropRefresh ? ' disabled' : '') + '><i class="fa ' + (r.pending ? 'fa-spinner fa-spin' : 'fa-sign-out') + '" aria-hidden="true"></i> ' + esc(t.drop) + '</button>'
                             + (r.err ? '<small class="rt-err">' + esc(r.err) + '</small>' : '')) + '</td></tr>';
                 }
             });
@@ -305,6 +317,12 @@
                 }
             }
             pane.innerHTML = html;
+            // the button that was pressed is gone with the old page: the focus goes to the new one unless it was moved meanwhile
+            var af = document.activeElement;
+            if (check && (!af || af === document.body || af === pane)) {
+                var nb = pane.querySelector('[data-rt-checkupd]') || pane.querySelector('[data-rt-reload]:not([disabled])');
+                if (nb) nb.focus();
+            }
         });
     }
 
@@ -488,7 +506,7 @@
                 var a = Math.max(d.from, p.at - step / 2), b = Math.min(d.to, p.at + step / 2);
                 if (b <= a) return;
                 var n = +p.n || 0, on = +p.on || 0, mixed = p.online && n > 0 && on < n;
-                var said = stamp(p.at - step / 2, true) + ' – ' + stamp(p.at + step / 2) + ': ' + (p.online ? onText : offText)
+                var said = stamp(a, true) + ' – ' + stamp(b) + ': ' + (p.online ? onText : offText)
                     + (mixed ? ' (' + on + ' ' + t.of + ' ' + n + ' ' + t.samples + ')' : '');
                 strip += '<i role="listitem" class="' + (mixed ? 'is-on is-mixed' : p.online ? 'is-on' : 'is-off') + '" title="' + esc(said) + '" style="left:' + ((a - d.from) / span * 100).toFixed(3) + '%;width:' + Math.max(0.15, (b - a) / span * 100).toFixed(3) + '%">'
                     + '<span class="sr-only">' + esc(said) + '</span></i>';
@@ -725,6 +743,7 @@
                     // are that one's to set, so this answer changes nothing)
                     if (dPane._dropReq[dKey] !== dReq) return;
                     dPane._drops[dKey] = d.ok ? 'gone' : { err: d.error || t.fail, user: dUser };
+                    (dPane._dropAt = dPane._dropAt || {})[dKey] = Date.now(); // when the answer came: only a read begun after it shows absence
                     // the answer goes to the row it was sent from and to the same session in the list shown now (a Refresh may
                     // have replaced it); a list from other router settings is left alone
                     var cur = findStrict(dPane._lv);

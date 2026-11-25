@@ -470,6 +470,14 @@ class Communicator
             );
         }
 
+        // PHPNuxBill: under a deadline the source must be one whose reads cannot block: refused before any word is written
+        if (null !== $this->trans->timeLeft() && !T\Stream::isBoundedSource($stream)) {
+            throw new InvalidArgumentException(
+                'A deadline needs an in-memory source stream.',
+                InvalidArgumentException::CODE_SEEKABLE_REQUIRED
+            );
+        }
+
         // PHPNuxBill: under a deadline the lock is waited for only as long as there is time (a blocking flock() could hold the
         // request past it); the connection is closed when it runs out, as earlier words of the request may already be sent
         $left = $this->trans->timeLeft();
@@ -481,7 +489,12 @@ class Communicator
         } elseif (null === $left) {
             flock($stream, LOCK_SH);
         } else {
-            while (!flock($stream, LOCK_SH | LOCK_NB)) {
+            $wouldBlock = 0;
+            while (!flock($stream, LOCK_SH | LOCK_NB, $wouldBlock)) {
+                if (!$wouldBlock) {
+                    // locking itself is not possible here (not contention): go on without it, as a blocking flock() that fails does
+                    break;
+                }
                 if (($this->trans->timeLeft() ?? 0) <= 0) {
                     $this->trans->close();
                     throw new SocketException(

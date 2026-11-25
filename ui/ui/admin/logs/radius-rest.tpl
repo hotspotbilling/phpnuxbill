@@ -5,11 +5,12 @@
     status); $q, $level: the filters in use. No RADIUS database is needed.
 *}
 <div class="ls">
-    <div class="ls-tabs" role="tablist" aria-label="{Lang::T('Type')}">
-        <a class="ls-tab{if $level eq ''} is-on{/if}" href="{Text::url('logs/radius-rest')}" role="tab">{Lang::T('All')}</a>
-        <a class="ls-tab{if $level eq 'error'} is-on{/if}" href="{Text::url('logs/radius-rest&level=error')}" role="tab">{Lang::T('Errors')}</a>
-        <a class="ls-tab{if $level eq 'info'} is-on{/if}" href="{Text::url('logs/radius-rest&level=info')}" role="tab">{Lang::T('Notes')}</a>
-    </div>
+    {* filter links, not tabs: they load another page, so no tablist roles; the one in use says so with aria-current *}
+    <nav class="ls-tabs" aria-label="{Lang::T('Type')}">
+        <a class="ls-tab{if $level eq ''} is-on{/if}" href="{Text::url('logs/radius-rest')}"{if $level eq ''} aria-current="page"{/if}>{Lang::T('All')}</a>
+        <a class="ls-tab{if $level eq 'error'} is-on{/if}" href="{Text::url('logs/radius-rest&level=error')}"{if $level eq 'error'} aria-current="page"{/if}>{Lang::T('Errors')}</a>
+        <a class="ls-tab{if $level eq 'info'} is-on{/if}" href="{Text::url('logs/radius-rest&level=info')}"{if $level eq 'info'} aria-current="page"{/if}>{Lang::T('Notes')}</a>
+    </nav>
 
     <div class="ls-card">
         <form id="site-search" class="ls-bar" method="get" action="{Text::url('')}">
@@ -63,8 +64,8 @@
     </div>
 
     <div class="bs-callout bs-callout-info" role="note">
-        <h4><i class="fa fa-info-circle" aria-hidden="true"></i> {Lang::T('Accounting is always accepted')}</h4>
-        <p>{Lang::T('Accounting packets are always accepted by radius.php. Whatever went wrong while handling them is recorded here, not sent back to the router.')}</p>
+        <h4><i class="fa fa-info-circle" aria-hidden="true"></i> {Lang::T('Accounting is accepted')}</h4>
+        <p>{Lang::T('Accounting packets are accepted by radius.php even when something goes wrong while handling them: it is recorded here, and a packet the database could not take is kept in a queue and written later by the cron. The one exception is a Stop that could be neither stored nor queued: it is refused, so the router sends it again.')}</p>
     </div>
 </div>
 

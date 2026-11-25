@@ -151,16 +151,31 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
         // does not answer it would hold the caller for ever, so it gets a few seconds (a deadline on the stream, which also bounds
         // each read) and then the connection is dropped
         $limit = $this->syncLimit === null ? 3 : $this->syncLimit;
+        // an enclosing deadline (this close is part of another request's work) is never extended: the goodbye ends by whichever
+        // comes first, and the outer one is put back afterwards
+        $prior = $this->deadline;
+        $until = \PEAR2\Net\Transmitter\Stream::now() + $limit;
+        if ($prior !== null) {
+            $until = min($until, $prior);
+        }
+        if ($until - \PEAR2\Net\Transmitter\Stream::now() <= 0) {
+            $this->abort(); // out of time: no /quit is sent
+            return false;
+        }
         $this->quitting = true;
-        $this->readDeadline(\PEAR2\Net\Transmitter\Stream::now() + $limit);
+        $this->readDeadline($until);
         try {
-            return parent::close();
+            $closed = parent::close();
+            if ($closed === false) {
+                $this->abort(); // the goodbye failed: the transport is dropped, and the failure is still reported
+            }
+            return $closed;
         } catch (Throwable $e) {
             $this->abort();
             return false;
         } finally {
             $this->quitting = false;
-            $this->readDeadline(null);
+            $this->readDeadline($prior);
         }
     }
 }

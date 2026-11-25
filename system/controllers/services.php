@@ -493,7 +493,7 @@ switch ($action) {
             // the router the plan names now (the lock is held) must still be there
             $planRouterCheck($d, getUrl('services/edit/') . (int) _post('id'));
             // live mode: the device driver must be there before the change is saved, or the rename would be saved and reported as done
-            if (strcasecmp((string) $_app_stage, 'demo') !== 0 && !file_exists(Package::getDevice($d))) {
+            if (strcasecmp((string) $_app_stage, 'demo') !== 0 && !file_exists(Package::getDevice($d, false))) {
                 $routerLock(false);
                 r2(getUrl('services/edit/') . (int) _post('id'), 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars((string) $d['device'], ENT_QUOTES) . '. ' . Lang::T('Nothing was saved'));
             }
@@ -887,7 +887,7 @@ switch ($action) {
             // the router the plan names now (the lock is held) must still be there
             $planRouterCheck($d, getUrl('services/pppoe-edit/') . (int) _post('id'));
             // live mode: the device driver must be there before the change is saved, or the rename would be saved and reported as done
-            if (strcasecmp((string) $_app_stage, 'demo') !== 0 && !file_exists(Package::getDevice($d))) {
+            if (strcasecmp((string) $_app_stage, 'demo') !== 0 && !file_exists(Package::getDevice($d, false))) {
                 $routerLock(false);
                 r2(getUrl('services/pppoe-edit/') . (int) _post('id'), 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars((string) $d['device'], ENT_QUOTES) . '. ' . Lang::T('Nothing was saved'));
             }
@@ -1401,7 +1401,7 @@ switch ($action) {
             // the router the plan names now (the lock is held) must still be there
             $planRouterCheck($d, getUrl('services/vpn-edit/') . (int) _post('id'));
             // live mode: the device driver must be there before the change is saved, or the rename would be saved and reported as done
-            if (strcasecmp((string) $_app_stage, 'demo') !== 0 && !file_exists(Package::getDevice($d))) {
+            if (strcasecmp((string) $_app_stage, 'demo') !== 0 && !file_exists(Package::getDevice($d, false))) {
                 $routerLock(false);
                 r2(getUrl('services/vpn-edit/') . (int) _post('id'), 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars((string) $d['device'], ENT_QUOTES) . '. ' . Lang::T('Nothing was saved'));
             }

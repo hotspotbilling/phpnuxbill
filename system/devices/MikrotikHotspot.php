@@ -104,7 +104,12 @@ class MikrotikHotspot
 		$mikrotik = $this->info($plan['routers']);
 		$client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
 		// the active recharge of this plan (not any recharge of the username, which may be a PPPoE one)
-		$t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('plan_id', $plan['id'])->where('status', 'on')->find_one();
+		// the recharge of this plan on the router the plan names now: another plan or router is not this sync's (no update of it)
+		$t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('plan_id', $plan['id'])->where('routers', $plan['routers'])->where('status', 'on')->find_one();
+		if (!$t) {
+			// a deliberate skip, said to the caller (409), so the sync is not counted as done
+			throw new Exception(Lang::T('The customer has no active recharge of this plan: nothing was sent.'), 409);
+		}
 		if ($t) {
 			$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
 			$printRequest->setArgument('.proplist', '.id');
@@ -275,6 +280,11 @@ class MikrotikHotspot
             // a retry after the profile was renamed already (or created under the new name): the existing one is updated
             $printNew = new RouterOS\Request('/ip hotspot user profile print .proplist=.id', RouterOS\Query::where('name', $new_plan['name_plan']));
             $profileID = $client->sendSync($printNew)->getProperty('.id');
+            // a profile already under the new name is ours only when an earlier save of this plan failed after the rename (the note that
+            // services.php keeps, plan_rename_pending_<id>): otherwise it is someone else's, and is reported, never overwritten
+            if (!empty($profileID) && !ORM::for_table('tbl_appconfig')->where('setting', 'plan_rename_pending_' . (int) $new_plan['id'])->find_one()) {
+                throw new Exception(Lang::T('A profile named') . ' "' . $new_plan['name_plan'] . '" ' . Lang::T('already exists on the router and was not made by this plan, so nothing was changed. Rename or remove it there, or choose another plan name.'), 409);
+            }
         }
         if (empty($profileID)) {
             $this->add_plan($new_plan);
@@ -381,7 +391,14 @@ class MikrotikHotspot
         if (($datalimit = $this->bytesLimit($plan)) !== null) {
             $addRequest->setArgument('limit-bytes-total', $datalimit);
         }
-        $this->checked($client->sendSync($addRequest));
+        // a refused add is thrown in every mode: add_customer() removes the old user first, so a rejected add must not read as done
+        $res = $client->sendSync($addRequest);
+        if (($err = RouterApi::error($res)) !== null) {
+            throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+        }
+        if ($res instanceof RouterOS\ResponseCollection) {
+            $res->rewind();
+        }
     }
 
     /**

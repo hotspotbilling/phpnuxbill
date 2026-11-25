@@ -60,6 +60,7 @@ if (strpos($action, "-reset") !== false) {
         $ui->assign("writeable", is_writable($path));
         $ui->assign("pageHeader", str_replace('_', ' ', $action));
         $ui->assign("PageFile", $action);
+        $ui->assign('csrf_token', Csrf::generateAndStoreToken()); // the form posts it back (checked on save)
         $ui->display('admin/settings/page.tpl');
     } else
         $ui->display('admin/404.tpl');

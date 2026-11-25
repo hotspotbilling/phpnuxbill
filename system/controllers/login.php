@@ -354,12 +354,34 @@ switch ($do) {
                     // The account this request made is removed only when it is still wholly this request's: it still has the voucher
                     // code as its password and no recharge points at it. Another request that adopted the account meanwhile (the same
                     // username typed with its own voucher) has a recharge on it, or has changed the password, and then it stays.
+                    // under the customer lock a redemption takes (Package::rechargeUser), so a redemption that has the account at this
+                    // moment is waited for and then seen (its recharge exists), never deleted from under it; not got in time, the account stays
                     $dropNewAccount = function () use ($user, $voucher) {
-                        ORM::raw_execute(
-                            "DELETE FROM tbl_customers WHERE id = ? AND password = ? AND NOT EXISTS (SELECT 1 FROM tbl_user_recharges r WHERE r.customer_id = tbl_customers.id)",
-                            [(int) $user['id'], (string) $voucher]
-                        );
+                        if (!Package::passwordLock((int) $user['id'], true, 5)) {
+                            return;
+                        }
+                        try {
+                            ORM::raw_execute(
+                                "DELETE FROM tbl_customers WHERE id = ? AND password = ? AND NOT EXISTS (SELECT 1 FROM tbl_user_recharges r WHERE r.customer_id = tbl_customers.id)",
+                                [(int) $user['id'], (string) $voucher]
+                            );
+                        } finally {
+                            Package::passwordLock((int) $user['id'], false);
+                        }
                     };
+                    // a refusal that ends the request (a disabled plan or an inactive customer redirects with r2()/_alert(), which exits and
+                    // runs no catch or finally): the new account is dropped at shutdown, unless redemption went through or began to write
+                    $cleanupPending = $createdHere;
+                    if ($createdHere) {
+                        register_shutdown_function(function () use (&$cleanupPending, $dropNewAccount) {
+                            if ($cleanupPending && !Package::rechargeWrote()) {
+                                try {
+                                    $dropNewAccount();
+                                } catch (Throwable $ignored) {
+                                }
+                            }
+                        });
+                    }
                     try {
                         $redeemed = Package::redeemVoucher($v1, $user['id'], $user['username'], $voucher);
                     } catch (Throwable $e) {
@@ -367,12 +389,14 @@ switch ($do) {
                         if ($createdHere && !Package::rechargeWrote()) {
                             $dropNewAccount();
                         }
+                        $cleanupPending = false;
                         throw $e;
                     }
                     // a recharge that began to write and then reported failure left rows for this account: it is kept
                     if (!$redeemed && $createdHere && !Package::rechargeWrote()) {
                         $dropNewAccount();
                     }
+                    $cleanupPending = false; // settled here (kept, or dropped above): nothing is left for the shutdown step
                     if ($redeemed) {
                         $v1->status = "1";
                         $v1->used_date = date('Y-m-d H:i:s');

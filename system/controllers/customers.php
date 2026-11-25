@@ -245,11 +245,18 @@ switch ($action) {
         if (!Csrf::check($csrf_token)) {
             r2(getUrl('customers/view/') . $id_customer, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
+        // the lock a recharge holds (Package::rechargeUser): an in-flight renewal finishes first, and the recharge is read after it, so
+        // this cannot mark off a plan that was just renewed from a state read before. Released at exit (r2() ends the request).
+        if (!Package::passwordLock((int) $id_customer, true, 15)) {
+            r2(getUrl('customers/view/') . $id_customer, 'e', Lang::T('This customer is being changed by another request. Try again in a moment.'));
+        }
+        register_shutdown_function(function () use ($id_customer) {
+            Package::passwordLock((int) $id_customer, false);
+        });
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('plan_id', $plan_id)->find_one();
         if ($b) {
             $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
             if ($p) {
-                $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
                 $c = User::_info($id_customer);
                 $dvc = Package::getDevice($p);
                 if (strcasecmp((string) $_app_stage, 'demo') !== 0) {
@@ -314,10 +321,20 @@ switch ($action) {
                 }
                 if ($p) {
                     $dvc = Package::getDevice($p);
+                    $planPartial = false; // this plan's device did not finish: it is not counted as synced
                     if (strcasecmp((string) $_app_stage, 'demo') !== 0) {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             try {
+                                // a username change that could not be sent to this plan's device (no driver then): done first, so the old
+                                // account is renamed and not left beside a new one
+                                $pend = json_decode((string) User::getAttribute('Pending Rename ' . $p['id'], $id_customer), true);
+                                if (is_array($pend) && $pend) {
+                                    foreach ($pend as $pr) {
+                                        (new $p['device'])->change_username($p, $pr[0], $pr[1]);
+                                    }
+                                    User::setAttribute('Pending Rename ' . $p['id'], '', $id_customer);
+                                }
                                 if (method_exists($p['device'], 'sync_customer')) {
                                     $syncRes = (new $p['device'])->sync_customer($c, $p);
                                 } else {
@@ -325,20 +342,25 @@ switch ($action) {
                                 }
                                 if (is_string($syncRes) && $syncRes !== '') {
                                     $partialSync[] = $p['name_plan'] . ': ' . $syncRes;
+                                    $planPartial = true;
                                 }
                             } catch (Exception $e) {
-                                // code 207: saved on the router, a later step refused: said for this plan, and the others still go
-                                if ($e->getCode() !== 207) {
+                                // code 207: saved on the router, a later step refused; 409: the recharge was replaced meanwhile (nothing was
+                                // sent for it, and its replacement's expiry is not used): said for this plan, and the others still go
+                                if (!in_array($e->getCode(), [207, 409], true)) {
                                     throw $e;
                                 }
                                 $partialSync[] = $p['name_plan'] . ': ' . $e->getMessage();
+                                $planPartial = true;
                             }
                         } else {
                             $failedSync[] = $b['routers']; // no driver file: not synced, and not reported as done
                             continue;
                         }
                     }
-                    $routers[] = $b['routers']; // only once the driver has finished
+                    if (!$planPartial) {
+                        $routers[] = $b['routers']; // only once the driver has finished: an incomplete one is reported apart (partialSync)
+                    }
                 }
             }
             if ($partialSync) {
@@ -347,12 +369,15 @@ switch ($action) {
                 } catch (Throwable $ignored) {
                 }
             }
+            // three outcomes, told apart: completed ($routers), incomplete ($partialSync) and no driver ($failedSync)
+            $incompleteText = $partialSync ? Lang::T('The router update is incomplete for') . ': ' . htmlspecialchars(implode('; ', $partialSync), ENT_QUOTES) : '';
             if ($failedSync) {
                 r2(getUrl('customers/view/') . $id_customer, 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars(implode(', ', array_unique($failedSync)), ENT_QUOTES)
-                    . ($routers ? '. ' . Lang::T('Synced') . ': ' . htmlspecialchars(implode(', ', $routers), ENT_QUOTES) : ''));
+                    . ($routers ? '. ' . Lang::T('Synced') . ': ' . htmlspecialchars(implode(', ', $routers), ENT_QUOTES) : '')
+                    . ($incompleteText !== '' ? '. ' . $incompleteText : ''));
             }
-            if ($partialSync && $routers) {
-                r2(getUrl('customers/view/') . $id_customer, 'w', 'Sync to ' . implode(", ", $routers) . '. ' . Lang::T('The router update is incomplete for') . ': ' . htmlspecialchars(implode('; ', $partialSync), ENT_QUOTES));
+            if ($partialSync) {
+                r2(getUrl('customers/view/') . $id_customer, 'w', ($routers ? 'Sync to ' . implode(", ", $routers) . '. ' : '') . $incompleteText);
             }
             if ($routers) { // nothing applied (every recharge expired or without a plan) is no success
                 r2(getUrl('customers/view/') . $id_customer, 's', 'Sync success to ' . implode(", ", $routers));
@@ -504,10 +529,8 @@ switch ($action) {
                                     $partial = $r;
                                 }
                             } catch (Exception $e) {
-                                // code 207: not every driver has taken the access off by then: the customer is kept until it is
-                                if ($e->getCode() !== 207) {
-                                    throw $e;
-                                }
+                                // code 207: not every driver has taken the access off by then. Any other error from this plan's device
+                                // is the same for the customer: kept, with the plans already removed and this one named, so it can be retried
                                 $partial = $e->getMessage();
                             }
                             if ($partial !== null) {
@@ -804,6 +827,15 @@ switch ($action) {
                     }
                     r2(getUrl('customers/edit/') . $id, 'e', Lang::T('This IP address is already saved for another customer') . ': ' . $pppoe_ip);
                 }
+                // an address another customer was just moved off stays reserved until its router's secret has let go (MikrotikVpn::holdAddress):
+                // the lock above only excludes a request at the same time, and no customer row has it now
+                if ($pppoe_ip !== '' && $pppoe_ip !== (string) $oldPppoeIp && ORM::for_table('tbl_appconfig')->where('setting', 'vpn_held_' . $pppoe_ip)->find_one()) {
+                    Package::passwordLock((int) $id, false);
+                    if ($vpnLocks) {
+                        MikrotikVpn::unlockAddressEdit($vpnLocks);
+                    }
+                    r2(getUrl('customers/edit/') . $id, 'e', Lang::T('This IP address was just released by another customer and is still reserved') . ': ' . $pppoe_ip);
+                }
             }
             if (!empty($_FILES['photo']['name']) && file_exists($_FILES['photo']['tmp_name'])) {
                 if (function_exists('imagecreatetruecolor')) {
@@ -979,6 +1011,8 @@ switch ($action) {
             $renamed = []; // [plan, from, to] of the router renames that went through, to be undone if a later one is refused
             $doneTurs = []; // recharges already moved to the new username
             $skippedPlans = []; // plans with no driver file: nothing was sent to their device
+            $toProvision = []; // plans given their new credentials once every rename has gone through
+            $provisionSkipped = false; // a PPPoE / VPN recharge that was not provisioned (expired or off): its secret may still use the old address
             $passwordOnly = ($passDiff || $pppoePassDiff) && !$userDiff && !$pppoeDiff && !$pppoeIpDiff;
             if ($passwordOnly) {
                 // only a password changed: just the password goes to the devices (Package::sendPassword), not a full re-provisioning
@@ -1098,29 +1132,36 @@ switch ($action) {
                                     r2(getUrl('customers/edit/') . $id, 'e', Lang::T('The router did not accept the username change and it was reverted on the routers. Other profile changes in this form may have been saved') . ': ' . htmlspecialchars($e->getMessage(), ENT_QUOTES)
                                         . ($undoFailed ? '. ' . Lang::T('The rename could not be undone on') . ': ' . htmlspecialchars(implode(', ', $undoFailed), ENT_QUOTES) : ''));
                                 }
-                                try {
-                                    if (!$expiredTur) {
-                                        (new $p['device'])->add_customer($c, $p);
-                                    }
-                                } catch (Exception $e) {
-                                    // code 207: saved on the router, one later step refused (a fixed IP not cleared, a port forward not
-                                    // made): the change stands, so it is saved here too, logged for the admins and named in a warning;
-                                    // any other error stops as before
-                                    if ($e->getCode() !== 207) {
-                                        throw $e;
-                                    }
-                                    $cause = $e->getPrevious();
-                                    _log('[' . $c['username'] . '] edit: ' . $e->getMessage()
-                                        . ($cause && strpos($e->getMessage(), $cause->getMessage()) === false ? ' (' . $cause->getMessage() . ')' : ''), 'Router');
-                                    $partialPlans[] = $p['name_plan'];
-                                    $heldOld = false; // not confirmed clean: the old address stays held until its time runs out
-                                    $keepHeld = true;
+                                // the new credentials go out only after every plan's rename went through (the second loop below): a rename
+                                // refused on a later plan then finds no earlier device already given the new username and password
+                                if (!$expiredTur) {
+                                    $toProvision[] = $p;
                                 }
                             } else {
-                                new Exception(Lang::T("Devices Not Found"));
                                 $deviceSkipped = true; // no driver file: no secret was changed, so no address is let go
                                 $skippedPlans[] = $p['name_plan'] . ' (' . Lang::T('Devices Not Found') . ')';
+                                // the old account is still on that router under its old name: kept for Sync, which renames it first
+                                $pend = [];
+                                if ($userDiff) {
+                                    $pend[] = [$oldusername, $username];
+                                }
+                                if ($pppoeDiff && in_array($tur['type'], ['PPPOE', 'VPN'], true)) {
+                                    if (empty($oldPppoeUsername) && !empty($pppoe_username)) {
+                                        $pend[] = [$username, $pppoe_username];
+                                    } elseif (empty($pppoe_username) && !empty($oldPppoeUsername)) {
+                                        $pend[] = [$oldPppoeUsername, $username];
+                                    } else {
+                                        $pend[] = [$oldPppoeUsername, $pppoe_username];
+                                    }
+                                }
+                                if ($pend) {
+                                    $oldPend = json_decode((string) User::getAttribute('Pending Rename ' . $p['id'], $c['id']), true);
+                                    User::setAttribute('Pending Rename ' . $p['id'], json_encode(array_merge(is_array($oldPend) ? $oldPend : [], $pend)), $c['id']);
+                                }
                             }
+                        }
+                        if ($pppoeIpDiff && in_array($tur['type'], ['PPPOE', 'VPN'], true) && ($tur['status'] != 'on' || $expiredTur)) {
+                            $provisionSkipped = true;
                         }
                     }
                     $tur->username = $username;
@@ -1128,6 +1169,26 @@ switch ($action) {
                     $doneTurs[] = $tur;
                 }
             }
+            // every rename is done: the new credentials are sent now
+            foreach ($toProvision as $p) {
+                try {
+                    (new $p['device'])->add_customer($c, $p);
+                } catch (Exception $e) {
+                    // code 207: saved on the router, one later step refused (a fixed IP not cleared, a port forward not
+                    // made): the change stands, so it is saved here too, logged for the admins and named in a warning;
+                    // any other error stops as before
+                    if ($e->getCode() !== 207) {
+                        throw $e;
+                    }
+                    $cause = $e->getPrevious();
+                    _log('[' . $c['username'] . '] edit: ' . $e->getMessage()
+                        . ($cause && strpos($e->getMessage(), $cause->getMessage()) === false ? ' (' . $cause->getMessage() . ')' : ''), 'Router');
+                    $partialPlans[] = $p['name_plan'];
+                    $heldOld = false; // not confirmed clean: the old address stays held until its time runs out
+                    $keepHeld = true;
+                }
+            }
+            $deviceSkipped = $deviceSkipped || $provisionSkipped; // a recharge not provisioned is not confirmed to have let go of the old address
             if ($heldOld && !$keepHeld && !$deviceSkipped) {
                 MikrotikVpn::releaseHeld($oldPppoeIp); // every device update finished: no secret uses the old address any more
             } elseif ((string) $oldPppoeIp !== '' && (string) $oldPppoeIp !== $pppoe_ip && ($keepHeld || $deviceSkipped) && $vpnLocks && class_exists('MikrotikVpn')) {

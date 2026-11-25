@@ -56,12 +56,18 @@ class RadiusSessions
         // session is gone, so the REST sessions are left as they are until the queue is written
         // The queue is checked and the sessions closed under the queue's own lock: radius.php appends a packet under it, so an update
         // queued while this runs is either seen here (nothing is closed) or comes after the close: it can no longer slip in between
-        // the check and the close. (A session closed here has the status Stop, like one the NAS stopped: telling the two apart
-        // would need a column of its own, so a late update does not reopen either.)
+        // the check and the close. (A session closed here has the status Stale, not Stop: a NAS that was only late or
+        // unreachable and then sends an update for the session reopens it and its usage goes on being counted, while a Stop sent by
+        // the NAS stays final.)
         $qlock = @fopen(self::queueFile() . '.lock', 'c');
         $gotLock = $qlock && flock($qlock, LOCK_EX | LOCK_NB);
         try {
-            if (!$gotLock) {
+            if (!$qlock) {
+                // the lock file itself could not be opened (permissions, full disk): not another process holding it. REST sessions are
+                // left alone (the queue cannot be checked), and the failure is reported
+                $out['failed'] = true;
+                $out['lines'][] = 'REST: the accounting queue lock file could not be opened (' . self::queueFile() . '.lock); stale sessions are not closed';
+            } elseif (!$gotLock) {
                 $out['lines'][] = 'REST: the accounting queue is being written; stale sessions are checked on the next run';
             } else {
                 // updates still queued (the database was busy and a replay has not written them): an older row does not show that a
@@ -76,7 +82,7 @@ class RadiusSessions
                     'rad_acct',
                     null,
                     'acctstatustype = ?',
-                    ['Stop'],
+                    ['Stale'],
                     // a row with receivedAt (epoch microseconds, set by radius.php) is judged by it, not by the date text; an older row by its dates
                     "(acctstatustype IN (?, ?) OR acctstatustype IS NULL) AND IF(receivedAt IS NOT NULL AND receivedAt > ?, receivedAt < ?, COALESCE(dateUpdated, dateAdded) > ? AND COALESCE(dateUpdated, dateAdded) < ?)",
                     ['Start', 'Interim-Update', 946684800000000, (time() - $seconds) * 1000000, '2000-01-01 00:00:00', $cutoff]
@@ -160,7 +166,13 @@ class RadiusSessions
             $p['receivedAt'] = (int) strtotime((string) ($p['dateUpdated'] ?? '')) * 1000000;
         }
         $p['receivedAt'] = (int) $p['receivedAt'];
-        $p['nasipaddress'] = self::normalizeNas($p['nasipaddress'] ?? ''); // also for packets queued before the spelling was unified
+        // values longer than their rad_acct column are cut (strict mode would refuse the whole packet, and a replay would never succeed)
+        foreach (['acctsessionid' => 64, 'username' => 64, 'realm' => 128, 'nasid' => 32, 'nasportid' => 32, 'nasporttype' => 32, 'macaddr' => 50, 'framedipaddress' => 15] as $col => $max) {
+            if (isset($p[$col]) && is_string($p[$col]) && mb_strlen($p[$col]) > $max) {
+                $p[$col] = mb_substr($p[$col], 0, $max);
+            }
+        }
+        $p['nasipaddress'] = mb_substr(self::normalizeNas($p['nasipaddress'] ?? ''), 0, 45); // also for packets queued before the spelling was unified
         $set = [
             'acctinputoctets' => 'VALUES(acctinputoctets)',
             'acctoutputoctets' => 'VALUES(acctoutputoctets)',
@@ -169,22 +181,24 @@ class RadiusSessions
             'acctstatustype' => 'COALESCE(VALUES(acctstatustype), acctstatustype)',
             'dateUpdated' => 'VALUES(dateUpdated)', // after the others: MySQL applies the assignments in order, the test reads the old values
         ];
-        if ($replay) {
-            // the final counters of a session the NAS has stopped are not replaced by a delayed Interim-Update (only by a Stop)
-            foreach (['acctinputoctets', 'acctoutputoctets', 'acctsessiontime'] as $cnt) {
-                $set[$cnt] = "IF(acctstatustype = 'Stop' AND COALESCE(VALUES(acctstatustype), '') <> 'Stop', {$cnt}, {$set[$cnt]})";
-            }
-            // a session already closed (by its Stop or the stale cleanup) is not made live again by an older queued update
-            $set['acctstatustype'] = "IF(acctstatustype = 'Stop', acctstatustype, {$set['acctstatustype']})";
+        // live and replayed packets alike: the final counters of a session the NAS has stopped are not replaced by a delayed
+        // Interim-Update (only by a Stop), and a session the NAS stopped is not made live again. A session the stale cleanup closed (status Stale, not Stop) is different: an
+        // update from it shows it was alive, so it is reopened (by the newer-packet rule below)
+        foreach (['acctinputoctets', 'acctoutputoctets', 'acctsessiontime'] as $cnt) {
+            $set[$cnt] = "IF(acctstatustype = 'Stop' AND COALESCE(VALUES(acctstatustype), '') <> 'Stop', {$cnt}, {$set[$cnt]})";
         }
+        $set['acctstatustype'] = "IF(acctstatustype = 'Stop', acctstatustype, {$set['acctstatustype']})";
         $newer = 'IF(receivedAt IS NOT NULL, VALUES(receivedAt) >= receivedAt, VALUES(dateUpdated) >= COALESCE(dateUpdated, dateAdded))';
         // Live and replayed packets alike only change a row they are newer than (by receivedAt): a Start retried by the NAS or an
         // older packet that arrives late never turns the counters back
+        // A Start for a session that is already stored (the NAS's resend, or an Interim that came first) only inserts or restores the
+        // start date (below): a later receivedAt is no proof that its zero counters are newer than the usage already recorded
+        $apply = "({$newer} AND COALESCE(VALUES(acctstatustype), '') <> 'Start')";
         $parts = [];
         foreach ($set as $col => $expr) {
-            $parts[] = "{$col} = IF({$newer}, {$expr}, {$col})";
+            $parts[] = "{$col} = IF({$apply}, {$expr}, {$col})";
         }
-        $parts[] = "receivedAt = IF({$newer}, VALUES(receivedAt), receivedAt)";
+        $parts[] = "receivedAt = IF({$apply}, VALUES(receivedAt), receivedAt)";
         // last: the tests above compare with the row as it was, and the legacy test (a row with no receivedAt) reads dateAdded; the
         // earlier start is restored independently of which packet owns the counters
         $parts[] = 'dateAdded = LEAST(dateAdded, VALUES(dateAdded))';
@@ -205,6 +219,9 @@ class RadiusSessions
     {
         clearstatcache(true);
         $file = self::queueFile();
+        if (@scandir(dirname($file)) === false) {
+            return true; // the folder could not be listed: snapshots cannot be ruled out, so the queue is taken as not empty
+        }
         return (int) @filesize($file) > 0 || self::snapshots($file) !== [];
     }
 
@@ -339,7 +356,17 @@ class RadiusSessions
     /** Appends a packet line to the quarantine file (system/cache, web-denied) for review; true when written and flushed */
     private static function quarantine(string $line): bool
     {
-        $fh = @fopen(self::queueFile() . '.quarantine', 'ab');
+        $qfile = self::queueFile() . '.quarantine';
+        clearstatcache(true, $qfile);
+        // bounded: past 10 MB the file becomes the ".1" one (replacing the previous ".1", whose records are lost), so the two
+        // together never exceed about 20 MB
+        if ((int) @filesize($qfile) > 10 * 1024 * 1024 && @rename($qfile, $qfile . '.1')) {
+            try {
+                RadiusRestLog::write('error', 'Quarantine of rejected accounting packets is over 10 MB: the oldest records were removed (kept: ' . basename($qfile) . '.1)');
+            } catch (Throwable $ignored) {
+            }
+        }
+        $fh = @fopen($qfile, 'ab');
         if (!$fh) {
             return false;
         }
@@ -421,7 +448,10 @@ class RadiusSessions
                     }
                     return mb_strtolower($v);
                 };
-                $key = json_encode([$fold($p['nasipaddress'] ?? ''), $fold($p['username']), $fold($p['acctsessionid'])], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+                // the NAS spelled as the writer stores it (saveAccounting), so equivalent IPv6 spellings share one key; kept that way
+                // when the packet is written back for a retry
+                $p['nasipaddress'] = self::normalizeNas($p['nasipaddress'] ?? '');
+                $key = json_encode([$fold($p['nasipaddress']), $fold($p['username']), $fold($p['acctsessionid'])], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
                 // held back behind an earlier packet of its session that is waiting
                 if (isset($state['blocked'][$key])) {
                     $keep($line);

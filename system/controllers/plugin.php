@@ -44,6 +44,8 @@ if ($pluginRunnable) {
         $menuOk = false;
         $menuAdmin = false;
         $menuCustomer = false;
+        $adminOk = false;
+        $customerOk = false;
         foreach ((array) $menu_registered as $menuEntry) {
             if (strtolower((string) strtok((string) ($menuEntry['function'] ?? ''), '/')) !== $menuFn) {
                 continue;
@@ -52,11 +54,13 @@ if ($pluginRunnable) {
                 $menuAdmin = true;
                 if (_admin(false) && (empty($menuEntry['auth']) || in_array($admin['user_type'] ?? '', (array) $menuEntry['auth'], true))) {
                     $menuOk = true;
+                    $adminOk = true;
                 }
             } else {
                 $menuCustomer = true;
                 if (_auth(false)) {
                     $menuOk = true;
+                    $customerOk = true;
                 }
             }
         }
@@ -66,9 +70,11 @@ if ($pluginRunnable) {
             }
             r2(getUrl('dashboard'), 'e', Lang::T('You do not have permission to access this page'));
         }
-        if ($menuAdmin && _admin(false)) {
+        // the audience that was allowed is the one signed in for: a customer's grant never stands in for an admin entry whose role list
+        // refused this admin (both can be signed in at once)
+        if ($adminOk) {
             _admin();
-        } elseif ($menuCustomer) {
+        } elseif ($customerOk) {
             _auth();
         }
     }

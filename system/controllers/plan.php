@@ -58,18 +58,33 @@ switch ($action) {
                             $log .= "SKIPPED (router is disabled) : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
                             continue;
                         }
+                        // as the per-customer Sync: a voucher plan has no account on a device (its add_customer() would issue a new voucher), and
+                        // a recharge past its expiry (the cron has not switched it off yet) is not given its access back
+                        if ((string) $p['device'] === 'Voucher') {
+                            continue;
+                        }
+                        if (strtotime($tur['expiration'] . ' ' . $tur['time']) <= time()) {
+                            $log .= "SKIPPED (expired) : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
+                            continue;
+                        }
+                        $syncRes = null;
                         if ($_app_stage != 'Demo') {
                             if (!file_exists($dvc)) {
                                 throw new Exception(Lang::T("Devices Not Found"));
                             }
                             require_once $dvc;
                             $dev = new $p['device'];
-                            method_exists($dev, 'sync_customer') ? $dev->sync_customer($c, $p) : $dev->add_customer($c, $p);
+                            $syncRes = method_exists($dev, 'sync_customer') ? $dev->sync_customer($c, $p) : $dev->add_customer($c, $p);
+                        }
+                        if (is_string($syncRes) && $syncRes !== '') {
+                            // the device did its main work and reports a step left over (a result string): listed apart, never as DONE
+                            $log .= "PARTIAL : $tur[username], $tur[namebp], $tur[type], $tur[routers]: " . htmlspecialchars($syncRes) . "<br>";
+                            continue;
                         }
                         $log .= "DONE : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
                     } catch (Throwable $e) {
                         // code 207: the device saved the customer but a cleanup step was refused; listed apart, never retried with add_customer()
-                        $state = $e->getCode() === 207 ? 'PARTIAL' : 'FAILED';
+                        $state = $e->getCode() === 207 ? 'PARTIAL' : ($e->getCode() === 409 ? 'SKIPPED' : 'FAILED'); // 409: no matching active recharge
                         $log .= "$state : $tur[username], $tur[namebp], $tur[type], $tur[routers]: " . htmlspecialchars($e->getMessage()) . "<br>";
                     }
                 } else {
@@ -366,17 +381,27 @@ switch ($action) {
             if ($_app_stage != 'Demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
+                    $partial = null;
                     try {
-                        (new $p['device'])->remove_customer($c, $p);
+                        $r = (new $p['device'])->remove_customer($c, $p);
+                        if (is_string($r) && $r !== '') {
+                            $partial = $r; // MikrotikPppoe returns what it could not finish
+                        }
                     } catch (Exception $e) {
                         // code 207: done on the router except a later step it refused: logged, and the action stands
                         if ($e->getCode() !== 207) {
                             throw $e;
                         }
+                        $partial = $e->getMessage();
+                    }
+                    if ($partial !== null) {
                         // the access may still be usable (a static address not blocked, a fixed IP not cleared) and nothing else retries
                         // a deleted recharge: it is kept, so the removal can be tried again
-                        _log('[' . $c['username'] . '] remove incomplete, recharge kept: ' . $e->getMessage(), 'Router');
-                        r2(getUrl('plan/list'), 'w', Lang::T('The router did not finish taking the access off, so the plan was not deleted') . ': ' . htmlspecialchars($e->getMessage(), ENT_QUOTES));
+                        try {
+                            _log('[' . $c['username'] . '] remove incomplete, recharge kept: ' . $partial, 'Router');
+                        } catch (Throwable $ignored) {
+                        }
+                        r2(getUrl('plan/list'), 'w', Lang::T('The router did not finish taking the access off, so the plan was not deleted') . ': ' . htmlspecialchars($partial, ENT_QUOTES));
                     }
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
@@ -485,7 +510,12 @@ switch ($action) {
                                 if ($e->getCode() !== 207) {
                                     throw $e;
                                 }
-                                _log('[' . $customer['username'] . '] change plan' . ': ' . $e->getMessage(), 'Router');
+                                // best effort: a log that cannot be written must not stop the plan change from being saved below
+                                try {
+                                    _log('[' . $customer['username'] . '] change plan' . ': ' . $e->getMessage(), 'Router');
+                                } catch (Throwable $ignored) {
+                                }
+                                $devicePartial = $e->getMessage(); // reported to the admin below; the customer is not told it is all done
                             }
                         } else {
                             throw new Exception(Lang::T("Devices Not Found"));
@@ -508,8 +538,8 @@ switch ($action) {
                 Package::followRename('tbl_user_recharges', $d->id(), (string) $newPlan['routers'], (int) $newPlan['id'], $newRouterId ?? null);
             }
 
-            // Send  Notifications
-            if (isset($_POST['notify']) && $_POST['notify'] == true) {
+            // Send  Notifications (not while a router step is unfinished: the customer is not told the new plan is fully in place)
+            if (isset($_POST['notify']) && $_POST['notify'] == true && empty($devicePartial)) {
                 if ($oldPlanID != $id_plan) {
                     $oldPlan = ORM::for_table('tbl_plans')->find_one($oldPlanID);
                     $oldPlanName = $oldPlan ? $oldPlan['name_plan'] : 'Old Plan';
@@ -590,6 +620,9 @@ switch ($action) {
 
             $price = isset($p['price']) ? Lang::moneyFormat($p['price']) : '';
             _log('[' . $admin['username'] . ']: Edit Plan for Customer ' . $d['username'] . ' to [' . $d['namebp'] . "][$price]", $admin['user_type'], $admin['id']);
+            if (!empty($devicePartial)) {
+                r2(getUrl('plan/list'), 'w', Lang::T('Data Updated, but the router update is incomplete') . ': ' . htmlspecialchars($devicePartial, ENT_QUOTES) . '. ' . Lang::T('Use Sync to send it again.'));
+            }
             r2(getUrl('plan/list'), 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(getUrl('plan/edit/') . $id, 'e', $msg);
@@ -1013,10 +1046,14 @@ switch ($action) {
             // touches only codes still under a name no router has), in case the first request's follow failed
             $rec = $rec ?? ORM::for_table('tbl_appconfig')->where('setting', $formKey)->find_one();
             $saved = $rec ? json_decode((string) $rec['value'], true) : null;
-            if (is_array($saved) && !empty($saved['ids']) && !empty($saved['rid'])) {
+            // the record is kept a day, as the voucher list reads it: an older one is not announced, nor acted on
+            $savedFresh = is_array($saved) && time() - (int) ($saved['at'] ?? 0) <= 86400;
+            // and the replay writes only for a form this session was given (the same check as for a new batch, below)
+            $sessionIssued = $svoucher !== '' && isset($_SESSION['app_tokens'][$svoucher]);
+            if ($savedFresh && $sessionIssued && !empty($saved['ids']) && !empty($saved['rid'])) {
                 Package::followRename('tbl_voucher', $saved['ids'], (string) ($saved['server'] ?? ''), (int) ($saved['plan'] ?? 0), (int) $saved['rid']);
             }
-            if (!is_array($saved) || empty($saved['ids'])) {
+            if (!is_array($saved) || empty($saved['ids']) || !$savedFresh) {
                 // marked finished but no usable record of the batch: never made again for this token, and not reported as shown
                 r2(getUrl('plan/voucher') . '&made=' . $formHash, 'w',
                     Lang::T('The link to that batch of vouchers is no longer available. Look for them in the full list.'));
@@ -1521,7 +1558,11 @@ switch ($action) {
                     // same three, and then the expiry is the one first worked out (not worked out again on the retry)
                     // what the device is given for this customer: a changed username or password since the earlier try means the
                     // marker no longer describes the router, and it is provisioned again
-                    $credHash = hash('sha256', $c['username'] . "\0" . $c['password'] . "\0" . $c['pppoe_username'] . "\0" . $c['pppoe_password']);
+                    // the address too, for the drivers that give the device one (a changed address means the device holds the old one)
+                    $usesIp = in_array((string) $p['device'], ['MikrotikPppoe', 'MikrotikVpn', 'MikrotikStatic'], true);
+                    $credHash = hash('sha256', $c['username'] . "\0" . $c['password'] . "\0" . $c['pppoe_username'] . "\0" . $c['pppoe_password']
+                        . ($usesIp ? "\0" . $c['pppoe_ip'] : ''));
+                    $extendPartial = null; // an unfinished router step (code 207) of the provisioning: kept in the marker, so a retry still says it
                     $mark = $provKey !== '' ? ($_SESSION[$provKey] ?? null) : null;
                     $alreadyProvisioned = is_array($mark) && (string) $mark['id'] === (string) $id
                         && (string) $mark['plan'] === (string) $tur['plan_id'] && (string) $mark['router'] === (string) $p['routers']
@@ -1533,6 +1574,7 @@ switch ($action) {
                     }
                     if ($alreadyProvisioned) {
                         $expiration = $mark['expiration'];
+                        $extendPartial = !empty($mark['partial']) ? (string) $mark['partial'] : null;
                     }
                     if ($_app_stage != 'Demo' && !$alreadyProvisioned) {
                         try {
@@ -1553,10 +1595,14 @@ switch ($action) {
                                 unset($_SESSION[$provKey]);
                                 throw $e;
                             }
-                            _log('[' . $c['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
+                            $extendPartial = $e->getMessage();
+                            try {
+                                _log('[' . $c['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
+                            } catch (Throwable $ignored) { // best effort: the extension is saved below whatever the log does
+                            }
                         }
                         if ($provKey !== '') {
-                            $_SESSION[$provKey] = ['id' => $id, 'plan' => $tur['plan_id'], 'router' => $p['routers'], 'expiration' => $expiration, 'prev' => $tur['expiration'], 'cred' => $credHash];
+                            $_SESSION[$provKey] = ['id' => $id, 'plan' => $tur['plan_id'], 'router' => $p['routers'], 'expiration' => $expiration, 'prev' => $tur['expiration'], 'cred' => $credHash, 'partial' => $extendPartial];
                         }
                     }
                     $tur->expiration = $expiration;
@@ -1581,6 +1627,10 @@ switch ($action) {
                 "\nCustomer: " . $c['fullname'] .
                 "\nNew Expired: " . Lang::dateAndTimeFormat($expiration, $tur['time']));
             _log("$admin[fullname] extend Customer $tur[customer_id] $tur[username] #$tur[customer_id] for $days days", $admin['user_type'], $admin['id']);
+            if (!empty($extendPartial)) {
+                // saved, but a router step is unfinished: not reported as complete
+                r2(getUrl('plan'), 'w', "Extend until $expiration. " . Lang::T('The router update is incomplete for') . ': ' . htmlspecialchars((string) $extendPartial, ENT_QUOTES) . '. ' . Lang::T('Use Sync to send it again.'));
+            }
             r2(getUrl('plan'), 's', "Extend until $expiration");
         } else {
             r2(getUrl('plan'), 's', "Customer is not expired yet");

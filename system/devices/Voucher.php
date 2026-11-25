@@ -32,7 +32,16 @@ class Voucher
 						$router_name = $plan['routers'];
 						}
             if ($p) {
-                $router_id = Package::routerId($router_name); // the router by its id, before the code is written (see Package::followRename)
+                // the router by its id, before the code is written (see Package::followRename), found through the plan the router name was
+                // taken from in one statement: a name given to another router meanwhile is not looked up again afterwards. None (a RADIUS
+                // voucher, or no router has the name): null, and the code keeps the name it was made with, never another router's
+                $router_id = null;
+                if ($router_name !== 'radius') {
+                    $rs = ORM::getDb()->prepare('SELECT r.id FROM tbl_plans p JOIN tbl_routers r ON r.name = p.routers WHERE p.id = ? AND p.routers = ?');
+                    $rs->execute([(int) $plan['id'], (string) $router_name]);
+                    $rids = $rs->fetchAll(PDO::FETCH_COLUMN);
+                    $router_id = count($rids) === 1 ? (int) $rids[0] : null;
+                }
                 repeat:
                 if ($config['voucher_format'] == 'numbers') {
                     $code = generateUniqueNumericVouchers(1, 10)[0];
@@ -60,7 +69,11 @@ class Voucher
                 if ($d->save()) {
                     // a router renamed while this was written: the code follows to the new name (see Package). Followed by
                     // $plan, the plan the router name was taken from (the voucher's plan $p can be on another router)
-                    Package::followRename('tbl_voucher', $d->id(), $router_name, $plan['id'], $router_id);
+                    // best effort: the code is saved, and a failed follow must not keep the customer from being given it below
+                    try {
+                        Package::followRename('tbl_voucher', $d->id(), $router_name, $plan['id'], $router_id);
+                    } catch (Throwable $ignored) {
+                    }
                     $v = ORM::for_table('tbl_customers_inbox')->create();
                     $v->from = "System";
                     $v->customer_id = $customer['id'];

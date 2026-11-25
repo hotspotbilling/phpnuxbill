@@ -7,10 +7,15 @@
 
 /**
  * The log of the FreeRADIUS REST endpoint (radius.php): what could not be done while an accounting packet or a login was answered.
- * One JSON line per event in system/logs/radius_rest.log (the folder is denied over HTTP, and a cache clean-up does not touch it), so it works without the FreeRADIUS
+ * One JSON line per event in system/logs/ (a cache clean-up does not touch it), so it works without the FreeRADIUS
  * MySQL tables, without waiting for the database (the very thing that may be failing), and without holding the router's answer:
- * appending a line is a single short write. The file is rotated at 5 MB (the older half is kept as radius_rest.log.1).
+ * appending a line is a single short write. The file is rotated at 5 MB (the older half is kept as the same name with .1).
  * Shown in Logs > Radius REST.
+ *
+ * Protection: system/logs/.htaccess denies the folder on Apache. Servers that ignore .htaccess (nginx, for one) need the same rule in
+ * their own configuration (deny /system/logs/). As a second layer the file name carries a secret part made from the database
+ * password, so the address cannot be guessed where the folder is not denied. It is a name, not an access control: a log that
+ * must not be readable by anyone on the web belongs outside the web root.
  */
 class RadiusRestLog
 {
@@ -25,9 +30,23 @@ class RadiusRestLog
         global $CACHE_PATH, $root_path;
         $logs = rtrim((string) $root_path, '/\\') . DIRECTORY_SEPARATOR . 'system' . DIRECTORY_SEPARATOR . 'logs';
         if (is_dir($logs) && is_writable($logs)) {
-            return $logs . DIRECTORY_SEPARATOR . 'radius_rest.log';
+            return $logs . DIRECTORY_SEPARATOR . 'radius_rest.' . self::secret() . '.log';
         }
         return self::legacyFile();
+    }
+
+    /** The secret part of the file name (see the class note): stable for one installation */
+    private static function secret(): string
+    {
+        global $db_pass, $db_user, $db_name;
+        return substr(hash('sha256', 'radius_rest|' . $db_pass . '|' . $db_user . '|' . $db_name), 0, 16);
+    }
+
+    /** The name used before the secret part existed: still read (and cleared) so nothing written there is lost */
+    private static function plainFile(): string
+    {
+        global $root_path;
+        return rtrim((string) $root_path, '/\\') . DIRECTORY_SEPARATOR . 'system' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'radius_rest.log';
     }
 
     /** Where earlier versions kept it: still read (and cleared), so nothing written there is lost */
@@ -41,7 +60,7 @@ class RadiusRestLog
     private static function files(): array
     {
         $f = self::file();
-        $all = [$f, $f . '.1', self::legacyFile(), self::legacyFile() . '.1'];
+        $all = [$f, $f . '.1', self::plainFile(), self::plainFile() . '.1', self::legacyFile(), self::legacyFile() . '.1'];
         return array_values(array_unique($all));
     }
 

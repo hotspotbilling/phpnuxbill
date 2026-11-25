@@ -72,7 +72,8 @@ CLAUDE.md
 /mobile_app/
 /skeletons/
 
-# logs written at runtime (Logs > Radius REST); the folder itself is kept
+# logs written at runtime (Logs > Radius REST); the folder itself is kept. Apache denies it through system/logs/.htaccess; other
+# servers need their own deny rule for /system/logs/ (the file name also has a secret part, which is a name, not an access control)
 system/logs/**
 !system/logs/.htaccess
 !system/logs/index.html

@@ -74,10 +74,18 @@
         v = Number(v);
         return isFinite(v) ? v : null;
     }
+    // the total only when both counts are known: an unknown count is not a zero (zero is a count like any other)
     function users(d) {
         var h = num(d.hotspot), p = num(d.pppoe);
-        if (h === null && p === null) return null;
-        return (h || 0) + (p || 0);
+        if (h === null || p === null) return null;
+        return h + p;
+    }
+    // what is known when the total is not: "Hotspot 3" or "PPPoE 2", or '' when neither is
+    function usersPart(d) {
+        var h = num(d.hotspot), p = num(d.pppoe);
+        if (h !== null) return t.hotspot + ' ' + h;
+        if (p !== null) return t.pppoe + ' ' + p;
+        return '';
     }
     // an uptime as the server says it ("9d 3h 4m", to the minute) as seconds, or null when it is not in that form
     function upSecs(u) {
@@ -100,9 +108,10 @@
             td.innerHTML = '<span class="rt-err" title="' + esc((d.error || t.fail) + (d.hint ? ' ' + d.hint : '')) + '"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> ' + esc(d.error || t.fail) + '</span>';
             return;
         }
-        var n = users(d);
+        var n = users(d), part = n == null ? usersPart(d) : '';
         td.innerHTML = '<span class="rt-cell">' + meter(t.cpu, num(d.cpu)) + meter(t.ram, pct(num(d.mem_used), num(d.mem_total)))
-            + (n != null ? '<span class="rt-users" title="' + esc(t.users) + '"><i class="fa fa-users" aria-hidden="true"></i> ' + esc(n) + '</span>' : '') + '</span>';
+            + (n != null ? '<span class="rt-users" title="' + esc(t.users) + '"><i class="fa fa-users" aria-hidden="true"></i> ' + esc(n) + '</span>'
+                : part ? '<span class="rt-users" title="' + esc(t.users) + '"><i class="fa fa-users" aria-hidden="true"></i> ' + esc(part) + '</span>' : '') + '</span>';
     }
 
     /* ---------- history kept while a panel is open ---------- */
@@ -136,10 +145,12 @@
         // the router restarted since the last reading (its start time, when read less its uptime, moved later, or its uptime went
         // back): its counters started again, so the reading before is no baseline; this one is the new one (a gap, then speeds
         // from the next reading on). A counter that happens to be higher after the restart would otherwise give a wrong speed.
-        var up = upSecs(d.uptime);
+        // the exact uptime in seconds when the server sends it (the text is to the minute), with a tighter allowance for it
+        var exact = d.uptime_s != null && isFinite(Number(d.uptime_s));
+        var up = exact ? Number(d.uptime_s) : upSecs(d.uptime);
         if (up !== null) {
             var boot = d.at - up;
-            if (L.boot != null && (boot - L.boot > BOOT_SLACK || up < L.up)) L.prev = Object.create(null);
+            if (L.boot != null && (boot - L.boot > (exact ? 15 : BOOT_SLACK) || up < L.up)) L.prev = Object.create(null);
             L.boot = boot;
             L.up = up;
         }
@@ -175,6 +186,8 @@
         }
         (ifaces || []).forEach(function (i) {
             var p = L.prev[i.name];
+            // an interface with the same name but another internal id is another interface (removed and made again): a new baseline
+            if (p && (p.id || '') !== (i.id || '')) p = null;
             if (!p && L.rate[i.name] && L.rate[i.name].length) {
                 // a new baseline after a failed reading or a pause: a gap in the graph, so the next speed is not joined to the
                 // last one from before
@@ -188,7 +201,7 @@
                 // current speed until the next pair of readings
                 push(L.rate[i.name], down >= 0 && up >= 0 ? [d.at, down, up] : [d.at, null, null]);
             }
-            L.prev[i.name] = { rx: i.rx, tx: i.tx, at: d.at, type: i.type, total: i.rx + i.tx };
+            L.prev[i.name] = { rx: i.rx, tx: i.tx, at: d.at, type: i.type, total: i.rx + i.tx, id: i.id || '' };
         });
         // every interface's speeds older than the window go, those of one that is not listed now included; a series left with
         // nothing is dropped, and what is still inside the window stays for an interface that comes back
@@ -451,8 +464,10 @@
             + meter(t.disk, pct(d.disk_used, d.disk_total), true, d.disk_total ? t.of + ' ' + size(d.disk_total) : '');
         var n = users(d);
         var nh = num(d.hotspot), np = num(d.pppoe);
-        body.querySelector('.rt-online').innerHTML = n == null ? '' : '<i class="fa fa-users" aria-hidden="true"></i> ' + esc(t.online) + ': <b>' + esc(n) + '</b>'
-            + ' <span class="ls-dim">(' + esc([nh !== null ? t.hotspot + ' ' + nh : '', np !== null ? t.pppoe + ' ' + np : ''].filter(Boolean).join(', ')) + ')</span>';
+        // no total unless both counts are known; one that is known is still shown, labelled, never as the whole
+        body.querySelector('.rt-online').innerHTML = (nh === null && np === null) ? '' : '<i class="fa fa-users" aria-hidden="true"></i> ' + esc(t.online) + ': '
+            + (n == null ? '' : '<b>' + esc(n) + '</b> ')
+            + '<span class="ls-dim">' + (n == null ? '' : '(') + esc([nh !== null ? t.hotspot + ' ' + nh : '', np !== null ? t.pppoe + ' ' + np : ''].filter(Boolean).join(', ')) + (n == null ? '' : ')') + '</span>';
         draw(id);
     }
     function draw(id) {

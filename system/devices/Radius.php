@@ -112,7 +112,7 @@ class Radius
         $t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('plan_id', $plan['id'])->where('status', 'on')->findOne();
         if (!$t) {
             // only an active recharge of the requested plan is sent: another plan's expiry must not be provisioned under this one
-            throw new Exception(Lang::T('The customer has no active recharge of this plan: nothing was sent.'));
+            throw new Exception(Lang::T('The customer has no active recharge of this plan: nothing was sent.'), 409); // 409: replaced meanwhile
         }
         $date_exp = $t['expiration'];
         $time = $t['time'];
@@ -405,7 +405,11 @@ class Radius
     {
         // renewing a VPN keeps the password it already dials with (changed through customerPassword()), but only while the account
         // is live: with no active recharge the row holds what customerDeactivate() overwrote, and the configured credential is restored
-        $vpnLive = $plan['type'] === 'VPN' && $this->getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Cleartext-Password')->find_one()
+        $row = $plan['type'] === 'VPN' ? $this->getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Cleartext-Password')->find_one() : null;
+        // customerDeactivate() leaves a 32-character hex placeholder (an md5) as the password: a row holding one was taken off by a
+        // remove-then-add (a plan change), not renewed, and the configured credential is restored whatever the old recharge says
+        $placeholder = $row && preg_match('/^[0-9a-f]{32}$/', (string) $row['value']) === 1;
+        $vpnLive = $row && !$placeholder
             && ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->where('type', 'VPN')->find_one();
         if ($vpnLive) {
             // kept
@@ -428,8 +432,7 @@ class Radius
     public function customerPassword($customer, $plan)
     {
         $pass = (in_array($plan['type'], ['PPPOE', 'VPN'], true) && !empty($customer['pppoe_password'])) ? $customer['pppoe_password'] : $customer['password'];
-        $this->upsertCustomer($customer['username'], 'Cleartext-Password', $pass);
-        return true;
+        return $this->upsertCustomer($customer['username'], 'Cleartext-Password', $pass);
     }
 
     private function delAtribute($table, $attribute, $key, $value)
@@ -468,8 +471,8 @@ class Radius
         $r->attribute = $attr;
         $r->op = $op;
         $r->value = $value;
-        $r->save();
-        return true;
+        // the result of the write: a rejected one that does not throw is a failure the caller can see
+        return $r->save() !== false;
     }
     /**
      * To insert or update existing customer Attribute

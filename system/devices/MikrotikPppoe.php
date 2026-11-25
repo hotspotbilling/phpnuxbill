@@ -116,7 +116,10 @@ class MikrotikPppoe
                 $discErr = $client ? $this->dropSessions($client, $customer, $mikrotik) : null;
                 if ($discErr !== null) {
                     if ($unsetErr === null) {
-                        _log('PPPoE ' . $customer['username'] . ': ' . Lang::T('the active session could not be disconnected') . ': ' . $discErr->getMessage(), 'Router');
+                        try {
+                            _log('PPPoE ' . $customer['username'] . ': ' . Lang::T('the active session could not be disconnected') . ': ' . $discErr->getMessage(), 'Router');
+                        } catch (Throwable $ignored) { // diagnostic only: the secret is saved, and a log failure must not turn that into a failed update
+                        }
                     } else {
                         $unsetErr .= '; ' . Lang::T('the active session could not be disconnected') . ': ' . $discErr->getMessage();
                     }
@@ -228,7 +231,8 @@ class MikrotikPppoe
                 }
                 try {
                     $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    $done = !empty($this->secretId($client, $to, true)) && empty($this->secretId($client, $from, true));
+                    // the secret under the new name must be the very one renamed ($cid), not another one that has that name
+                    $done = (string) $this->secretId($client, $to, true) === (string) $cid && empty($this->secretId($client, $from, true));
                 } catch (Exception $check) {
                     $done = false;
                 }
@@ -365,7 +369,18 @@ class MikrotikPppoe
         }
         $comment = (string) RouterApi::text($res->getProperty('comment'));
         $mine = $customer['fullname'] . ' | ' . $customer['email'];
-        return strncmp($comment, $mine, strlen($mine)) === 0 ? $id : '';
+        if (strncmp($comment, $mine, strlen($mine)) === 0) {
+            return $id;
+        }
+        // a secret of that name whose owner cannot be established: another customer's own (their dial login or portal name) is left
+        // alone, as before. Otherwise it may be this customer's secret from before comments named the owner (or the name or email
+        // changed since), and a second secret would be made beside it: reported as a conflict, nothing is changed
+        $other = ORM::for_table('tbl_customers')->select('id')->where_not_equal('id', (int) ($customer['id'] ?? 0))
+            ->where_raw('(pppoe_username = ? OR username = ?)', [$name, $name])->find_one();
+        if ($other) {
+            return '';
+        }
+        throw new Exception(Lang::T('A PPPoE secret named') . ' "' . $name . '" ' . Lang::T('exists on the router but is not recognised as this customer\'s. Nothing was changed: fix its comment or rename it there, then use Sync.'), 409);
     }
 
     /** The .id of the secret with this name (empty when none); with $checked, the router's refusal is thrown */
@@ -395,6 +410,11 @@ class MikrotikPppoe
             // a retry after the profile was renamed already (or created under the new name): the existing one is updated
             $printNew = new RouterOS\Request('/ppp profile print .proplist=.id', RouterOS\Query::where('name', $new_plan['name_plan']));
             $profileID = $client->sendSync($printNew)->getProperty('.id');
+            // a profile already under the new name is ours only when an earlier save of this plan failed after the rename (the note that
+            // services.php keeps, plan_rename_pending_<id>): otherwise it is someone else's, and is reported, never overwritten
+            if (!empty($profileID) && !ORM::for_table('tbl_appconfig')->where('setting', 'plan_rename_pending_' . (int) $new_plan['id'])->find_one()) {
+                throw new Exception(Lang::T('A profile named') . ' "' . $new_plan['name_plan'] . '" ' . Lang::T('already exists on the router and was not made by this plan, so nothing was changed. Rename or remove it there, or choose another plan name.'), 409);
+            }
         }
         if (empty($profileID)) {
             $this->add_plan($new_plan);
@@ -551,7 +571,14 @@ class MikrotikPppoe
         $printRequest = new RouterOS\Request('/ppp/secret/print');
         //$printRequest->setArgument('.proplist', '.id');
         $printRequest->setQuery(RouterOS\Query::where('name', $username));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
+        $res = $client->sendSync($printRequest);
+        if (($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err);
+        }
+        $id = $res->getProperty('.id'); // (error() leaves the collection at its first reply)
+        if (empty($id)) {
+            return null; // already gone (a retry of a removal that went through): nothing to remove, the rest of the cleanup goes on
+        }
         $removeRequest = new RouterOS\Request('/ppp/secret/remove');
         $removeRequest->setArgument('numbers', $id);
         $client->sendSync($removeRequest);

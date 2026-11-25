@@ -68,9 +68,15 @@ if ($step == 1) {
         $ui->assign('username', $username);
         $user = ORM::for_table('tbl_customers')->selects(['id', 'phonenumber', 'email'])->where('username', $username)->find_one();
         $age = Otp::age('forgot', $username);
+        // the account this session asked about (checked when a code is used): set whenever the username exists, cleared when it does not,
+        // so a stale value from an earlier request never stands for this one
+        if ($user) {
+            $_SESSION['forgot_uid'] = (int) $user['id'];
+        } else {
+            unset($_SESSION['forgot_uid']);
+        }
         if ($user && ($age < 0 || $age >= Otp::TTL)) {
             $otp = Otp::issue('forgot', $username);
-            $_SESSION['forgot_uid'] = (int) $user['id']; // the account the code was issued for (checked when it is used)
             forgot_notify($user['phonenumber'], $user['email'], $config['CompanyName'] . " C0de: $otp", $config['CompanyName'] . ' ' . Lang::T("Your Verification Code") . ' : ' . $otp);
         }
         $ui->assign('notify_t', 's');
@@ -91,7 +97,8 @@ if ($step == 1) {
         // bound to the account's id as well, so a username reassigned before the reset cannot move the ticket to another account
         $owner = ORM::for_table('tbl_customers')->selects(['id'])->where('username', $username)->find_one();
         // a username reassigned since the code was issued does not carry the code to the new account
-        if ($owner && isset($_SESSION['forgot_uid']) && (int) $_SESSION['forgot_uid'] !== (int) $owner['id']) {
+        // the id is mandatory: a code is never carried to an account the session did not ask about (no id, or another one, is refused)
+        if (!$owner || !isset($_SESSION['forgot_uid']) || (int) $_SESSION['forgot_uid'] !== (int) $owner['id']) {
             unset($_SESSION['forgot_uid']);
             r2(getUrl('forgot&step=1'), 'e', Lang::T('Invalid Username or Verification Code'));
         }

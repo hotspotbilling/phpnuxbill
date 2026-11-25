@@ -36,7 +36,8 @@ function sendReminderNotifications($config, $customer, $planName, $price, $messa
                     $messageType,
                     $method
                 ) . "\n";
-                if (Message::$lastDelivered && $key !== '') {
+                // a push with no subscriptions has nothing to send: marked done, not retried on every run
+                if ((Message::$lastDelivered || Message::$lastNothingToSend) && $key !== '') {
                     if (!$row) {
                         $row = ORM::for_table('tbl_appconfig')->create();
                         $row->setting = $key;
@@ -230,22 +231,9 @@ foreach ($d as $ds) {
                     echo "Partial: " . ($isCli ? $partial : htmlspecialchars($partial, ENT_QUOTES)) . "\n";
                 }
 
-                // Send notification and update user status
+                // Update user status first: the access is taken off already, and that is recorded whatever the notifications do
+                // (a failed marker lookup or message must not leave the recharge on to be taken off again on every run)
                 try {
-                    {
-                        // [[expired_date]] is read from the global $ds: the expiry re-read under the lock, not the one listed earlier
-                        $dsListed = $ds;
-                        $ds = $u;
-                        print_r(sendReminderNotifications(
-                            $config,
-                            $c,
-                            $u['namebp'],
-                            $p['price'],
-                            Message::getMessageType($p['type'], $textExpired),
-                            $config['user_notification_expired']
-                        )) . "\n";
-                        $ds = $dsListed;
-                    }
                     if ($partial !== null) {
                         if (!$pendingRow) {
                             $pendingRow = ORM::for_table('tbl_appconfig')->create();
@@ -259,6 +247,21 @@ foreach ($d as $ds) {
                         if ($pendingRow) {
                             $pendingRow->delete();
                         }
+                    }
+                    // [[expired_date]] is read from the global $ds: the expiry re-read under the lock, not the one listed earlier
+                    $dsListed = $ds;
+                    $ds = $u;
+                    try {
+                        print_r(sendReminderNotifications(
+                            $config,
+                            $c,
+                            $u['namebp'],
+                            $p['price'],
+                            Message::getMessageType($p['type'], $textExpired),
+                            $config['user_notification_expired']
+                        )) . "\n";
+                    } finally {
+                        $ds = $dsListed;
                     }
                 } catch (Throwable $e) {
                     _log($e->getMessage());
@@ -315,6 +318,12 @@ foreach ($d as $ds) {
     }
 }
 
+// rows a router rename could not be followed on at the time (Package::followRename)
+try {
+    Package::repairRenames();
+} catch (Throwable $e) {
+}
+
 // RADIUS sessions: those that stopped sending accounting updates, then old finished REST sessions (rad_acct)
 try {
     // accounting packets radius.php could not save (database busy or down) and kept in a file: written now, oldest first,
@@ -343,10 +352,17 @@ try {
     if ($keepDays > 0) {
         $before = date('Y-m-d H:i:s', time() - $keepDays * 86400);
         $removed = 0;
-        for ($i = 0; $i < 20; $i++) {
+        // A Stop row is deleted only while no accounting packet waits in the retry queue (one could recreate its session), and the
+        // check and the deletes happen under the queue's lock: radius.php appends under it, so nothing queues in between.
+        $pruneLock = @fopen(RadiusSessions::queueFile() . '.lock', 'c');
+        $pruneOk = $pruneLock && flock($pruneLock, LOCK_EX | LOCK_NB) && !RadiusSessions::hasQueued();
+        if (!$pruneOk) {
+            echo "RADIUS REST: finished sessions are not removed this run (accounting updates are queued, or the queue is busy)\n";
+        }
+        for ($i = 0; $pruneOk && $i < 20; $i++) {
             ORM::raw_execute(
                 "DELETE FROM rad_acct
-                  WHERE acctstatustype = 'Stop' AND COALESCE(dateUpdated, dateAdded) < ?
+                  WHERE acctstatustype IN ('Stop', 'Stale') AND COALESCE(dateUpdated, dateAdded) < ?
                     AND NOT EXISTS (SELECT 1 FROM tbl_user_recharges r
                          WHERE r.username = rad_acct.username AND r.status = 'on'
                            AND rad_acct.dateAdded >= TIMESTAMP(r.recharged_on, r.recharged_time)
@@ -359,6 +375,10 @@ try {
             if ($n < 5000) {
                 break;
             }
+        }
+        if ($pruneLock) {
+            flock($pruneLock, LOCK_UN);
+            fclose($pruneLock);
         }
         if ($removed > 0) {
             echo "RADIUS REST: removed $removed finished session(s) older than $keepDays day(s)\n";
@@ -459,7 +479,8 @@ if ($config['router_check']) {
         try {
             $cur = $locked ? ORM::for_table('tbl_routers')->select_many('ip_address', 'enabled')->find_one($router->id) : null;
             if (!$cur || (string) $cur['ip_address'] !== (string) $router->ip_address || (int) $cur['enabled'] !== 1
-                || $moveGeneration($router->id) !== $probeGeneration) {
+                || $probeGeneration === -1 || ($nowGeneration = $moveGeneration($router->id)) === -1 || $nowGeneration !== $probeGeneration) {
+                // (a generation that could not be read, before or after, proves nothing: the result is dropped)
                 continue;
             }
             if ($probeError !== null) {

@@ -94,9 +94,10 @@ try {
             }
             break;
         case 'accounting':
-            // Accounting is always accepted (HTTP 200): the NAS gets its Accounting-Response whatever happens here, so it never
-            // resends or logs "no response" because of a problem on this side. Anything that goes wrong is written to the logs
-            // (Logs > System, type RADIUS, and the PHP error log) after the answer is out.
+            // Accounting is accepted (HTTP 200): the NAS gets its Accounting-Response whatever happens here, so it never
+            // resends or logs "no response" because of a problem on this side. The one exception is a Stop that could be neither
+            // written nor queued (HTTP 503 below). Anything that goes wrong is written to the logs
+            // (Logs > Radius > Rest).
             $username = _req('username');
             if (empty($username)) {
                 radius_log('Accounting packet without a username was not stored. NAS: ' . (string) _req('nasIpAddress', _req('nasipaddress', _req('nasid'))) . ', session: ' . (string) _req('acctSessionId', _req('acctsessionid')));
@@ -180,9 +181,13 @@ try {
                 $queued = RadiusSessions::queueAccounting($packet);
                 radius_alert("Database save error on RADIUS accounting (" . ($queued ? 'queued for retry' : 'NOT queued') . ").\nUsername: {$username}\nSession ID: {$acctSessionId}\nError: " . $e->getMessage());
                 if (!$queued) {
-                    // kept nowhere else: the whole packet is in the PHP error log, so it can be entered by hand. The NAS is still
-                    // answered 200, as for every accounting packet.
+                    // kept nowhere else: the whole packet is in the PHP error log, so it can be entered by hand. Only a Stop is
+                    // refused (503, below) so the NAS sends it again; any other packet is still answered 200.
                     @error_log('[RADIUS] accounting packet NOT stored: ' . json_encode($packet, JSON_INVALID_UTF8_SUBSTITUTE));
+                    if ($acctStatusType === 'Stop') {
+                        // a Stop carries the session's final usage and is kept nowhere: no Accounting-Response, so the NAS sends it again
+                        show_radius_result(['Reply-Message' => 'Not stored, please resend'], 503);
+                    }
                 }
                 show_radius_result(['Reply-Message' => 'Accepted'], 200);
             }

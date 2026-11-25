@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/loading.css?2026.11.11.1" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/summernote/summernote.min.css" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.11.24.7" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.11.25.1" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/admin-chrome.css?2026.11.24.2" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <script src="{$app_url}/ui/ui/scripts/chart.min.js"></script>
@@ -604,15 +604,25 @@
                         <ul class="treeview-menu">
                             <li {if $_routes[0] eq 'logs' and ($_routes[1] eq 'phpnuxbill' || empty($_routes[1]) || $_routes[1] eq 'list')}class="active" {/if}><a
                                     href="{Text::url('logs/phpnuxbill')}">System</a></li>
-                            {if $_c['radius_enable']}
-                            <li {if $_routes[0] eq 'logs' and $_routes[1] eq 'radius'}class="active" {/if}><a
-                                    href="{Text::url('logs/radius')}">Radius</a>
-                            </li>
-                            {/if}
-                            <li {if $_routes[0] eq 'logs' and $_routes[1] eq 'radius-rest'}class="active" {/if}><a
-                                    href="{Text::url('logs/radius-rest')}">Radius REST</a></li>
                             <li {if $_routes[0] eq 'logs' and $_routes[1] eq 'message'}class="active" {/if}><a
                                     href="{Text::url('logs/message')}">Message</a></li>
+                            {if $_c['radius_enable']}
+                            {* two kinds of RADIUS log: a group with a second level (MySQL tables, and the REST endpoint's own file) *}
+                            <li class="{if $_routes[0] eq 'logs' and ($_routes[1] eq 'radius' or $_routes[1] eq 'radius-rest')}active menu-open{/if} treeview">
+                                <a href="#" title="Radius"><span>Radius</span>
+                                    <span class="pull-right-container"><i class="fa fa-angle-down pull-right"></i></span>
+                                </a>
+                                <ul class="treeview-menu">
+                                    <li {if $_routes[0] eq 'logs' and $_routes[1] eq 'radius'}class="active" {/if}><a
+                                            href="{Text::url('logs/radius')}">MySQL</a></li>
+                                    <li {if $_routes[0] eq 'logs' and $_routes[1] eq 'radius-rest'}class="active" {/if}><a
+                                            href="{Text::url('logs/radius-rest')}">REST</a></li>
+                                </ul>
+                            </li>
+                            {else}
+                            <li {if $_routes[0] eq 'logs' and $_routes[1] eq 'radius-rest'}class="active" {/if}><a
+                                    href="{Text::url('logs/radius-rest')}">Radius REST</a></li>
+                            {/if}
                             {$_MENU_LOGS}
                         </ul>
                     </li>

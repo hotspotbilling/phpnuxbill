@@ -273,6 +273,23 @@ class Stream
     }
 
     /**
+     * PHPNuxBill: whether reading this stream can never block (php://memory and php://temp are buffered in the process). A plain
+     * file is not: on a network or stalled disk fread() can wait past any deadline, and nothing here can interrupt it.
+     *
+     * @param resource $stream
+     *
+     * @return bool
+     */
+    public static function isBoundedSource($stream)
+    {
+        if (!self::isStream($stream)) {
+            return false;
+        }
+        $meta = stream_get_meta_data($stream);
+        return in_array(strtoupper((string) ($meta['stream_type'] ?? '')), array('MEMORY', 'TEMP'), true);
+    }
+
+    /**
      * PHPNuxBill: an optional moment (self::now(), the monotonic clock) after which no more is read. The socket's own time limit starts again
      * with every read, so a reply that keeps trickling in could run far past it; with a deadline, each read only waits for
      * the time left. NULL removes it.
@@ -330,6 +347,9 @@ class Stream
             $this->timedOut = true;
             $this->close();
             return false;
+        }
+        if (!self::isStream($this->stream)) {
+            return false; // already closed: stream_set_timeout() on it would throw
         }
         // the shorter of the time left and the stream's ordinary timeout: a deadline never makes one read wait longer than usual.
         // A negative ordinary timeout is no limit (the deadline decides); zero is a poll, and stays one
@@ -570,8 +590,8 @@ class Stream
             $seekable = !empty($contentsMeta['seekable']);
             // under a deadline the source must be one whose reads cannot block (a local, seekable file or memory stream): a
             // socket or pipe could hold fread() past it, so it is refused before anything is written
-            if (null !== $this->deadline && !($seekable && stream_is_local($contents))) {
-                throw $this->createException('A deadline needs a local, seekable source stream.', 8, null, 0);
+            if (null !== $this->deadline && !($seekable && self::isBoundedSource($contents))) {
+                throw $this->createException('A deadline needs an in-memory, seekable source stream.', 8, null, 0);
             }
             $oldPos = ftell($contents);
             try {

@@ -12,6 +12,9 @@ class Package
     /** The customer credential lock of the recharge running: 'none' (not needed), 'held', 'busy' (not got in time), 'released' */
     private static $pwState = 'none';
 
+    /** Customers whose credential lock rechargeUser() holds right now: released at exit if the request ends inside the recharge (r2()/_alert() exit, and a finally block does not run on exit) */
+    private static $exitLocks = [];
+
     /** Whether the recharge running has gone past its checks to where it changes anything (a device, the recharge or the transaction) */
     private static $wrote = false;
 
@@ -53,6 +56,20 @@ class Package
         $voucher = trim((string) $gateway) == 'Voucher' && $id_customer == 0;
         if (!$voucher && (int) $id_customer > 0 && !in_array($router_name, ['balance', 'Custom Balance'], true)) {
             self::$pwState = self::passwordLock($id_customer, true, 10) ? 'held' : 'busy';
+            if (self::$pwState === 'held') {
+                if (!self::$exitLocks) {
+                    register_shutdown_function(function () {
+                        foreach (array_keys(self::$exitLocks) as $cid) {
+                            try {
+                                ORM::getDb()->query("SELECT RELEASE_LOCK('phpnuxbill_pw_c_" . (int) $cid . "')");
+                            } catch (Throwable $ignored) {
+                            }
+                        }
+                        self::$exitLocks = [];
+                    });
+                }
+                self::$exitLocks[(int) $id_customer] = true;
+            }
         }
         try {
             return self::rechargeUserRun($id_customer, $router_name, $plan_id, $gateway, $channel, $note);
@@ -63,6 +80,9 @@ class Package
             }
             if (self::$pwState === 'held') {
                 self::passwordLock($id_customer, false);
+            }
+            if (self::$pwState === 'held' || self::$pwState === 'released') {
+                unset(self::$exitLocks[(int) $id_customer]);
             }
             self::$pwState = $was;
         }
@@ -250,6 +270,9 @@ class Package
         }
 
         if ($router_name == 'Custom Balance') {
+            if ($isVoucher) {
+                return false; // a voucher is never for a custom balance (issuance does not make one): refused before anything is written, so it is given back
+            }
             $markWrote();
             return self::rechargeCustomBalance($c, $p, $gateway, $channel);
         }
@@ -1113,8 +1136,51 @@ class Package
                     WHERE t.id IN (" . implode(',', $ids) . ") AND t.routers = ? AND r2.name <> t.routers", [(int) $router_id, $router_name]);
             } catch (Throwable $e2) {
                 _log('Router rename not followed by ' . $table . ' ' . implode(',', $ids) . ': ' . $e2->getMessage(), 'Package');
+                // kept for the cron (repairRenames), which tries again until the rows are on the router's current name
+                try {
+                    $row = ORM::for_table('tbl_appconfig')->where('setting', 'router_rename_repair')->find_one() ?: ORM::for_table('tbl_appconfig')->create();
+                    $list = json_decode((string) ($row['value'] ?? ''), true);
+                    $list = is_array($list) ? $list : [];
+                    $list[] = ['table' => $table, 'ids' => $ids, 'name' => (string) $router_name, 'router' => (int) $router_id];
+                    $row->setting = 'router_rename_repair';
+                    $row->value = json_encode(array_slice($list, -500));
+                    $row->save();
+                } catch (Throwable $e3) {
+                    // the log line above is all that is left of it
+                }
             }
         }
+    }
+
+    /**
+     * Cron: rows that followRename() could not move to their router's new name (both tries failed) are moved now. An entry is
+     * dropped once its update has run (it moves nothing when the rows are already right), and kept when it fails again.
+     */
+    public static function repairRenames()
+    {
+        $row = ORM::for_table('tbl_appconfig')->where('setting', 'router_rename_repair')->find_one();
+        $list = $row ? json_decode((string) $row['value'], true) : null;
+        if (!is_array($list) || !$list) {
+            return 0;
+        }
+        $left = [];
+        $done = 0;
+        foreach ($list as $e) {
+            $ids = array_values(array_filter(array_map('intval', (array) ($e['ids'] ?? []))));
+            if (!$ids || !in_array($e['table'] ?? '', ['tbl_user_recharges', 'tbl_transactions', 'tbl_voucher', 'tbl_payment_gateway'], true) || empty($e['router'])) {
+                continue; // not an entry this can act on
+            }
+            try {
+                ORM::raw_execute("UPDATE `{$e['table']}` t JOIN `tbl_routers` r2 ON r2.id = ? SET t.routers = r2.name
+                    WHERE t.id IN (" . implode(',', $ids) . ") AND t.routers = ? AND r2.name <> t.routers", [(int) $e['router'], (string) $e['name']]);
+                $done++;
+            } catch (Throwable $x) {
+                $left[] = $e;
+            }
+        }
+        $row->value = json_encode($left);
+        $row->save();
+        return $done;
     }
 
     /**
@@ -1141,6 +1207,10 @@ class Package
             }
             $type = strtoupper((string) $p['type']);
             $device = (string) $p['device'] !== '' ? (string) $p['device'] : (!empty($p['is_radius']) ? 'Radius' : '');
+            // sendPassword writes nothing to a RADIUS account past its expiry: it takes no part in what is shared
+            if (in_array($device, ['Radius', 'RadiusALE', 'RadiusChillispot'], true) && strtotime($tur['expiration'] . ' ' . $tur['time']) <= time()) {
+                continue;
+            }
             if (($type === 'PPPOE' || $type === 'VPN') && in_array($device, ['Radius', 'RadiusALE', 'RadiusChillispot'], true)) {
                 $radiusDial = true; // writes the PPPoE password (when there is one) as the account's Cleartext-Password
             } else {
@@ -1199,6 +1269,13 @@ class Package
                 $plans[$tur['id']] = [null, $e];
             }
         }
+        // one decision per recharge (not expired when this ran), used for the conflict scan and for what is written below, so a recharge
+        // that passes the clock between the two is not scanned as live and then skipped (or the other way round)
+        $now = time();
+        $eligible = [];
+        foreach ($turs as $tur) {
+            $eligible[$tur['id']] = strtotime($tur['expiration'] . ' ' . $tur['time']) > $now;
+        }
         $hsCustomer = null;
         $pppoePass = (string) $customer['pppoe_password'];
         if ($pppoePass !== '' && $pppoePass !== (string) $customer['password']) {
@@ -1206,7 +1283,7 @@ class Package
             foreach ($turs as $tur) {
                 try {
                     // only a recharge that is sent the password below counts: an expired one is skipped there, so it cannot conflict
-                    if ($plans[$tur['id']][1] === null && strtotime($tur['expiration'] . ' ' . $tur['time']) > time()) {
+                    if ($plans[$tur['id']][1] === null && $eligible[$tur['id']]) {
                         $share[(string) self::radiusShare($plans[$tur['id']][0])] = true;
                     }
                 } catch (Throwable $e) {
@@ -1262,7 +1339,7 @@ class Package
                 $dev = new $p['device'];
                 // a recharge past its expiry (the cron has not switched it off yet) has no account to bring back: a missing secret
                 // or user is not created for it, only one that exists gets the new password
-                $mayAdd = strtotime($tur['expiration'] . ' ' . $tur['time']) > time();
+                $mayAdd = $eligible[$tur['id']];
                 if ($p['device'] === 'MikrotikHotspot') {
                     self::hotspotPassword($dev, $customer, $p, $mayAdd);
                 } elseif ($p['device'] === 'MikrotikPppoe') {
@@ -1315,6 +1392,11 @@ class Package
                 $held[$name]++;
                 return true;
             }
+            // another customer's lock is already held by this request: on a database where GET_LOCK frees the lock already held
+            // (MySQL before 5.7.5, MariaDB before 10.0.2) taking this one would silently release the outer one, so it is refused
+            if ($held && (class_exists('MikrotikVpn') || DeviceLoader::load('MikrotikVpn')) && !MikrotikVpn::nestedLocks()) {
+                return false;
+            }
             $got = (int) ORM::getDb()->query("SELECT GET_LOCK('$name', " . (int) $wait . ")")->fetchColumn() === 1;
             if ($got) {
                 $held[$name] = 1;
@@ -1335,10 +1417,10 @@ class Package
     private static function radiusPassword($dev, $customer, $plan, $tur)
     {
         $set = function () use ($dev, $customer, $plan) {
-            if (method_exists($dev, 'customerPassword')) {
-                $dev->customerPassword($customer, $plan);
-            } else {
-                $dev->customerUpsert($customer, $plan);
+            // a driver may report a failed write by returning false instead of throwing: that is a failure, not a success
+            $res = method_exists($dev, 'customerPassword') ? $dev->customerPassword($customer, $plan) : $dev->customerUpsert($customer, $plan);
+            if ($res === false) {
+                throw new Exception(Lang::T('The new password could not be written to RADIUS') . ': ' . $plan['name_plan']);
             }
         };
         if (!method_exists($dev, 'getTableUserPackage')) {
@@ -1511,7 +1593,8 @@ class Package
         return null;
     }
 
-    public static function getDevice($plan)
+    /** $persist false: a plan saved without its driver name is resolved in memory only (a preflight must not save form changes) */
+    public static function getDevice($plan, $persist = true)
     {
         global $DEVICE_PATH;
         if ($plan === false) {
@@ -1530,21 +1613,29 @@ class Package
         }
         if ($plan['is_radius'] == 1) {
             $plan->device = 'Radius';
-            $plan->save();
+            if ($persist) {
+                $plan->save();
+            }
             return $DEVICE_PATH . DIRECTORY_SEPARATOR . 'Radius' . '.php';
         }
         if ($plan['type'] == 'VPN') {
             $plan->device = 'MikrotikVpn';
-            $plan->save();
+            if ($persist) {
+                $plan->save();
+            }
             return $DEVICE_PATH . DIRECTORY_SEPARATOR . 'MikrotikVpn' . '.php';
         }
         if ($plan['type'] == 'PPPOE') {
             $plan->device = 'MikrotikPppoe';
-            $plan->save();
+            if ($persist) {
+                $plan->save();
+            }
             return $DEVICE_PATH . DIRECTORY_SEPARATOR . 'MikrotikPppoe' . '.php';
         }
         $plan->device = 'MikrotikHotspot';
-        $plan->save();
+        if ($persist) {
+            $plan->save();
+        }
         return $DEVICE_PATH . DIRECTORY_SEPARATOR . 'MikrotikHotspot' . '.php';
     }
 }

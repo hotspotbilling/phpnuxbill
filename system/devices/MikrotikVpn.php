@@ -501,6 +501,11 @@ class MikrotikVpn
             // a retry after the profile was renamed already (or created under the new name): the existing one is updated, not added again
             $printNew = new RouterOS\Request('/ppp profile print .proplist=.id', RouterOS\Query::where('name', $new_plan['name_plan']));
             $profileID = $client->sendSync($printNew)->getProperty('.id');
+            // a profile already under the new name is ours only when an earlier save of this plan failed after the rename (the note that
+            // services.php keeps, plan_rename_pending_<id>): otherwise it is someone else's, and is reported, never overwritten
+            if (!empty($profileID) && !ORM::for_table('tbl_appconfig')->where('setting', 'plan_rename_pending_' . (int) $new_plan['id'])->find_one()) {
+                throw new Exception(Lang::T('A profile named') . ' "' . $new_plan['name_plan'] . '" ' . Lang::T('already exists on the router and was not made by this plan, so nothing was changed. Rename or remove it there, or choose another plan name.'), 409);
+            }
         }
         if (empty($profileID)) {
             $this->add_plan($new_plan);
@@ -657,10 +662,18 @@ class MikrotikVpn
         $printRequest = new RouterOS\Request('/ppp/secret/print');
         //$printRequest->setArgument('.proplist', '.id');
         $printRequest->setQuery(RouterOS\Query::where('name', $username));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
-        $removeRequest = new RouterOS\Request('/ppp/secret/remove');
-        $removeRequest->setArgument('numbers', $id);
-        $client->sendSync($removeRequest);
+        $res = $client->sendSync($printRequest);
+        if (($err = RouterApi::error($res)) !== null) {
+            throw new Exception(Lang::T('The router refused the command') . ': ' . $err); // a refused lookup is not "no secret"
+        }
+        $id = $res->getProperty('.id'); // (error() leaves the collection at its first reply)
+        if (!empty($id)) { // none: already gone, and the forwards below are still cleared
+            $removeRequest = new RouterOS\Request('/ppp/secret/remove');
+            $removeRequest->setArgument('numbers', $id);
+            if (($err = RouterApi::error($client->sendSync($removeRequest))) !== null) {
+                throw new Exception(Lang::T('The router refused the command') . ': ' . $err); // the secret is still there: not a done removal
+            }
+        }
         $this->rmNat($client, $cstid);
     }
 
@@ -830,10 +843,16 @@ class MikrotikVpn
     private function heldByOther($customer, $ip)
     {
         $ip = trim((string) $ip);
-        return $ip !== '' && (bool) ORM::for_table('tbl_customers')
-            ->where('pppoe_ip', $ip)
-            ->where_not_equal('id', $customer['id'])
-            ->find_one();
+        if ($ip === '') {
+            return false;
+        }
+        if (ORM::for_table('tbl_customers')->where('pppoe_ip', $ip)->where_not_equal('id', $customer['id'])->find_one()) {
+            return true;
+        }
+        // an address another customer was moved off stays reserved (holdAddress) while no row has it: not this customer's to take
+        // unless it is the one they have saved themselves
+        return $ip !== trim((string) ($customer['pppoe_ip'] ?? ''))
+            && (bool) ORM::for_table('tbl_appconfig')->where('setting', 'vpn_held_' . $ip)->find_one();
     }
 
     /**
@@ -1107,7 +1126,7 @@ class MikrotikVpn
             return true; // no port pool for this router: its customers get no forwards
         }
         $pub = trim((string) $ip['public_ip']);
-        if (!filter_var($pub, FILTER_VALIDATE_IP)) {
+        if (!filter_var($pub, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) { // the NAT rules below are IPv4 only
             if ($this->strict) {
                 throw new Exception(Lang::T('The port pool of this router has no valid public IP address'));
             }

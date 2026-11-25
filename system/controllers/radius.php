@@ -23,8 +23,8 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
 $radiusProblem = function ($needRouters = true) {
     return SystemInfo::radiusProblem('nas', $needRouters);
 };
-// deleting a NAS does not use the routers column: a table without it does not block that
-if (($problem = $radiusProblem($action !== 'nas-delete')) !== null) {
+// the routers column is needed only to save a NAS: the blank Add form, the list and a delete do not use it
+if (($problem = $radiusProblem(in_array($action, ['nas-add-post', 'nas-edit-post'], true))) !== null) {
     $ui->assign('_system_menu', 'radius');
     $ui->assign('_title', Lang::T('RADIUS database'));
     $ui->assign('problem', $problem);

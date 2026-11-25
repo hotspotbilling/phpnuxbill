@@ -221,6 +221,16 @@ switch ($action) {
             r2(getUrl('settings/app'), 'e', 'Special characters are not allowed in tax rate');
             die();
         }
+        // days of finished RADIUS REST sessions kept in rad_acct (0 = all), removed by cron.php. Checked before any file is replaced:
+        // a refused form changes nothing (the logo included)
+        if (isset($_POST['frrest_keep_days'])) {
+            // the whole value must be a whole number: anything else leaves the saved value as it is
+            if (is_string($_POST['frrest_keep_days']) && preg_match('/^\s*\d{1,6}\s*$/', $_POST['frrest_keep_days'])) {
+                $_POST['frrest_keep_days'] = (string) min(3650, (int) $_POST['frrest_keep_days']);
+            } else {
+                r2(getUrl('settings/app'), 'e', Lang::T('Keep Finished Sessions must be a whole number of days, 0 to 3650'));
+            }
+        }
         run_hook('save_settings'); #HOOK
         if (!empty($_FILES['logo']['name'])) {
             if (function_exists('imagecreatetruecolor')) {
@@ -279,15 +289,6 @@ switch ($action) {
             }
             if (isset($_POST['radius_rest_log_all'])) {
                 $_POST['radius_rest_log_all'] = $_POST['radius_rest_log_all'] === '1' ? '1' : '0';
-            }
-            // days of finished RADIUS REST sessions kept in rad_acct (0 = all), removed by cron.php
-            if (isset($_POST['frrest_keep_days'])) {
-                // the whole value must be a whole number: anything else leaves the saved value as it is
-                if (is_string($_POST['frrest_keep_days']) && preg_match('/^\s*\d{1,6}\s*$/', $_POST['frrest_keep_days'])) {
-                    $_POST['frrest_keep_days'] = (string) min(3650, (int) $_POST['frrest_keep_days']);
-                } else {
-                    r2(getUrl('settings/app'), 'e', Lang::T('Keep Finished Sessions must be a whole number of days, 0 to 3650'));
-                }
             }
             // Captcha: which logins are protected, one check box each
             $_POST['captcha_on_admin'] = isset($_POST['captcha_on_admin']) ? 'yes' : 'no';

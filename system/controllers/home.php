@@ -125,10 +125,18 @@ if (isset($_GET['sync']) && !empty($_GET['sync'])) {
                     if ($_app_stage != 'demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
-                            if (method_exists($p['device'], 'sync_customer')) {
-                                (new $p['device'])->sync_customer($c, $p);
-                            }else{
-                                (new $p['device'])->add_customer($c, $p);
+                            try {
+                                if (method_exists($p['device'], 'sync_customer')) {
+                                    (new $p['device'])->sync_customer($c, $p);
+                                } else {
+                                    (new $p['device'])->add_customer($c, $p);
+                                }
+                            } catch (Exception $e) {
+                                if ($e->getCode() !== 409) { // 409: no matching active recharge, nothing was sent
+                                    throw $e;
+                                }
+                                $log .= "SKIPPED : $tur[namebp], $tur[type], $tur[routers]<br>";
+                                continue;
                             }
                         } else {
                             $log .= "DEVICES NOT FOUND : $tur[namebp], $tur[type], $tur[routers]<br>";
@@ -251,6 +259,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     if ($bill) {
         $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
         $dvc = Package::getDevice($p);
+        $cleanupPending = false; // the plan was taken off but a later router step (a fixed IP, a port forward) is still to do
         if ($_app_stage != 'demo') {
             if (file_exists($dvc)) {
                 require_once $dvc;
@@ -276,12 +285,15 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                         _log('[' . $user['username'] . '] deactivate: ' . $e->getMessage(), 'Router');
                     } catch (Throwable $ignored) { // diagnostic only: the deactivation goes on
                     }
+                    $cleanupPending = true;
                 }
             } else {
                 r2(getUrl('home'), 'e', Lang::T("Devices Not Found"));
             }
         }
-        $bill->status = 'off';
+        // an unfinished router step keeps the recharge on, expiring now: the cron (which takes every recharge on and past its expiry)
+        // repeats the removal until it is done and only then marks it off, so the leftover is never forgotten
+        $bill->status = $cleanupPending ? 'on' : 'off';
         $bill->expiration = date('Y-m-d');
         $bill->time = date('H:i:s');
         $bill->save();

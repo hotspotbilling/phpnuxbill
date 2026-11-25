@@ -744,7 +744,7 @@ class SystemInfo
         // 1. Radius REST Online Users (table rad_acct in database)
         // Sessions updated by radius.php with acctstatustype IN ('Start', 'Interim-Update') OR NULL, and != 'Stop'
         $restActive = "(acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL)";
-        $restNotStopped = "(acctstatustype != 'Stop' OR acctstatustype IS NULL)";
+        $restNotStopped = "(acctstatustype NOT IN ('Stop', 'Stale') OR acctstatustype IS NULL)";
         $restOnline = 0;
         $restUsers = 0;
         try {
@@ -805,7 +805,7 @@ class SystemInfo
             $restSessions = ORM::for_table('rad_acct')
                 ->select_many('radacctid', 'username', 'nasipaddress', 'framedipaddress', 'callingstationid', 'acctstarttime', 'acctstatustype')
                 ->where_raw("(acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL)")
-                ->where_raw("(acctstatustype != 'Stop' OR acctstatustype IS NULL)")
+                ->where_raw("(acctstatustype NOT IN ('Stop', 'Stale') OR acctstatustype IS NULL)")
                 ->order_by_desc('radacctid')
                 ->limit(10)
                 ->find_array();

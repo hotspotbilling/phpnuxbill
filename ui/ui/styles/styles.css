@@ -5036,6 +5036,27 @@ body.fixed .main-sidebar,
   transform: rotate(180deg);
 }
 
+/* a group inside a submenu (Logs > Radius): its chevron sits at the right and turns like the first level's */
+.sidebar-menu .treeview-menu > li.treeview > a {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-menu .treeview-menu > li.treeview > a > .pull-right-container {
+  margin-left: auto;
+  position: static !important;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sidebar-menu .treeview-menu > li.treeview > a > .pull-right-container .fa-angle-down {
+  transition: transform 0.25s ease;
+}
+
+.sidebar-menu .treeview-menu > li.treeview.menu-open > a > .pull-right-container .fa-angle-down {
+  transform: rotate(180deg);
+}
+
 .sidebar-menu .treeview-menu {
   padding: 4px 0 6px 0 !important;
   margin: 0 10px 4px 10px !important;

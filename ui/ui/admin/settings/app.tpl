@@ -1582,7 +1582,8 @@
             }
 
             if (clearGroup) clearGroup.style.display = '';
-            var clearOn = clearSelect && clearSelect.value === '1';
+            // the timeout field is the one shared cleanup uses: shown for Yes and for the legacy REST-only choice, hidden for No
+            var clearOn = clearSelect && (clearSelect.value === '1' || clearSelect.value === 'legacy');
             if (timeoutGroup) timeoutGroup.style.display = clearOn ? '' : 'none';
         }
 

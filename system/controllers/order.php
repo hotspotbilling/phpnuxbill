@@ -329,6 +329,13 @@ switch ($action) {
                 r2(getUrl('order/package'), 'e', Lang::T("Target has active plan, different with current plant.") . " [ <b>$active[namebp]</b> ]");
             }
             
+            // the router the plan is on, taken before the recharge: a rename (or the old name taken by another router) during or after it
+            // cannot change which router the two receipts follow
+            $planRouterId = 0;
+            try {
+                $planRouterId = (int) Package::routerId($router_name);
+            } catch (Throwable $ignored) {
+            }
             $result = Package::rechargeUser($target['id'], $router_name, $plan['id'], $user['username'], 'Balance');
             if (!empty($result)) {
                 // if success, then get the balance
@@ -353,8 +360,11 @@ switch ($action) {
                 $d->status = 2;
                 $d->save();
                 $trx_id = $d->id();
-                $planRouterId = (int) Package::routerId($router_name); // the router the plan is on, not a number from the address
-                Package::followRename('tbl_payment_gateway', $trx_id, $router_name, $plan['id'], $planRouterId); // a router renamed meanwhile
+                // a failure here must not stop the receiver's receipt below (the sender is charged already)
+                try {
+                    Package::followRename('tbl_payment_gateway', $trx_id, $router_name, $plan['id'], $planRouterId); // a router renamed meanwhile
+                } catch (Throwable $ignored) {
+                }
                 //receiver
                 $d = ORM::for_table('tbl_payment_gateway')->create();
                 $d->username = $target['username'];
@@ -374,7 +384,10 @@ switch ($action) {
                 $d->trx_invoice = $result;
                 $d->status = 2;
                 $d->save();
-                Package::followRename('tbl_payment_gateway', $d->id(), $router_name, $plan['id'], $planRouterId);
+                try {
+                    Package::followRename('tbl_payment_gateway', $d->id(), $router_name, $plan['id'], $planRouterId);
+                } catch (Throwable $ignored) {
+                }
                 r2(getUrl("order/view/$trx_id"), 's', Lang::T("Success to send package"));
             } else {
                 $errorMessage = "Send Package with Balance Failed\n\n#u$user[username] #send \n" . $plan['name_plan'] .

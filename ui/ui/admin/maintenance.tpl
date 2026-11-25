@@ -339,7 +339,9 @@
                 // a stalled answer is given up on after 10 seconds, and then goes through the same cleanup as any other
                 var ctl = window.AbortController ? new AbortController() : null;
                 var stop = setTimeout(function () { if (ctl) ctl.abort(); }, 10000);
-                fetch(location.pathname + location.search, { cache: 'no-store', credentials: 'same-origin', headers: { 'X-Requested-With': 'maintenance-check' }, signal: ctl ? ctl.signal : undefined })
+                // the page address without its query: a link that did something (an extend, a confirmation) must not be repeated by this
+                // check, which only asks whether the site answers again
+                fetch(location.pathname, { cache: 'no-store', credentials: 'same-origin', headers: { 'X-Requested-With': 'maintenance-check' }, signal: ctl ? ctl.signal : undefined })
                     // reloads only when the application itself answered: a 502, 503 or 504 (a proxy or the maintenance page) keeps waiting
                     .then(function (r) { if (r.ok) location.reload(); })
                     .catch(function () { })

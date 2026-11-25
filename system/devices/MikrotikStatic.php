@@ -401,7 +401,8 @@ class MikrotikStatic
                 if ($r->getType() !== RouterOS\Response::TYPE_DATA) {
                     continue;
                 }
-                if (strtolower((string) RouterApi::text($r->getProperty('disabled'))) !== 'true') {
+                // RouterOS writes a boolean as true/false (the API) or yes/no (some versions): both spellings of "disabled" count
+                if (!in_array(strtolower((string) RouterApi::text($r->getProperty('disabled'))), ['true', 'yes'], true)) {
                     return null; // an enabled entry is there
                 }
                 $disabledId = $disabledId ?? $r->getProperty('.id');

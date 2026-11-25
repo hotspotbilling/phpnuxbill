@@ -404,7 +404,21 @@ class RouterMonitor
                                 $pick = $i;
                             }
                         }
-                        if ($pick && is_numeric($pick['rx-byte']) && is_numeric($pick['tx-byte'])) {
+                        // the counters count from the router's last start: they are kept only when the router is shown not to have
+                        // restarted since /system/resource was read (a second uptime reading, taken after the counters). Anything
+                        // that cannot be shown leaves the counters unknown, and so the speed.
+                        $sameBoot = false;
+                        if ($pick) {
+                            try {
+                                $again = RouterApi::rows($c, '/system/resource/print', ['uptime'], $until);
+                                $up2 = self::seconds($again[0]['uptime'] ?? '');
+                                $sameBoot = $s['uptime'] !== null && $readAt !== null && $up2 !== null && $up2 >= (int) $s['uptime']
+                                    && !self::restarted($readAt, $s['uptime'], time(), $up2);
+                            } catch (Throwable $e) {
+                                $sameBoot = false;
+                            }
+                        }
+                        if ($pick && $sameBoot && is_numeric($pick['rx-byte']) && is_numeric($pick['tx-byte'])) {
                             $s['iface'] = mb_substr((string) $pick['name'], 0, 64);
                             $s['rx'] = $pick['rx-byte'];
                             $s['tx'] = $pick['tx-byte'];

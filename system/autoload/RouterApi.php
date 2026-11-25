@@ -183,6 +183,20 @@ class RouterApi
                 $recvErr = $e;
                 // told now: putting an outer deadline back below starts the time-out record again
                 $recvTimedOut = method_exists($c, 'readTimedOut') ? $c->readTimedOut() : null;
+            } catch (\Throwable $cbErr) {
+                // anything else (a callback of another request threw): this request is retired before the error goes on. Its closing
+                // reply is collected if it came; otherwise replies could still arrive for a tag nobody reads, so the connection is
+                // dropped (abort() keeps the completed replies of other requests)
+                try {
+                    if ($c->isRequestActive($tag)) {
+                        array_push($got, ...$c->extractNewResponses($tag)->toArray());
+                    }
+                    if (!$closes($got)) {
+                        method_exists($c, 'abort') ? $c->abort() : $c->close();
+                    }
+                } catch (\Throwable $ignored) {
+                }
+                throw $cbErr;
             } finally {
                 if (method_exists($c, 'readDeadline')) {
                     $c->readDeadline($prior); // (null for a top-level request: the ordinary time limit)
@@ -489,7 +503,17 @@ class RouterApi
             };
             $routers = [];
             foreach (ORM::for_table('tbl_routers')->where('enabled', 1)->find_many() as $r) {
-                if ($usable($r) && $pending(self::backupKey($r))) {
+                if (!$usable($r)) {
+                    continue;
+                }
+                // a saved address that cannot be read is that router's problem only: reported, and the others go on
+                try {
+                    $rkey = self::backupKey($r);
+                } catch (Throwable $e) {
+                    $log[] = $r['name'] . ': ' . Lang::T('the saved address is not valid, skipped') . ' (' . $e->getMessage() . ')';
+                    continue;
+                }
+                if ($pending($rkey)) {
                     $routers[] = (int) $r['id'];
                 }
             }
@@ -523,7 +547,12 @@ class RouterApi
                 if (!$usable($r)) {
                     continue;
                 }
-                $key = self::backupKey($r);
+                try {
+                    $key = self::backupKey($r);
+                } catch (Throwable $e) {
+                    $log[] = $r['name'] . ': ' . Lang::T('the saved address is not valid, skipped') . ' (' . $e->getMessage() . ')';
+                    continue;
+                }
                 if (!$pending($key)) {
                     continue; // moved to an address already done (or out of tries) today
                 }

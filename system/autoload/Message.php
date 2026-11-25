@@ -17,7 +17,7 @@ require "{$root_path}system/autoload/mail/SMTP.php";
 class Message
 {
 
-    /** $timeout: seconds to connect and to wait for Telegram's answer (3000 and up is read as milliseconds, the default Http uses everywhere) */
+    /** $timeout: to connect and to wait for Telegram's answer. Below 100 it is seconds, 100 and up milliseconds (Http::timeoutMs); the default 3000 is milliseconds */
     public static function sendTelegram($txt, $chat_id = null, $topik = '', $timeout = 3000, $runHook = true)
     {
         global $config;
@@ -99,6 +99,9 @@ class Message
                 $ok = true;
                 foreach (str_split($txt, 160) as $part) {
                     $ok = (bool) self::sendSMS($phone, $part, $timeout) && $ok;
+                    if (!$ok) {
+                        break; // a part that failed (a timeout leaves it unknown): the rest is not sent after it
+                    }
                 }
                 return $ok;
             }
@@ -107,7 +110,9 @@ class Message
                 self::logMessage('MikroTikSMS', $phone, $txt, 'Success');
                 return true;
             } catch (Throwable $e) {
-                self::logMessage('MikroTikSMS', $phone, $txt, 'Error', $e->getMessage());
+                // 408: the router did not answer in time; the message may have been sent, so it is never retried here
+                $unknown = $e->getCode() === 408 ? ' (' . Lang::T('delivery unknown, not resent') . ')' : '';
+                self::logMessage('MikroTikSMS', $phone, $txt, 'Error', $e->getMessage() . $unknown);
                 return false;
             }
         }
@@ -163,7 +168,13 @@ class Message
         try {
             $res = $client_m->sendSync($smsRequest);
         } catch (Throwable $e) {
-            $client_m = null; // the connection was dropped: the next message connects again
+            // the connection was dropped: the next message connects again. Abort it so a late reply can never reach it. On a
+            // 408 the router may still have sent the SMS: delivery is unknown, so the caller must not send it again
+            try {
+                method_exists($client_m, 'abort') ? $client_m->abort() : null;
+            } catch (Throwable $ignored) {
+            }
+            $client_m = null;
             throw $e;
         }
         // the router answered but refused the command (!trap): the connection is fine, the message was not sent
@@ -285,10 +296,13 @@ class Message
 
     /** Whether the last sendPackageNotification() handed its message over (false when the channel refused or failed, or nothing was sent) */
     public static $lastDelivered = false;
+    /** True when the last push had nobody to send to (no subscriptions): nothing was delivered, and there is nothing to retry */
+    public static $lastNothingToSend = false;
 
     public static function sendPackageNotification($customer, $package, $price, $message, $via)
     {
         self::$lastDelivered = false;
+        self::$lastNothingToSend = false;
         global $ds, $config;
         if (empty($message)) {
             return "";
@@ -380,7 +394,9 @@ class Message
                         break;
                     case 'push':
                         $r = Message::sendPush($customer['id'], 'Package Expiry Notification', $msg, $url ?? null);
-                        $sent = is_array($r) ? !empty($r['success']) : (bool) $r;
+                        // delivered only when something was really sent: no subscriptions (sent 0) or all failed is not delivered
+                        $sent = is_array($r) ? (!empty($r['success']) && (int) ($r['sent'] ?? 0) > 0) : (bool) $r;
+                        self::$lastNothingToSend = is_array($r) && !empty($r['success']) && (int) ($r['sent'] ?? 0) === 0 && (int) ($r['failed'] ?? 0) === 0;
                         break;
                 }
                 self::$lastDelivered = $sent !== false && $sent !== null;

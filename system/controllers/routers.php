@@ -135,10 +135,29 @@ $endpointLock = function ($on = true) {
             ORM::getDb()->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
             return true;
         }
-        return (int) ORM::getDb()->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 15)")->fetchColumn() === 1;
+        $got = (int) ORM::getDb()->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 15)")->fetchColumn() === 1;
+        if ($got) {
+            // r2() and _alert() exit, and a finally block does not run on exit: released at shutdown on this same connection too
+            // (idempotent: releasing a lock that is no longer held does nothing)
+            static $shutdownSet = false;
+            if (!$shutdownSet) {
+                $shutdownSet = true;
+                register_shutdown_function(function () {
+                    try {
+                        ORM::getDb()->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
+                    } catch (Throwable $ignored) {
+                    }
+                });
+            }
+        }
+        return $got;
     } catch (Throwable $e) {
         return !$on;
     }
+};
+// the saved address column is varchar(128): the joined host and port must fit it, or storage would cut or refuse what Test now just used
+$addressTooLong = function ($address) {
+    return mb_strlen((string) $address) > 128;
 };
 // whether a lock may be taken while another one is held (MikrotikVpn::nestedLocks(): false on a database that frees the held lock
 // when it takes another)
@@ -316,7 +335,9 @@ $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime, $rosS
     }
     $h['board'] = (string) $rosText($r->getProperty('board-name'));
     $h['version'] = (string) $rosText($r->getProperty('version'));
-    $h['uptime'] = $rosUptime($rosText($r->getProperty('uptime')));
+    $rawUptime = $rosText($r->getProperty('uptime'));
+    $h['uptime'] = $rosUptime($rawUptime);
+    $h['uptime_s'] = RouterMonitor::seconds($rawUptime); // exact seconds, for restart detection (the text above is to the minute)
     $num = function ($k) use ($r, $rosText) {
         $v = $rosText($r->getProperty($k));
         return is_numeric($v) ? (float) $v : null;
@@ -371,7 +392,7 @@ $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime, $rosS
         $h['ifaces'] = [];
         try {
             $q = new \PEAR2\Net\RouterOS\Request('/interface/print');
-            $q->setArgument('.proplist', 'name,type,rx-byte,tx-byte,running,disabled');
+            $q->setArgument('.proplist', '.id,name,type,rx-byte,tx-byte,running,disabled');
             foreach ($rosSend($c, $q, $until) as $i) {
                 if ($i->getType() !== \PEAR2\Net\RouterOS\Response::TYPE_DATA || $rosText($i->getProperty('running')) !== 'true'
                     || $rosText($i->getProperty('disabled')) === 'true' || count($h['ifaces']) >= 64) {
@@ -380,7 +401,7 @@ $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime, $rosS
                 $rx = $rosText($i->getProperty('rx-byte'));
                 $tx = $rosText($i->getProperty('tx-byte'));
                 if (is_numeric($rx) && is_numeric($tx)) {
-                    $h['ifaces'][] = ['name' => (string) $rosText($i->getProperty('name')), 'type' => (string) $rosText($i->getProperty('type')), 'rx' => (float) $rx, 'tx' => (float) $tx];
+                    $h['ifaces'][] = ['id' => (string) $rosText($i->getProperty('.id')), 'name' => (string) $rosText($i->getProperty('name')), 'type' => (string) $rosText($i->getProperty('type')), 'rx' => (float) $rx, 'tx' => (float) $tx];
                 }
             }
         } catch (Throwable $e) {
@@ -557,6 +578,10 @@ switch ($action) {
             echo json_encode(['ok' => false, 'error' => Lang::T('The API port must be a number from 1 to 65535')]);
             exit;
         }
+        if ($addressTooLong($ip)) {
+            echo json_encode(['ok' => false, 'error' => Lang::T('The address is too long (128 characters at most)')]);
+            exit;
+        }
         $user = _post('username');
         $pass = _post('password');
         if ($ip === '' || $user === '' || $hostMissing($ip)) {
@@ -624,6 +649,9 @@ switch ($action) {
                 continue;
             }
             $changed = (int) $r['enabled'] !== ($op === 'enable' ? 1 : 0);
+            if ($op === 'enable' && (string) $r['ip_address'] !== $addr) {
+                $r->ip_address = $addr; // the legacy ":0" is saved away too: what was validated is what is stored and connected to
+            }
             $r->enabled = $op === 'enable' ? 1 : 0;
             $r->save();
             if ($changed) {
@@ -713,22 +741,20 @@ switch ($action) {
                 try {
                     // the list was read at the start: a recharge that has expired since (the cron) is not sent back to the router
                     // read again in full: its plan or router may have changed since too (a renewal, a move), and the current ones are used
-                    $now = ORM::for_table('tbl_user_recharges')->find_one($tur['id']);
-                    if (!$now || $now['status'] !== 'on') {
-                        continue;
+                    // by the same bound predicate as the list above (not a PHP comparison of names): still on, and still on this router
+                    $now = ORM::for_table('tbl_user_recharges')->where('id', $tur['id'])->where('status', 'on')->where('routers', $d['name'])->find_one();
+                    if (!$now) {
+                        continue; // turned off, or moved to another router since the list was read: not this router's to sync
                     }
                     $tur = $now;
                     // past its expiry but still "on" (the cron is retrying an unfinished clean-up): access is not sent back
                     if (strtotime($tur['expiration'] . ' ' . $tur['time']) <= time()) {
                         continue;
                     }
-                    if (strcasecmp(rtrim((string) $tur['routers']), rtrim((string) $d['name'])) !== 0) {
-                        continue; // moved to another router since the list was read: not this router's to sync
-                    }
-                    $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
+                    $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->where('routers', $d['name'])->find_one();
                     $c = ORM::for_table('tbl_customers')->find_one($tur['customer_id']);
                     // the device sends a customer to its plan's router: a plan now on another router is not this router's to sync
-                    if (!$p || !$c || strcasecmp(rtrim((string) $p['routers']), rtrim((string) $d['name'])) !== 0) {
+                    if (!$p || !$c) {
                         $failed[] = $tur['username'];
                         continue;
                     }
@@ -754,6 +780,8 @@ switch ($action) {
                     } catch (Throwable $e) {
                         if ($e->getCode() === 207) { // the Mikrotik drivers' "saved, but a follow-up step failed" (MikrotikPppoe::PARTIAL)
                             $partial[] = $tur['username'];
+                        } elseif ($e->getCode() === 409) {
+                            // no active recharge of this plan on this router any more: nothing was sent, and nothing failed
                         } else {
                             $failed[] = $tur['username'];
                         }
@@ -850,7 +878,8 @@ switch ($action) {
                 $q = new \PEAR2\Net\RouterOS\Request('/ip/hotspot/active/print');
                 $q->setArgument('.proplist', '.id');
                 $ids = [];
-                $list = $rosSend($c, $q, RouterApi::now() + 15);
+                $kickUntil = RouterApi::now() + 15; // one deadline for the whole action: the list and every batch
+                $list = $rosSend($c, $q, $kickUntil);
                 if (($err = $rosError($list)) !== null) {
                     throw new Exception($err);
                 }
@@ -863,11 +892,17 @@ switch ($action) {
                 $removed = 0;
                 $stopped = null;
                 $unsure = 0; // a batch sent without an answer: the router may have removed it, or not
-                foreach (array_chunk($ids, 50) as $chunk) {
+                $notSent = 0; // batches never sent: out of time first
+                foreach (array_chunk($ids, 50) as $ci => $chunk) {
+                    if ($kickUntil - RouterApi::now() <= 0) {
+                        $stopped = Lang::T('Out of time: the rest were not sent');
+                        $notSent = count($ids) - $ci * 50; // this batch and every one after it
+                        break;
+                    }
                     $rm = new \PEAR2\Net\RouterOS\Request('/ip/hotspot/active/remove');
                     $rm->setArgument('numbers', implode(',', $chunk));
                     try {
-                        $stopped = $rosError($rosSend($c, $rm, RouterApi::now() + 15));
+                        $stopped = $rosError($rosSend($c, $rm, $kickUntil));
                     } catch (Throwable $e) {
                         $stopped = $e->getMessage();
                         $unsure = count($chunk);
@@ -883,7 +918,8 @@ switch ($action) {
                         . Lang::T('The router did not answer for the last') . ' ' . $unsure . ', ' . Lang::T('so they may or may not have been disconnected') . '. ' . $stopped));
                 }
                 if ($stopped !== null) {
-                    r2($back, 'e', htmlspecialchars($d['name'] . ': ' . Lang::T('hotspot users disconnected') . ': ' . $removed . ' ' . Lang::T('of') . ' ' . count($ids) . '. ' . $stopped));
+                    r2($back, 'e', htmlspecialchars($d['name'] . ': ' . Lang::T('hotspot users disconnected') . ': ' . $removed . ' ' . Lang::T('of') . ' ' . count($ids) . '. ' . $stopped
+                        . ($notSent ? ' (' . $notSent . ' ' . Lang::T('not sent') . ')' : '')));
                 }
                 r2($back, 's', htmlspecialchars($d['name']) . ': ' . Lang::T('hotspot users disconnected') . ': ' . $removed . '. ' . Lang::T('They can sign in again at once.'));
             }
@@ -1653,7 +1689,16 @@ switch ($action) {
             // a reading begun before the router was last reset (enabled or disabled, details changed) is not handed out, even when
             // the details are the same again: it is the same check the fresh answer below goes through
             $resetSince = (float) @file_get_contents($dir . DIRECTORY_SEPARATOR . $id . '.reset');
+            // the router read again right before the answer is handed out: disabled, given other details or reset since the request began
+            // (an edit, a disable) makes the stored answer a miss, and a fresh reading is made from the current details
+            $stillSame = false;
             if (is_array($cached) && ($cached['key'] ?? '') === $key && $fresh && $resetSince <= (float) ($cached['observed'] ?? 0)) {
+                $curRow = ORM::for_table('tbl_routers')->find_one($id);
+                $stillSame = $curRow && (int) $curRow['enabled'] === 1
+                    && hash('sha256', $curRow['ip_address'] . "\n" . $curRow['username'] . "\n" . $curRow['password']) === $key
+                    && (float) @file_get_contents($dir . DIRECTORY_SEPARATOR . $id . '.reset') <= (float) ($cached['observed'] ?? 0);
+            }
+            if ($stillSame) {
                 unset($cached['key']);
                 // the stored answer is shared by every admin: its words are put in this admin's language here
                 if (($cached['code'] ?? '') === 'no_read') {
@@ -1761,6 +1806,9 @@ switch ($action) {
         if ($hostMissing($ip_address)) {
             $msg .= Lang::T('Enter the router\'s IP address or host name') . '<br>';
         }
+        if ($addressTooLong($ip_address)) {
+            $msg .= Lang::T('The address is too long (128 characters at most)') . '<br>';
+        }
         if (Validator::Length($name, 30, 1) == false) {
             $msg .= 'Name should be between 1 to 30 characters' . '<br>';
         }
@@ -1828,6 +1876,9 @@ switch ($action) {
         }
         if ($hostMissing($ip_address)) {
             $msg .= Lang::T('Enter the router\'s IP address or host name') . '<br>';
+        }
+        if ($addressTooLong($ip_address)) {
+            $msg .= Lang::T('The address is too long (128 characters at most)') . '<br>';
         }
         if (Validator::Length($name, 30, 4) == false) {
             $msg .= 'Name should be between 5 to 30 characters' . '<br>';
