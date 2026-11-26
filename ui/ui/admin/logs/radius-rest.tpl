@@ -61,6 +61,7 @@
                 </tbody>
             </table>
         </div>
+        {include file="pagination.tpl"}
     </div>
 
     <div class="bs-callout bs-callout-info" role="note">

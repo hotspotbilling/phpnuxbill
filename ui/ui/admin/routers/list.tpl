@@ -231,6 +231,7 @@
             chartKeys: '{Lang::T('Use the left and right arrow keys to read each value, Home and End for the first and last.')|escape:'javascript'}',
             partial: '{Lang::T('partial list')|escape:'javascript'}', ev_moved: '{Lang::T('Address changed')|escape:'javascript'}',
             notCollecting: '{Lang::T('Router history is off in Routers > Settings, so no new readings are kept.')|escape:'javascript'}',
+            sparse: '{Lang::T('Only %1 readings in this period (about %2 expected), so the graphs are mostly gaps. Check that the cron runs every 5 minutes. If History was turned on only recently, this fills in by itself.')|escape:'javascript'}',
             ev_offline: '{Lang::T('Went offline')|escape:'javascript'}', ev_online: '{Lang::T('Back online')|escape:'javascript'}', ev_reboot: '{Lang::T('Restarted')|escape:'javascript'}',
             ev_cpu_high: '{Lang::T('CPU high')|escape:'javascript'}', ev_cpu_ok: '{Lang::T('CPU normal')|escape:'javascript'}', ev_mem_high: '{Lang::T('Memory high')|escape:'javascript'}',
             ev_mem_ok: '{Lang::T('Memory normal')|escape:'javascript'}', ev_disk_high: '{Lang::T('Disk nearly full')|escape:'javascript'}', ev_disk_ok: '{Lang::T('Disk normal')|escape:'javascript'}',
@@ -243,8 +244,8 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-chart.js?2026.11.25"></script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.25"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-chart.js?2026.11.25.2"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.25.2"></script>
 <script>
     // routers-tools.js did not load: its tabs cannot work. They are switched off and each details row says so; the Live tab is
     // left to routers-health.js, which works without it

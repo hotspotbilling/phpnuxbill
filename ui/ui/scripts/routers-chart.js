@@ -46,7 +46,7 @@
                 s.points.forEach(function (p, i) {
                     var before = s.points[i - 1], after = s.points[i + 1];
                     if (p[1] != null && !(before && before[1] != null) && !(after && after[1] != null)) {
-                        svg += '<circle class="rt-chart__pt ' + s.cls + '" r="2.5" cx="' + g.X(p[0]).toFixed(1) + '" cy="' + g.Y(p[1]).toFixed(1) + '"></circle>';
+                        svg += '<circle class="rt-chart__pt ' + s.cls + '" r="3.5" cx="' + g.X(p[0]).toFixed(1) + '" cy="' + g.Y(p[1]).toFixed(1) + '"></circle>';
                     }
                 });
             });

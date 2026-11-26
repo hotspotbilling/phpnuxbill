@@ -5985,5 +5985,13 @@
     "stale_sessions": "stale sessions",
     "No_stale_sessions": "No stale sessions",
     "Delete_the_stale_sessions__closed_by_Clear_Stale_Sessions___Stopped_sessions_and_sessions_inside_an_active_plan_are_kept_": "Delete the stale sessions (closed by Clear Stale Sessions)? Stopped sessions and sessions inside an active plan are kept.",
-    "Delete_Stale_Sessions": "Delete Stale Sessions"
+    "Delete_Stale_Sessions": "Delete Stale Sessions",
+    "Your_price_per_SMS": "Your price per SMS",
+    "What_one_SMS_costs_you_here__to_estimate_this_month_s_spend_": "What one SMS costs you here, to estimate this month's spend.",
+    "not_answered": "not answered",
+    "No_sessions_were_found_in_the_lists_that_could_be_read": "No sessions were found in the lists that could be read",
+    "Waiting_for_the_first_readings__the_cron_reads_each_router_about_every_5_minutes_": "Waiting for the first readings: the cron reads each router about every 5 minutes.",
+    "Refresh_the_list_first__it_lets_you_try_again_only_if_it_shows_when_this_session_started__If_it_does_not__check_the_current_session_on_the_router_before_disconnecting_it_there_": "Refresh the list first: it lets you try again only if it shows when this session started. If it does not, check the current session on the router before disconnecting it there.",
+    "The_other_detail_tabs_could_not_be_loaded__The_Live_readings_still_work__Reload_the_page_to_try_again_": "The other detail tabs could not be loaded. The Live readings still work. Reload the page to try again.",
+    "Only__1_readings_in_this_period__about__2_expected___so_the_graphs_are_mostly_gaps__Check_that_the_cron_runs_every_5_minutes__If_History_was_turned_on_only_recently__this_fills_in_by_itself_": "Only %1 readings in this period (about %2 expected), so the graphs are mostly gaps. Check that the cron runs every 5 minutes. If History was turned on only recently, this fills in by itself."
 }

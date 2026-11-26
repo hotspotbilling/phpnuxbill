@@ -477,8 +477,15 @@
                 strip += '<i role="listitem" class="' + (mixed ? 'is-on is-mixed' : p.online ? 'is-on' : 'is-off') + '" title="' + esc(said) + '" style="left:' + ((a - d.from) / span * 100).toFixed(3) + '%;width:' + Math.max(0.15, (b - a) / span * 100).toFixed(3) + '%">'
                     + '<span class="sr-only">' + esc(said) + '</span></i>';
             });
+            // far fewer readings than a cron every 5 minutes gives (under a quarter): said, as the charts are then mostly gaps
+            var expected = Math.round(span / 300), sparse = '';
+            if (d.collecting && d.samples > 0 && expected > 0 && d.samples < expected / 4 && t.sparse) {
+                sparse = '<p class="rt-err rt-err--block"><i class="fa fa-info-circle" aria-hidden="true"></i> '
+                    + esc(t.sparse.replace('%1', d.samples).replace('%2', expected.toLocaleString())) + '</p>';
+            }
             var html = head(t.history, picker)
                 + (d.collecting ? '' : '<p class="rt-err rt-err--block">' + esc(t.notCollecting) + '</p>')
+                + sparse
                 + '<dl class="rt-facts"><div><dt>' + esc(t.uptimePct) + '</dt><dd>' + (d.uptime == null ? '&mdash;' : esc(d.uptime) + '%') + '</dd></div>'
                 + '<div><dt>' + esc(t.samples) + '</dt><dd>' + esc(d.samples) + '</dd></div></dl>'
                 + '<div class="rt-strip" role="list" title="' + esc(t.uptimePct) + '" aria-label="' + esc(t.uptimePct) + '">' + strip + '</div><div class="rt-charts">';

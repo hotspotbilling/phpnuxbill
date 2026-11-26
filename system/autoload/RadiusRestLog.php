@@ -137,18 +137,22 @@ class RadiusRestLog
     }
 
     /**
-     * The newest entries first, at most $limit, the ones that contain $q (any field, no matter the case) and, when given, of $level.
+     * The newest entries first, at most $limit after skipping the first $offset, the ones that contain $q (any field, no matter the
+     * case) and, when given, of $level. $total is set to how many entries match in all (for the pager): every line is looked at,
+     * but only the page asked for is kept.
      * @return array<int,array<string,string>>
      */
-    public static function read(int $limit = 300, string $q = '', string $level = ''): array
+    public static function read(int $limit = 300, string $q = '', string $level = '', int $offset = 0, &$total = null): array
     {
         $rows = [];
+        $total = 0;
+        $offset = max(0, $offset);
         foreach (self::files() as $file) {
-            if (!is_file($file) || count($rows) >= $limit) {
+            if (!is_file($file)) {
                 continue;
             }
             $lines = @file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
-            for ($i = count($lines) - 1; $i >= 0 && count($rows) < $limit; $i--) {
+            for ($i = count($lines) - 1; $i >= 0; $i--) {
                 $r = json_decode($lines[$i], true);
                 if (!is_array($r) || !isset($r['at'], $r['message'])) {
                     continue;
@@ -159,7 +163,10 @@ class RadiusRestLog
                 if ($q !== '' && mb_stripos(implode(' ', array_map('strval', $r)), $q, 0, 'UTF-8') === false) {
                     continue;
                 }
-                $rows[] = $r;
+                if ($total >= $offset && count($rows) < $limit) {
+                    $rows[] = $r;
+                }
+                $total++;
             }
         }
         return $rows;

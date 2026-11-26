@@ -151,7 +151,22 @@ switch ($action) {
         // what radius.php could not do while it answered FreeRADIUS (a file, so no RADIUS database is needed)
         $q = trim((string) (_post('q') ?: _get('q')));
         $level = _get('level') === 'error' ? 'error' : (_get('level') === 'info' ? 'info' : '');
-        $ui->assign('rows', RadiusRestLog::read(500, $q, $level));
+        // read from a file, not a table: the file reader keeps only the page asked for and counts the rest, and Paginator draws the
+        // same pager as the other log pages from that count (the small object below stands in for the query it expects)
+        $perPage = 25;
+        $page = max(1, (int) _get('p', 1));
+        $rows = RadiusRestLog::read($perPage, $q, $level, ($page - 1) * $perPage, $total);
+        $search = array_filter(['q' => $q, 'level' => $level], 'strlen');
+        $rows = Paginator::findMany(new class ($rows) {
+            private $rows;
+            public function __construct($rows) { $this->rows = $rows; }
+            public function count() { return count($this->rows); }
+            public function offset($n) { return $this; }
+            public function limit($n) { return $this; }
+            public function find_many() { return $this->rows; }
+            public function find_array() { return $this->rows; }
+        }, $search, $perPage, '', true, $total);
+        $ui->assign('rows', $rows ?: []);
         $ui->assign('q', $q);
         $ui->assign('level', $level);
         $ui->assign('_title', Lang::T('Radius REST Logs'));
